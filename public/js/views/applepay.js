@@ -78,7 +78,7 @@ export function renderApplePay() {
               <span data-title style="display:block;font-size:17px;font-weight:800;letter-spacing:-.2px"></span>
               <span data-body style="display:block;margin-top:2px;font-size:14px;font-weight:500;line-height:1.35;color:#5A5470"></span>
               <span style="display:flex;align-items:center;gap:8px;margin-top:8px">
-                ${s.token ? `<span style="flex:1;min-width:0;display:flex;align-items:center;height:38px;box-sizing:border-box;padding:0 12px;border:1.5px dashed rgba(27,27,31,.4);border-radius:14px;background:#F0EAFF">
+                ${s.token ? `<span style="flex:1;min-width:0;display:flex;align-items:center;height:38px;box-sizing:border-box;padding:0 12px;border:1.5px dashed rgba(27,27,31,.4);border-radius:14px;background:#F2F0F5">
                   <span data-token style="flex:1;min-width:0;font-size:14px;font-weight:700;letter-spacing:.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">…</span>
                 </span>` : ""}
                 <button type="button" data-act data-press style="flex:none;height:38px;box-sizing:border-box;padding:0 16px;border:1.5px solid rgba(27,27,31,.25);border-radius:22px;font-size:14px;font-weight:800;color:#1B1B1F;cursor:pointer"></button>

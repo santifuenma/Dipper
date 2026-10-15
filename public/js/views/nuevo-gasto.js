@@ -196,7 +196,7 @@ export function renderNuevoGasto() {
     const cat = st.cats.find((c) => c.id === st.cat);
     const card = st.cards.find((k) => k.id === st.card);
     const done = html(`
-      <div style="position:absolute;inset:0;z-index:10;background:#F0EAFF;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:32px;text-align:center">
+      <div style="position:absolute;inset:0;z-index:10;background:#F2F0F5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:32px;text-align:center">
         <div style="position:relative;width:200px;height:200px;margin-bottom:12px">
           <div class="plop" style="position:absolute;inset:0;box-sizing:border-box;border-radius:56px;border:1.5px solid rgba(27,27,31,.22);background:#fff;overflow:hidden">
             <div data-fill style="position:absolute;left:0;right:0;bottom:0;height:62%"></div>

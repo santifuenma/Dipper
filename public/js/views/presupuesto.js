@@ -10,7 +10,7 @@ const MINUS = (s) =>
   `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"/></svg>`;
 const PLUS = (s) =>
   `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg>`;
-const ROUND = "flex:none;border-radius:50%;border:1.5px solid rgba(27,27,31,.25);background:#F0EAFF;color:#1B1B1F;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0";
+const ROUND = "flex:none;border-radius:50%;border:1.5px solid rgba(27,27,31,.25);background:#F2F0F5;color:#1B1B1F;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0";
 
 export function renderPresupuesto() {
   const st = { monthly: 0, bud: new Map(), cats: [], spent: new Map(), loaded: false };
