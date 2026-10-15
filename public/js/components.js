@@ -247,3 +247,120 @@ export function merchantEditor({ value, raw, merchants, categories, max = 8, not
   });
   return el;
 }
+
+// Deslizar una fila hacia la izquierda (como en las apps de Apple) deja ver Editar y Borrar.
+// Borrar pide confirmación: el primer toque lo ensancha con "¿Borrar?", el segundo borra.
+const ACT_W = 152; // los botones: dos de 72 px y un hueco de 8
+const OPEN = ACT_W + 8; // lo que se aparta la tarjeta (con su hueco antes de los botones)
+const PEN =
+  '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>';
+
+export function swipeRow(card, { editHref, onDelete, onError }) {
+  const row = html(`
+    <div style="position:relative">
+      <div data-acts style="position:absolute;top:0;right:0;bottom:0;width:${ACT_W}px;display:flex;justify-content:flex-end;gap:8px;opacity:0">
+        <a data-edit aria-label="Editar" style="flex:none;width:72px;box-sizing:border-box;border-radius:20px;background:#E3E0EA;color:#1B1B1F;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:width .3s cubic-bezier(.3,1.3,.5,1),opacity .2s">${PEN}</a>
+        <button type="button" data-del aria-label="Borrar" style="flex:none;width:72px;box-sizing:border-box;border:0;border-radius:20px;background:#FF3B30;color:#fff;display:flex;align-items:center;justify-content:center;gap:6px;font:inherit;font-size:15px;font-weight:800;cursor:pointer;padding:0;transition:width .3s cubic-bezier(.3,1.3,.5,1)">${ICON.trash}<span data-ask hidden>¿Borrar?</span></button>
+      </div>
+    </div>
+  `);
+  const acts = row.querySelector("[data-acts]");
+  const edit = row.querySelector("[data-edit]");
+  const del = row.querySelector("[data-del]");
+  edit.href = editHref;
+  card.style.position = "relative";
+  card.style.touchAction = "pan-y";
+  card.style.willChange = "transform";
+  row.append(card);
+
+  let x = 0; // desplazamiento actual (0 o negativo)
+  let confirming = false;
+
+  function setX(v, animate) {
+    x = v;
+    card.style.transition = animate ? "transform .45s cubic-bezier(.3,1.25,.5,1)" : "none";
+    card.style.transform = v ? `translateX(${v}px)` : "";
+    acts.style.opacity = String(Math.min(1, -v / 40));
+  }
+  function setConfirm(v) {
+    confirming = v;
+    del.querySelector("[data-ask]").hidden = !v;
+    del.style.width = v ? ACT_W + "px" : "72px";
+    edit.style.width = v ? "0px" : "72px";
+    edit.style.opacity = v ? "0" : "1";
+    if (v) edit.style.marginLeft = "-8px";
+    else edit.style.marginLeft = "";
+  }
+  row.close = () => {
+    setConfirm(false);
+    setX(0, true);
+  };
+  row.isOpen = () => x !== 0;
+
+  // Arrastre con el dedo: solo horizontal; el vertical sigue siendo scroll.
+  let start = null;
+  let dragged = false;
+  card.addEventListener("pointerdown", (e) => {
+    start = { px: e.clientX, py: e.clientY, x, id: e.pointerId, locked: null };
+    dragged = false;
+  });
+  card.addEventListener("pointermove", (e) => {
+    if (!start || e.pointerId !== start.id) return;
+    const dx = e.clientX - start.px;
+    const dy = e.clientY - start.py;
+    if (start.locked === null && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) start.locked = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+    if (start.locked !== "x") return;
+    if (!dragged) {
+      dragged = true;
+      try {
+        card.setPointerCapture(e.pointerId);
+      } catch {}
+      row.dispatchEvent(new CustomEvent("swipestart", { bubbles: true }));
+    }
+    let v = Math.min(0, start.x + dx);
+    if (v < -OPEN) v = -OPEN - (-OPEN - v) / 3; // tira con resistencia al pasarse
+    setX(v, false);
+  });
+  const end = () => {
+    if (!start) return;
+    if (dragged) {
+      if (confirming && x > -OPEN + 20) setConfirm(false);
+      setX(x < -OPEN / 2 ? -OPEN : 0, true);
+    }
+    start = null;
+  };
+  card.addEventListener("pointerup", end);
+  card.addEventListener("pointercancel", end);
+  // Tras arrastrar no se abre la tarjeta; con la fila abierta, tocarla solo la cierra.
+  card.addEventListener("click", (e) => {
+    if (dragged || x !== 0) {
+      e.preventDefault();
+      if (!dragged) row.close();
+      dragged = false;
+    }
+  });
+
+  del.addEventListener("click", async () => {
+    if (!confirming) return setConfirm(true);
+    del.disabled = true;
+    try {
+      await onDelete();
+      // Se va hacia la izquierda y la fila se cierra hacia arriba.
+      row.style.overflow = "hidden";
+      row.style.transition = "height .35s ease, margin .35s ease, opacity .25s";
+      row.style.height = row.offsetHeight + "px";
+      setX(-row.offsetWidth, true);
+      requestAnimationFrame(() => {
+        row.style.height = "0px";
+        row.style.opacity = "0";
+        row.style.marginBottom = "-10px";
+      });
+      setTimeout(() => row.remove(), 380);
+    } catch (err) {
+      del.disabled = false;
+      setConfirm(false);
+      if (onError) onError(err);
+    }
+  });
+  return row;
+}

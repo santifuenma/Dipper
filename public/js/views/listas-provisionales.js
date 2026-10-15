@@ -3,6 +3,7 @@
 import { api } from "../api.js";
 import { html, ICON } from "../dom.js";
 import { cardBorder, cardFg, categoryIcon } from "../icons.js";
+import { swipeRow } from "../components.js";
 
 function shell(title, addHref, addLabel) {
   return html(`
@@ -22,30 +23,45 @@ function shell(title, addHref, addLabel) {
   `);
 }
 
+// Tarjetas: deslizar una hacia la izquierda deja ver Editar y Borrar (con confirmación).
 export function renderTarjetas() {
   const el = shell("Tarjetas", "#/tarjeta", "Añadir tarjeta");
   const list = el.querySelector("[data-list]");
+  const error = el.querySelector(".error");
+  let rows = [];
+  // Abrir una fila cierra las demás; tocar fuera de las filas abiertas las cierra.
+  list.addEventListener("swipestart", (e) => rows.forEach((r) => r !== e.target && r.isOpen() && r.close()));
+  el.addEventListener("click", (e) => {
+    const inRow = e.target.closest("[data-list] > div");
+    rows.forEach((r) => r !== inRow && r.isOpen() && r.close());
+  });
   api("/cards")
     .then(({ cards }) => {
-      list.replaceChildren(
-        ...cards.map((c) => {
-          const a = html(`
-            <a data-press style="height:96px;box-sizing:border-box;padding:14px;border:1.5px solid rgba(27,27,31,.22);border-radius:20px;display:flex;flex-direction:column;justify-content:space-between">
-              <span data-name style="font-size:17px;font-weight:800;letter-spacing:-.2px"></span>
-              <span data-last style="font-size:14px;font-weight:600;letter-spacing:1.5px"></span>
-            </a>
-          `);
-          a.href = "#/tarjeta?id=" + c.id;
-          a.style.background = c.color;
-          a.style.color = cardFg(c.color);
-          a.style.borderColor = cardBorder(c.color);
-          a.querySelector("[data-name]").textContent = c.name;
-          a.querySelector("[data-last]").textContent = "···· " + c.last4 + (c.walletName ? "  ·  " + c.walletName : "");
-          return a;
-        })
-      );
+      rows = cards.map((c) => {
+        const a = html(`
+          <a data-press style="height:96px;box-sizing:border-box;padding:14px;border:1.5px solid rgba(27,27,31,.22);border-radius:20px;display:flex;flex-direction:column;justify-content:space-between">
+            <span data-name style="font-size:17px;font-weight:800;letter-spacing:-.2px"></span>
+            <span data-last style="font-size:14px;font-weight:600;letter-spacing:1.5px"></span>
+          </a>
+        `);
+        a.href = "#/tarjeta?id=" + c.id;
+        a.style.background = c.color;
+        a.style.color = cardFg(c.color);
+        a.style.borderColor = cardBorder(c.color);
+        a.querySelector("[data-name]").textContent = c.name;
+        a.querySelector("[data-last]").textContent = "···· " + c.last4 + (c.walletName ? "  ·  " + c.walletName : "");
+        return swipeRow(a, {
+          editHref: "#/tarjeta?id=" + c.id,
+          onDelete: () => {
+            error.textContent = "";
+            return api(`/cards/${c.id}/delete`, {});
+          },
+          onError: (err) => (error.textContent = err.message),
+        });
+      });
+      list.replaceChildren(...rows);
     })
-    .catch((err) => (el.querySelector(".error").textContent = err.message));
+    .catch((err) => (error.textContent = err.message));
   return el;
 }
 
