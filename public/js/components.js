@@ -248,19 +248,20 @@ export function merchantEditor({ value, raw, merchants, categories, max = 8, not
   return el;
 }
 
-// Deslizar una fila hacia la izquierda (como en las apps de Apple) deja ver Editar y Borrar.
-// Borrar pide confirmación: el primer toque lo ensancha con "¿Borrar?", el segundo borra.
-const ACT_W = 152; // los botones: dos de 72 px y un hueco de 8
-const OPEN = ACT_W + 8; // lo que se aparta la tarjeta (con su hueco antes de los botones)
+// Deslizar una fila hacia la izquierda (como en las apps de Apple) deja ver Editar y Borrar,
+// en botones redondos como los del resto de Dipper (la papelera con borde punteado).
+// Borrar pide confirmación como en Editar tarjeta: el primer toque la pone en rojo, el segundo borra.
+const ACT_W = 114; // dos botones de 52 px y un hueco de 10
+const OPEN = ACT_W + 12; // lo que se aparta la tarjeta (con su hueco antes de los botones)
 const PEN =
   '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>';
 
 export function swipeRow(card, { editHref, onDelete, onError }) {
   const row = html(`
     <div style="position:relative">
-      <div data-acts style="position:absolute;top:0;right:0;bottom:0;width:${ACT_W}px;display:flex;justify-content:flex-end;gap:8px;opacity:0">
-        <a data-edit aria-label="Editar" style="flex:none;width:72px;box-sizing:border-box;border-radius:20px;background:#E3E0EA;color:#1B1B1F;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:width .3s cubic-bezier(.3,1.3,.5,1),opacity .2s">${PEN}</a>
-        <button type="button" data-del aria-label="Borrar" style="flex:none;width:72px;box-sizing:border-box;border:0;border-radius:20px;background:#FF3B30;color:#fff;display:flex;align-items:center;justify-content:center;gap:6px;font:inherit;font-size:15px;font-weight:800;cursor:pointer;padding:0;transition:width .3s cubic-bezier(.3,1.3,.5,1)">${ICON.trash}<span data-ask hidden>¿Borrar?</span></button>
+      <div data-acts style="position:absolute;top:0;right:0;bottom:0;width:${ACT_W}px;display:flex;align-items:center;justify-content:flex-end;gap:10px;opacity:0">
+        <a data-edit class="round-btn" aria-label="Editar" style="width:52px;height:52px">${PEN}</a>
+        <button type="button" data-del class="round-btn" aria-label="Borrar" style="width:52px;height:52px;border-style:dashed;border-color:rgba(27,27,31,.4)">${ICON.trash}</button>
       </div>
     </div>
   `);
@@ -284,12 +285,10 @@ export function swipeRow(card, { editHref, onDelete, onError }) {
   }
   function setConfirm(v) {
     confirming = v;
-    del.querySelector("[data-ask]").hidden = !v;
-    del.style.width = v ? ACT_W + "px" : "72px";
-    edit.style.width = v ? "0px" : "72px";
-    edit.style.opacity = v ? "0" : "1";
-    if (v) edit.style.marginLeft = "-8px";
-    else edit.style.marginLeft = "";
+    del.classList.toggle("danger", v);
+    del.style.borderStyle = v ? "solid" : "dashed";
+    del.style.borderColor = v ? "" : "rgba(27,27,31,.4)";
+    del.setAttribute("aria-label", v ? "Toca otra vez para borrar" : "Borrar");
   }
   row.close = () => {
     setConfirm(false);
