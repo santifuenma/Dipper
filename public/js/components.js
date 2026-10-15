@@ -104,7 +104,7 @@ export function cardChips(cards, selectedId, onPick, firstId, { cash = true } = 
     b.style.color = o.fg;
     b.style.opacity = on ? "1" : ".55";
     b.style.transform = on ? "translateY(-2px)" : "none";
-    b.style.boxShadow = on ? "0 0 0 2px #F2F0F5,0 0 0 4px #1B1B1F" : "none";
+    b.style.boxShadow = on ? "0 0 0 2px #F1EDF9,0 0 0 4px #1B1B1F" : "none";
     b.querySelector("[data-n]").textContent = o.name;
     b.querySelector("[data-s]").textContent = o.sub;
     b.addEventListener("click", () => onPick(o.id));

@@ -58,7 +58,7 @@ export function renderCategoriaForm(params) {
   const delHint = el.querySelector("[data-delete-hint]");
   const error = el.querySelector(".error");
 
-  const ring = (on) => (on ? "0 0 0 3px #F2F0F5,0 0 0 5px #1B1B1F" : "none");
+  const ring = (on) => (on ? "0 0 0 3px #F1EDF9,0 0 0 5px #1B1B1F" : "none");
 
   function draw() {
     fill.style.color = st.color;

@@ -94,7 +94,7 @@ export function renderTarjetaForm(params) {
         const on = c.bg === st.color;
         b.setAttribute("aria-label", c.name);
         b.setAttribute("aria-pressed", on ? "true" : "false");
-        b.style.cssText = `width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(27,27,31,.25);cursor:pointer;transition:transform .3s cubic-bezier(.3,1.6,.5,1),box-shadow .2s;background:${c.bg};transform:${on ? "scale(1.1)" : "none"};box-shadow:${on ? "0 0 0 3px #F2F0F5,0 0 0 5px #1B1B1F" : "none"}`;
+        b.style.cssText = `width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(27,27,31,.25);cursor:pointer;transition:transform .3s cubic-bezier(.3,1.6,.5,1),box-shadow .2s;background:${c.bg};transform:${on ? "scale(1.1)" : "none"};box-shadow:${on ? "0 0 0 3px #F1EDF9,0 0 0 5px #1B1B1F" : "none"}`;
         b.addEventListener("click", () => {
           st.color = c.bg;
           draw();

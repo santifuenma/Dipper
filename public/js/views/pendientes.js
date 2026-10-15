@@ -48,7 +48,7 @@ export function renderPendientes() {
           <div style="font-size:13px;font-weight:700;color:#5A5470">Tienes varias tarjetas con este nombre. ¿Con cuál pagaste?</div>
           <div data-cardchips class="noscroll" style="display:flex;gap:8px;overflow-x:auto;margin:2px -16px 0;padding:8px 16px"></div>
         </div>
-        <div style="padding:12px 16px 14px;border-top:1.5px solid rgba(27,27,31,.1);background:#FAF9FB">
+        <div style="padding:12px 16px 14px;border-top:1.5px solid rgba(27,27,31,.1);background:#FAF8FD">
           <div data-hint style="font-size:13px;font-weight:700;color:#5A5470"></div>
           <div data-cats class="chips-fill" style="margin-top:10px"></div>
         </div>
