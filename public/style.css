@@ -54,7 +54,8 @@ input:focus { outline: 2px solid var(--ink); outline-offset: 1px; }
   max-width: 480px;
   margin: 0 auto;
   box-sizing: border-box;
-  padding: calc(6px + env(safe-area-inset-top)) 20px max(16px, env(safe-area-inset-bottom));
+  /* Abajo: algo menos que la franja de la barra de inicio del iPhone, que queda casi pegada */
+  padding: calc(6px + env(safe-area-inset-top)) 20px max(8px, calc(env(safe-area-inset-bottom) - 14px));
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: none;
