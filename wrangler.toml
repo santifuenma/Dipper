@@ -17,3 +17,22 @@ binding = "DB"
 database_name = "dipper"
 database_id = "52bb4076-2c47-4c86-b359-794f1592f3f4"
 migrations_dir = "migrations"
+
+# Entorno de pruebas: https://dipper-pruebas.dipper-app.workers.dev con su propia base de datos.
+# Cada rama se publica aquí para probarla antes de hacer el merge a main (npm run deploy:pruebas).
+[env.pruebas]
+name = "dipper-pruebas"
+
+[env.pruebas.observability]
+enabled = true
+
+[env.pruebas.assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = ["/api/*"]
+
+[[env.pruebas.d1_databases]]
+binding = "DB"
+database_name = "dipper-pruebas"
+database_id = "a80a2f68-c799-460e-b63e-ba576ff01912"
+migrations_dir = "migrations"
