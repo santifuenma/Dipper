@@ -82,14 +82,27 @@ function pick(body, ...names) {
   return undefined;
 }
 
-function matchCard(cards, walletCard) {
-  if (!walletCard) return null;
+// Tarjetas que encajan con el nombre que manda Wallet. Varias = tarjetas que se llaman igual:
+// hay que preguntar con cuál se pagó.
+function matchCards(cards, walletCard) {
+  if (!walletCard) return [];
   const w = walletCard.toLowerCase();
-  return (
-    cards.find((c) => c.wallet_name && c.wallet_name.toLowerCase() === w) ||
-    cards.find((c) => c.last4 && w.includes(c.last4)) ||
-    null
-  );
+  const byName = cards.filter((c) => c.wallet_name && c.wallet_name.toLowerCase() === w);
+  if (byName.length) return byName;
+  const byDigits = cards.find((c) => c.last4 && w.includes(c.last4));
+  return byDigits ? [byDigits] : [];
+}
+
+// Entre varias tarjetas posibles, la que se usó la última vez en ese comercio.
+async function guessCard(env, userId, merchantKey, candidates) {
+  const ids = candidates.map((c) => c.id);
+  const row = await env.DB.prepare(
+    `SELECT card_id FROM charges WHERE user_id = ? AND merchant_key = ? AND card_id IN (${ids.map(() => "?").join(",")})
+     ORDER BY occurred_at DESC LIMIT 1`
+  )
+    .bind(userId, merchantKey, ...ids)
+    .first();
+  return row ? row.card_id : null;
 }
 
 export async function ingest(request, env, token) {
@@ -120,18 +133,22 @@ export async function ingest(request, env, token) {
     const key = fecha ? await sha256([fecha, amountRaw, raw, walletCard].join("|")) : null;
 
     const m = merchantInfo(raw);
-    const card = matchCard(cards, walletCard);
+    const matches = matchCards(cards, walletCard);
+    const cardCheck = matches.length > 1;
+    const cardId = cardCheck ? await guessCard(env, user.id, m.key, matches) : matches.length ? matches[0].id : null;
     const rule = await env.DB.prepare("SELECT category_id FROM merchant_rules WHERE user_id = ? AND merchant_key = ?")
       .bind(user.id, m.key)
       .first();
     const own = await env.DB.prepare("SELECT name FROM merchant_names WHERE user_id = ? AND merchant_key = ?")
       .bind(user.id, m.key)
       .first();
+    // Con dos tarjetas que se llaman igual, el pago no se coloca solo aunque el comercio esté recordado.
+    const autoCat = rule && !cardCheck ? rule.category_id : null;
 
     const res = await env.DB.prepare(
       `INSERT OR IGNORE INTO charges (user_id, amount_cents, merchant_raw, merchant_key, merchant_name, card_id, wallet_card,
-         category_id, status, source, occurred_at, created_at, ingest_key)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'applepay', ?, ?, ?)`
+         category_id, status, source, occurred_at, created_at, ingest_key, card_check)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'applepay', ?, ?, ?, ?)`
     )
       .bind(
         user.id,
@@ -139,13 +156,14 @@ export async function ingest(request, env, token) {
         raw,
         m.key,
         own ? own.name : m.name,
-        card ? card.id : null,
+        cardId,
         walletCard || null,
-        rule ? rule.category_id : null,
-        rule ? "done" : "pending",
+        autoCat,
+        autoCat ? "done" : "pending",
         date.getTime(),
         Date.now(),
-        key
+        key,
+        cardCheck ? 1 : 0
       )
       .run();
     added += res.meta.changes;
@@ -200,18 +218,27 @@ async function applePayLink(env, url, user) {
 async function pending(env, user) {
   const categories = await listCategories(env, user.id);
   const { results } = await env.DB.prepare(
-    `SELECT ch.id, ch.amount_cents, ch.merchant_raw, ch.merchant_name, ch.wallet_card, ch.occurred_at,
-            ca.name AS card_name, ca.last4 AS card_last4, ca.color AS card_color
+    `SELECT ch.id, ch.amount_cents, ch.merchant_raw, ch.merchant_key, ch.merchant_name, ch.wallet_card, ch.occurred_at,
+            ch.card_id, ch.card_check, ca.name AS card_name, ca.last4 AS card_last4, ca.color AS card_color
      FROM charges ch LEFT JOIN cards ca ON ca.id = ch.card_id
      WHERE ch.user_id = ? AND ch.status = 'pending'
      ORDER BY ch.occurred_at DESC`
   )
     .bind(user.id)
     .all();
+  const { results: cards } = await env.DB.prepare("SELECT id, name, last4, color, wallet_name FROM cards WHERE user_id = ? ORDER BY id")
+    .bind(user.id)
+    .all();
+  const { results: rules } = await env.DB.prepare("SELECT merchant_key, category_id FROM merchant_rules WHERE user_id = ?")
+    .bind(user.id)
+    .all();
 
   const items = results.map((r) => {
+    // Comercio recordado (pago retenido solo por la tarjeta): su categoría; si no, la sugerida por el nombre.
+    const rule = rules.find((x) => x.merchant_key === r.merchant_key);
     const slug = merchantInfo(r.merchant_raw).slug;
-    const sug = slug ? categories.find((c) => c.icon === slug) : null;
+    const sug = rule ? categories.find((c) => c.id === rule.category_id) : slug ? categories.find((c) => c.icon === slug) : null;
+    const w = (r.wallet_card || "").toLowerCase();
     return {
       id: r.id,
       amountCents: r.amount_cents,
@@ -221,15 +248,21 @@ async function pending(env, user) {
       card: r.card_name ? { name: r.card_name, last4: r.card_last4, color: r.card_color } : null,
       walletCard: r.wallet_card,
       suggestedCategoryId: sug ? sug.id : null,
+      // Tarjetas que se llaman igual en Wallet: hay que elegir con cuál se pagó (cardId = la adivinada).
+      cardCheck: !!r.card_check,
+      cardId: r.card_id,
+      cardOptions: r.card_check
+        ? cards.filter((c) => c.wallet_name && c.wallet_name.toLowerCase() === w).map(({ id, name, last4, color }) => ({ id, name, last4, color }))
+        : [],
     };
   });
   return json({ items, categories, merchants: await listMerchants(env, user.id) });
 }
 
 async function confirm(request, env, user, id) {
-  const { categoryId, remember, name } = await readJson(request);
+  const { categoryId, remember, name, cardId } = await readJson(request);
   const charge = await env.DB.prepare(
-    "SELECT id, merchant_key, merchant_name FROM charges WHERE id = ? AND user_id = ? AND status = 'pending'"
+    "SELECT id, merchant_key, merchant_name, card_check FROM charges WHERE id = ? AND user_id = ? AND status = 'pending'"
   )
     .bind(id, user.id)
     .first();
@@ -238,8 +271,14 @@ async function confirm(request, env, user, id) {
   if (!cat) return json({ error: "Elige una categoría." }, 400);
   const newName = name === undefined ? null : cleanMerchantName(name);
   if (name !== undefined && !newName) return json({ error: "Escribe el nombre del comercio." }, 400);
+  let card = null;
+  if (charge.card_check) {
+    card = await env.DB.prepare("SELECT id FROM cards WHERE id = ? AND user_id = ?").bind(Number.isInteger(cardId) ? cardId : -1, user.id).first();
+    if (!card) return json({ error: "Elige con qué tarjeta pagaste." }, 400);
+  }
 
   const stmts = [env.DB.prepare("UPDATE charges SET status = 'done', category_id = ? WHERE id = ?").bind(cat.id, charge.id)];
+  if (card) stmts.push(env.DB.prepare("UPDATE charges SET card_id = ? WHERE id = ?").bind(card.id, charge.id));
   if (newName && newName !== charge.merchant_name) {
     // Recordando el comercio, el nombre vale para todos sus pagos; si no, solo para este.
     if (remember) stmts.push(...renameMerchantStmts(env, user.id, charge.merchant_key, newName));
@@ -252,9 +291,9 @@ async function confirm(request, env, user, id) {
     await env.DB.prepare("INSERT OR REPLACE INTO merchant_rules (user_id, merchant_key, category_id, created_at) VALUES (?, ?, ?, ?)")
       .bind(user.id, charge.merchant_key, cat.id, Date.now())
       .run();
-    // Los otros pagos pendientes del mismo comercio se colocan solos.
+    // Los otros pagos pendientes del mismo comercio se colocan solos (menos los que esperan tarjeta).
     const { results } = await env.DB.prepare(
-      "UPDATE charges SET status = 'done', category_id = ? WHERE user_id = ? AND status = 'pending' AND merchant_key = ? RETURNING id"
+      "UPDATE charges SET status = 'done', category_id = ? WHERE user_id = ? AND status = 'pending' AND merchant_key = ? AND card_check = 0 RETURNING id"
     )
       .bind(cat.id, user.id, charge.merchant_key)
       .all();

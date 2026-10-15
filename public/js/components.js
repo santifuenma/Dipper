@@ -81,11 +81,11 @@ export function movementGroups(charges, { cats, cards, mode = "category" }) {
 }
 
 // Fichas de tarjeta (estilo de Nuevo gasto): tus tarjetas y al final "Efectivo / Otros" (id null).
-// firstId: la tarjeta con la que se pagó va la primera (en Pago).
-export function cardChips(cards, selectedId, onPick, firstId) {
+// firstId: la tarjeta con la que se pagó va la primera (en Pago). cash: false quita "Efectivo".
+export function cardChips(cards, selectedId, onPick, firstId, { cash = true } = {}) {
   const opts = [
     ...cards.map((k) => ({ id: k.id, name: k.name, sub: "···· " + k.last4, bg: k.color, fg: cardFg(k.color) })),
-    { id: null, name: "Efectivo", sub: "Otros", bg: "#fff", fg: "#1B1B1F" },
+    ...(cash ? [{ id: null, name: "Efectivo", sub: "Otros", bg: "#fff", fg: "#1B1B1F" }] : []),
   ];
   if (firstId !== undefined) {
     const i = opts.findIndex((o) => o.id === firstId);

@@ -16,8 +16,17 @@ function validate(body) {
 
 // Asigna a esta tarjeta los pagos que llegaron sin tarjeta reconocida.
 async function relink(env, userId, card) {
+  // Si ya hay otra tarjeta con el mismo nombre de Wallet, sus pagos pendientes pasan a preguntar la tarjeta.
+  if (card.walletName) {
+    await env.DB.prepare(
+      `UPDATE charges SET card_check = 1 WHERE user_id = ? AND status = 'pending' AND LOWER(wallet_card) = LOWER(?)
+         AND (SELECT COUNT(*) FROM cards c WHERE c.user_id = ? AND LOWER(c.wallet_name) = LOWER(?)) > 1`
+    )
+      .bind(userId, card.walletName, userId, card.walletName)
+      .run();
+  }
   const { results } = await env.DB.prepare(
-    "SELECT id, wallet_card FROM charges WHERE user_id = ? AND card_id IS NULL AND wallet_card IS NOT NULL"
+    "SELECT id, wallet_card FROM charges WHERE user_id = ? AND card_id IS NULL AND wallet_card IS NOT NULL AND card_check = 0"
   )
     .bind(userId)
     .all();

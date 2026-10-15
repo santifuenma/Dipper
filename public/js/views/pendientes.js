@@ -3,12 +3,12 @@ import { api } from "../api.js";
 import { go } from "../app.js";
 import { html, ICON } from "../dom.js";
 import { euros, when } from "../format.js";
-import { merchantEditor, penButton, rawLine } from "../components.js";
+import { cardChips, merchantEditor, penButton, rawLine } from "../components.js";
 
 const CHECK_WHITE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 
 export function renderPendientes() {
-  // Estado de cada pago: { sel, rem, name, editing, draft, done, appliedIds, saving }
+  // Estado de cada pago: { sel, rem, card, name, editing, draft, done, appliedIds, saving }
   const state = new Map();
   let items = [];
   let categories = [];
@@ -44,6 +44,10 @@ export function renderPendientes() {
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true" style="flex:none"><path d="M12 5v14M5 12h14"/></svg>
           <span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Tarjeta nueva · Guardarla en Dipper</span>
         </a>
+        <div data-cardpick hidden style="padding:0 16px 10px">
+          <div style="font-size:13px;font-weight:700;color:#5A5470">Tienes varias tarjetas con este nombre. ¿Con cuál pagaste?</div>
+          <div data-cardchips class="noscroll" style="display:flex;gap:8px;overflow-x:auto;margin:2px -16px 0;padding:8px 16px"></div>
+        </div>
         <div style="padding:12px 16px 14px;border-top:1.5px solid rgba(27,27,31,.1);background:#FAF7FF">
           <div data-hint style="font-size:13px;font-weight:700;color:#5A5470"></div>
           <div data-cats class="chips-fill" style="margin-top:10px"></div>
@@ -126,19 +130,37 @@ export function renderPendientes() {
         })
       );
       top.querySelector("[data-raw]").replaceWith(rawLine(it.merchantRaw));
-      top.querySelector("[data-dot]").style.background = it.card ? it.card.color : "#fff";
-      const cardTxt = it.card ? `${it.card.name} ···· ${it.card.last4}` : it.walletCard || "Tarjeta desconocida";
+      // Con tarjetas que se llaman igual, la línea enseña la elegida aquí.
+      const shown = it.cardCheck ? it.cardOptions.find((k) => k.id === st.card) || null : it.card;
+      top.querySelector("[data-dot]").style.background = shown ? shown.color : "#fff";
+      const cardTxt = shown ? `${shown.name} ···· ${shown.last4}` : it.cardCheck ? "Elige la tarjeta" : it.walletCard || "Tarjeta desconocida";
       top.querySelector("[data-sub]").textContent = `${when(it.occurredAt)} · ${cardTxt}`;
       top.querySelector("[data-amount]").textContent = amount;
       head.append(top);
       // Pago de una tarjeta de Wallet que aún no está en Dipper: ofrecer guardarla ya rellenada.
-      if (!it.card && it.walletCard) {
+      if (!it.card && it.walletCard && !it.cardCheck) {
         const nc = card.querySelector("[data-newcard]");
         nc.hidden = false;
         nc.href = "#/tarjeta?wallet=" + encodeURIComponent(it.walletCard);
       }
     }
     drawHint();
+
+    if (it.cardCheck) {
+      card.querySelector("[data-cardpick]").hidden = false;
+      card.querySelector("[data-cardchips]").replaceChildren(
+        ...cardChips(
+          it.cardOptions,
+          st.card,
+          (id) => {
+            st.card = id;
+            draw();
+          },
+          undefined,
+          { cash: false }
+        )
+      );
+    }
 
     const chips = card.querySelector("[data-cats]");
     const confirmBtn = card.querySelector("[data-confirm]");
@@ -160,7 +182,7 @@ export function renderPendientes() {
           return chip;
         })
       );
-      confirmBtn.disabled = !st.sel || st.saving;
+      confirmBtn.disabled = !st.sel || st.saving || (it.cardCheck && !st.card);
     }
     drawCats();
 
@@ -238,6 +260,7 @@ export function renderPendientes() {
     try {
       const body = { categoryId: st.sel, remember: st.rem };
       if (st.name !== it.merchant) body.name = st.name;
+      if (it.cardCheck) body.cardId = st.card;
       const res = await api(`/pending/${it.id}/confirm`, body);
       st.done = true;
       st.appliedIds = res.appliedIds.filter((id) => id !== it.id);
@@ -275,7 +298,7 @@ export function renderPendientes() {
       items = data.items;
       categories = data.categories;
       merchants = data.merchants || [];
-      for (const it of items) state.set(it.id, { sel: it.suggestedCategoryId, rem: true, name: it.merchant, done: false });
+      for (const it of items) state.set(it.id, { sel: it.suggestedCategoryId, rem: true, card: it.cardId, name: it.merchant, done: false });
       loaded = true;
       draw();
     })
