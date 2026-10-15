@@ -1,0 +1,19 @@
+name = "dipper"
+main = "src/worker.js"
+compatibility_date = "2025-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Registro de peticiones (Workers Logs) para poder revisar después qué llegó del atajo.
+[observability]
+enabled = true
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = ["/api/*"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "dipper"
+database_id = "52bb4076-2c47-4c86-b359-794f1592f3f4"
+migrations_dir = "migrations"

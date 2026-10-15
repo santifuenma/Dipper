@@ -1,0 +1,155 @@
+/* Dipper: estilos base portados del diseño (dipper-diseno.zip) */
+:root {
+  --bg: #F0EAFF;
+  --ink: #1B1B1F;
+  --muted: #5A5470;
+  --line: rgba(27, 27, 31, .22);
+  --line-strong: rgba(27, 27, 31, .25);
+  --lima: #CDF56B;
+  --danger: #B3261E;
+}
+
+* { -webkit-tap-highlight-color: transparent; }
+[hidden] { display: none !important; }
+
+/* Sensación de app: sin zoom, sin rebote de página, sin selección de texto ni menú al mantener pulsado */
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+  background: var(--bg);
+  color: var(--ink);
+}
+body {
+  font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+input, textarea { -webkit-user-select: text; user-select: text; }
+
+/* Contenedor de pantallas: fijo; cada pantalla es una capa que se anima */
+#app { position: fixed; inset: 0; overflow: hidden; background: var(--bg); }
+
+/* Capa de decoración (olas, formas): recortada para que no haga la pantalla más alta */
+.deco { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+a { color: inherit; text-decoration: none; }
+button, input { font-family: inherit; }
+input::placeholder { color: #8A83A3; }
+input:focus { outline: 2px solid var(--ink); outline-offset: 1px; }
+.noscroll { scrollbar-width: none; }
+.noscroll::-webkit-scrollbar { display: none; }
+
+.screen {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: calc(6px + env(safe-area-inset-top)) 20px max(16px, env(safe-area-inset-bottom));
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: none;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  scrollbar-width: none;
+}
+.screen::-webkit-scrollbar { display: none; }
+
+.topbar { position: relative; display: flex; align-items: center; justify-content: space-between; height: 44px; flex: none; }
+/* Título centrado en la pantalla (y bajo la isla dinámica), aunque los botones de los lados midan distinto */
+.topbar > :nth-child(2):not(:last-child) { position: absolute; left: 50%; transform: translateX(-50%); white-space: nowrap; }
+.icon-btn { width: 44px; height: 44px; margin-left: -12px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--ink); }
+
+/* Campos */
+.field { display: flex; align-items: center; gap: 10px; height: 54px; box-sizing: border-box; padding: 0 16px; border: 1.5px solid var(--line); border-radius: 18px; background: #fff; }
+.field.has-btn { padding: 0 8px 0 16px; }
+.field input { flex: 1; min-width: 0; border: 0; background: transparent; font-size: 17px; font-weight: 600; color: var(--ink); }
+.field input:focus { outline: none; }
+.field:focus-within { outline: 2px solid var(--ink); outline-offset: 1px; }
+.field .toggle { flex: none; height: 40px; padding: 0 12px; border: 0; border-radius: 12px; background: transparent; font-size: 14px; font-weight: 700; color: var(--ink); cursor: pointer; }
+
+/* Botones */
+/* Todos los botones anchos miden y pesan lo mismo; solo cambia el color */
+.btn { flex: none; height: 56px; box-sizing: border-box; border-radius: 28px; border: 1.5px solid var(--line-strong); font-size: 18px; font-weight: 800; display: flex; align-items: center; justify-content: center; cursor: pointer; width: 100%; color: var(--ink); }
+.btn-lima { background: var(--lima); }
+.btn-dark { background: var(--ink); border-color: var(--ink); color: #fff; }
+.btn-white { background: #fff; }
+.btn:disabled { background: rgba(27, 27, 31, .08); color: rgba(27, 27, 31, .4); cursor: default; }
+
+/* Botón redondo de la cabecera para borrar; en rojo cuando pide confirmación */
+.round-btn { width: 44px; height: 44px; box-sizing: border-box; border-radius: 50%; border: 1.5px solid var(--line); background: #fff; color: var(--ink); display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
+.round-btn.danger { background: #B3261E; border-color: #B3261E; color: #fff; }
+.hint-danger { font-size: 14px; font-weight: 700; color: var(--danger); }
+.hint-danger:empty { display: none; }
+
+/* Al pulsar: se encoge un poco y rebota al soltar */
+.btn, .icon-btn, .round-btn, [data-press] { transition: transform .4s cubic-bezier(.3, 1.6, .5, 1), background .2s, opacity .2s; }
+.btn:active:not(:disabled), .icon-btn:active, .round-btn:active, [data-press]:active { transform: scale(.96); transition-duration: .08s; }
+.btn.busy { opacity: .6; pointer-events: none; }
+
+.divider { margin: 12px 0; display: flex; align-items: center; gap: 12px; font-size: 13px; font-weight: 700; }
+.divider span { flex: 1; height: 1px; background: rgba(27, 27, 31, .15); }
+
+.error { font-size: 14px; font-weight: 700; color: var(--danger); min-height: 0; }
+.error:empty { display: none; }
+.link-u { font-weight: 800; text-decoration: underline; background: none; border: 0; padding: 4px 0; cursor: pointer; color: var(--ink); font-size: inherit; }
+
+/* Olas de la pantalla Entrar */
+.lay { position: absolute; left: 0; right: 0; bottom: -12px; background: var(--c); animation: swell var(--sw) ease-in-out var(--dl) infinite; }
+.lay::before { content: ""; position: absolute; left: 0; right: 0; top: -9px; height: 10px; background: radial-gradient(circle at 11px 10px, var(--c) 9px, transparent 9.5px) 0 0/22px 10px repeat-x; animation: drift var(--sp) linear infinite; animation-direction: var(--dir); }
+@keyframes drift { to { background-position: 22px 0; } }
+@keyframes swell { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+/* Tarjeta que entra al abrir su pantalla */
+.card-in { animation: cardin .7s cubic-bezier(.3, 1.4, .5, 1) both; }
+@keyframes cardin { from { transform: translateY(40px) rotate(-3deg); opacity: 0; } }
+
+/* Categoría pasada de presupuesto: tiembla de vez en cuando */
+.wob { animation: wob 7s ease-in-out infinite; }
+@keyframes wob { 0%, 86%, 100% { transform: rotate(0); } 90% { transform: rotate(-1.2deg); } 94% { transform: rotate(1.2deg); } }
+
+/* Hoja que sube desde abajo (pregunta de Face ID) */
+.sheet-bg { position: absolute; inset: 0; z-index: 20; background: rgba(27, 27, 31, .35); display: flex; align-items: flex-end; animation: fadein .3s ease both; }
+/* Hoja flotante: misma separación a los lados y abajo, esquinas concéntricas con las de la pantalla del iPhone */
+.sheet { width: 100%; box-sizing: border-box; margin: 0 8px 8px; padding: 26px 22px max(22px, calc(env(safe-area-inset-bottom) + 4px)); border-radius: 30px 30px 48px 48px; background: #fff; border: 1.5px solid var(--line); animation: sheetup .5s cubic-bezier(.32, .72, 0, 1) both; }
+@keyframes fadein { from { opacity: 0; } }
+@keyframes sheetup { from { transform: translateY(110%); } }
+
+/* Bolitas que se mueven */
+.wig { animation: wig 1.6s ease-in-out infinite; }
+@keyframes wig { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+
+/* Líquido que sube dentro de las categorías (color = currentColor) */
+.fill { position: absolute; left: 0; right: 0; bottom: 0; background: currentColor; transform-origin: 50% 100%; animation: rise .9s cubic-bezier(.2, .9, .3, 1) both; transition: height .5s cubic-bezier(.2, .9, .3, 1), color .3s; }
+.fill::before { content: ""; position: absolute; left: 0; right: 0; top: -9px; height: 10px; background: radial-gradient(circle at 11px 10px, currentColor 9px, transparent 9.5px) 0 0/22px 10px repeat-x; animation: drift 4s linear infinite; }
+@keyframes rise { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+
+/* Nuevo gasto: cursor del importe y "plop" al guardar */
+.caret { display: inline-block; width: 4px; height: min(60px, 7dvh); margin-left: 4px; border-radius: 2px; background: var(--ink); align-self: center; animation: blink 1.1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.plop { animation: plop .7s cubic-bezier(.3, 1.6, .5, 1) both; }
+@keyframes plop { from { transform: scale(.4); opacity: 0; } }
+
+/* Aparecer con rebote (check, pegatina) */
+.pop { animation: pop .5s cubic-bezier(.3, 1.7, .5, 1) both; }
+@keyframes pop { from { transform: scale(.4); opacity: 0; } }
+.stick { animation: stick .6s cubic-bezier(.3, 1.6, .5, 1) both; }
+@keyframes stick { from { transform: scale(.9) translateY(-10px); opacity: .3; } }
+
+/* Chips y tarjetas comunes */
+.chip { flex: none; height: 38px; box-sizing: border-box; padding: 0 14px; border-radius: 99px; font-size: 14px; font-weight: 700; color: var(--ink); cursor: pointer; background: #fff; border: 1.5px solid var(--line); transition: background .2s, transform .3s cubic-bezier(.3, 1.6, .5, 1); }
+.chip.sug { border: 1.5px dashed rgba(27, 27, 31, .6); }
+.chip.on { border: 1.5px solid var(--ink); transform: translateY(-2px); }
+.card-box { box-sizing: border-box; border: 1.5px solid var(--line); border-radius: 24px; background: #fff; }
+
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }

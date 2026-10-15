@@ -1,0 +1,20 @@
+{
+  "name": "dipper",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:local": "wrangler d1 migrations apply dipper --local",
+    "db:remote": "wrangler d1 migrations apply dipper --remote",
+    "icons": "node scripts/make-icons.mjs",
+    "reset-password": "node scripts/reset-password.mjs"
+  },
+  "dependencies": {
+    "@simplewebauthn/server": "^13.1.1"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
