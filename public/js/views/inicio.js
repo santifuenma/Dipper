@@ -28,7 +28,7 @@ export function renderInicio() {
         </div>
         <div style="display:flex;gap:8px">
           <a href="#/presupuesto" data-press aria-label="Presupuesto" style="width:44px;height:44px;box-sizing:border-box;border-radius:50%;border:1.5px solid rgba(27,27,31,.22);background:#fff;display:flex;align-items:center;justify-content:center">${SLIDERS}</a>
-          <a href="#/ajustes" data-press aria-label="Ajustes" style="width:44px;height:44px;box-sizing:border-box;border-radius:50%;border:1.5px solid rgba(27,27,31,.22);background:#fff;display:flex;align-items:center;justify-content:center">${GEAR}</a>
+          <a href="#/ajustes" data-press aria-label="Ajustes" style="width:44px;height:44px;box-sizing:border-box;border-radius:50%;border:1.5px dashed rgba(27,27,31,.4);background:#fff;display:flex;align-items:center;justify-content:center">${GEAR}</a>
         </div>
       </div>
 
