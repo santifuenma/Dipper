@@ -1,5 +1,5 @@
 // Piezas compartidas entre Inicio, Tarjeta, Categoría y Movimientos.
-import { html } from "./dom.js";
+import { html, ICON } from "./dom.js";
 import { dayKey, dayTitle, euros, timeOf } from "./format.js";
 import { cardFg, categoryIcon } from "./icons.js";
 
@@ -139,4 +139,97 @@ export function emptyNote(text) {
   d.style.cssText = "margin-top:10px;padding:16px;border:1.5px dashed rgba(27,27,31,.35);border-radius:20px;font-size:15px;font-weight:600;color:#5A5470;text-align:center";
   d.textContent = text;
   return d;
+}
+
+// Botón redondo con lápiz para cambiar el nombre del comercio.
+export function penButton(onClick) {
+  const b = html(
+    `<button type="button" aria-label="Cambiar el nombre del comercio" style="flex:none;width:30px;height:30px;box-sizing:border-box;padding:0;border-radius:50%;border:1.5px solid rgba(27,27,31,.22);background:#fff;color:#1B1B1F;display:flex;align-items:center;justify-content:center;cursor:pointer">${ICON.pen}</button>`
+  );
+  b.addEventListener("click", onClick);
+  return b;
+}
+
+// Línea gris con el nombre tal cual lo mandó Apple Pay.
+export function rawLine(raw) {
+  const d = document.createElement("div");
+  d.style.cssText = "margin-top:2px;font-size:12px;font-weight:600;color:#8A83A3;overflow-wrap:anywhere";
+  d.textContent = "Apple Pay: " + raw;
+  return d;
+}
+
+const fold = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+
+// Editor del nombre del comercio: campo + "Listo", el nombre de Apple Pay y las fichas "Tus comercios".
+// Tocar una ficha pone su nombre y avisa con su categoría (onPick). onDone recibe el nombre escrito.
+export function merchantEditor({ value, raw, merchants, categories, max = 8, note, onInput, onPick, onDone }) {
+  const el = html(`
+    <div>
+      <form data-form class="field has-btn" style="margin-top:8px;height:50px">
+        <input data-input type="text" maxlength="60" autocomplete="off" autocapitalize="words" enterkeyhint="done" aria-label="Nombre del comercio">
+        <button type="submit" class="toggle" style="text-decoration:underline">Listo</button>
+      </form>
+      <div data-raw></div>
+      <div data-note style="margin-top:4px;font-size:12px;font-weight:600;color:#5A5470"></div>
+      <div data-label style="font-size:13px;font-weight:700;color:#5A5470;margin-top:12px">Tus comercios</div>
+      <div data-chips style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"></div>
+    </div>
+  `);
+  const input = el.querySelector("[data-input]");
+  const chipsEl = el.querySelector("[data-chips]");
+  const label = el.querySelector("[data-label]");
+  input.value = value;
+  if (raw) el.querySelector("[data-raw]").replaceWith(rawLine(raw));
+  if (note) el.querySelector("[data-note]").textContent = note;
+  else el.querySelector("[data-note]").remove();
+  let typed = false; // hasta que escriba se ven todas las fichas; luego, las que coinciden
+
+  function drawChips() {
+    const q = fold(input.value);
+    const list = (typed && q ? merchants.filter((m) => fold(m.name).includes(q)) : merchants).slice(0, max);
+    label.hidden = !list.length;
+    chipsEl.replaceChildren(
+      ...list.map((m) => {
+        const cat = categories.find((c) => c.id === m.categoryId);
+        const on = fold(m.name) === q;
+        const b = html(
+          `<button type="button" class="chip" style="display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="flex:none;width:8px;height:8px;border-radius:50%;box-sizing:border-box"></span><span data-n></span></button>`
+        );
+        b.classList.toggle("on", on);
+        b.setAttribute("aria-pressed", on ? "true" : "false");
+        const dot = b.firstElementChild;
+        if (on) {
+          b.style.background = cat ? cat.color : "#fff";
+          dot.style.background = "#1B1B1F";
+        } else {
+          dot.style.background = cat ? cat.color : "#fff";
+          dot.style.border = "1px solid rgba(27,27,31,.3)";
+        }
+        b.querySelector("[data-n]").textContent = m.name;
+        b.addEventListener("click", () => {
+          input.value = m.name;
+          drawChips();
+          onPick(m);
+        });
+        return b;
+      })
+    );
+  }
+
+  input.addEventListener("input", () => {
+    typed = true;
+    drawChips();
+    if (onInput) onInput(input.value.trim());
+  });
+  el.querySelector("[data-form]").addEventListener("submit", (e) => {
+    e.preventDefault();
+    onDone(input.value.trim().replace(/\s+/g, " "));
+  });
+  drawChips();
+  // Abierto: cursor en el campo con el texto seleccionado para escribir encima.
+  requestAnimationFrame(() => {
+    input.focus();
+    input.select();
+  });
+  return el;
 }

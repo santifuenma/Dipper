@@ -1,6 +1,7 @@
 // Movimientos: datos de un mes (Inicio, tarjeta, categoría, lista) y cambiar o borrar un pago.
 import { listCategories } from "./categories.js";
 import { normalize } from "./merchants.js";
+import { cleanMerchantName, listMerchants, renameMerchantStmts } from "./payments.js";
 import { json, readJson } from "./util.js";
 
 const monthKeyFmt = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Madrid", year: "numeric", month: "2-digit" });
@@ -44,16 +45,22 @@ async function getOne(env, user, id) {
     .bind(user.id)
     .all();
   const card = cards.find((k) => k.id === charge.cardId) || null;
-  return json({ charge, card, cards, categories: await listCategories(env, user.id) });
+  return json({ charge, card, cards, categories: await listCategories(env, user.id), merchants: await listMerchants(env, user.id) });
 }
 
-// Cambia la categoría y/o la tarjeta de un pago. cardId: null = efectivo u otros.
+// Cambia la categoría, la tarjeta y/o el nombre del comercio de un pago. cardId: null = efectivo u otros.
+// El nombre se cambia en todos los pagos de ese comercio y se recuerda para los que lleguen.
 async function update(request, env, user, id) {
   const body = await readJson(request);
-  const charge = await env.DB.prepare("SELECT id FROM charges WHERE id = ? AND user_id = ?").bind(id, user.id).first();
+  const charge = await env.DB.prepare("SELECT id, merchant_key FROM charges WHERE id = ? AND user_id = ?").bind(id, user.id).first();
   if (!charge) return json({ error: "Ese pago ya no existe." }, 404);
 
   const stmts = [];
+  if ("merchant" in body) {
+    const name = cleanMerchantName(body.merchant);
+    if (!name) return json({ error: "Escribe el nombre del comercio." }, 400);
+    stmts.push(...renameMerchantStmts(env, user.id, charge.merchant_key, name));
+  }
   if ("categoryId" in body) {
     const cat = await env.DB.prepare("SELECT id FROM categories WHERE id = ? AND user_id = ?")
       .bind(Number.isInteger(body.categoryId) ? body.categoryId : -1, user.id)

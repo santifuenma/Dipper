@@ -124,6 +124,9 @@ export async function ingest(request, env, token) {
     const rule = await env.DB.prepare("SELECT category_id FROM merchant_rules WHERE user_id = ? AND merchant_key = ?")
       .bind(user.id, m.key)
       .first();
+    const own = await env.DB.prepare("SELECT name FROM merchant_names WHERE user_id = ? AND merchant_key = ?")
+      .bind(user.id, m.key)
+      .first();
 
     const res = await env.DB.prepare(
       `INSERT OR IGNORE INTO charges (user_id, amount_cents, merchant_raw, merchant_key, merchant_name, card_id, wallet_card,
@@ -135,7 +138,7 @@ export async function ingest(request, env, token) {
         Math.round(amount * 100),
         raw,
         m.key,
-        m.name,
+        own ? own.name : m.name,
         card ? card.id : null,
         walletCard || null,
         rule ? rule.category_id : null,
@@ -152,6 +155,36 @@ export async function ingest(request, env, token) {
   if (!received && all.fromQueue) return json({ ok: true, recibidos: 0, nuevos: 0 });
   if (!received) return json({ error: "Falta el importe." }, 400);
   return json({ ok: true, recibidos: received, nuevos: added }, 201);
+}
+
+// Nombre que escribe el usuario para un comercio: vacío o demasiado largo no vale.
+export function cleanMerchantName(name) {
+  const s = typeof name === "string" ? name.trim().replace(/\s+/g, " ") : "";
+  return s && s.length <= 60 ? s : null;
+}
+
+// Fichas "Tus comercios": los nombres que ya usa, con la categoría de su último pago.
+export async function listMerchants(env, userId) {
+  const { results } = await env.DB.prepare(
+    `SELECT merchant_name AS name, category_id AS categoryId, MAX(occurred_at) AS last, COUNT(*) AS n
+     FROM charges WHERE user_id = ? AND status = 'done' GROUP BY merchant_name ORDER BY n DESC, last DESC LIMIT 60`
+  )
+    .bind(userId)
+    .all();
+  return results.map((r) => ({ name: r.name, categoryId: r.categoryId }));
+}
+
+// Recuerda el nombre del comercio y se lo pone a todos sus pagos (los de antes y los que lleguen).
+export function renameMerchantStmts(env, userId, merchantKey, name) {
+  return [
+    env.DB.prepare("INSERT OR REPLACE INTO merchant_names (user_id, merchant_key, name, created_at) VALUES (?, ?, ?, ?)").bind(
+      userId,
+      merchantKey,
+      name,
+      Date.now()
+    ),
+    env.DB.prepare("UPDATE charges SET merchant_name = ? WHERE user_id = ? AND merchant_key = ?").bind(name, userId, merchantKey),
+  ];
 }
 
 async function applePayLink(env, url, user) {
@@ -190,19 +223,29 @@ async function pending(env, user) {
       suggestedCategoryId: sug ? sug.id : null,
     };
   });
-  return json({ items, categories });
+  return json({ items, categories, merchants: await listMerchants(env, user.id) });
 }
 
 async function confirm(request, env, user, id) {
-  const { categoryId, remember } = await readJson(request);
-  const charge = await env.DB.prepare("SELECT id, merchant_key FROM charges WHERE id = ? AND user_id = ? AND status = 'pending'")
+  const { categoryId, remember, name } = await readJson(request);
+  const charge = await env.DB.prepare(
+    "SELECT id, merchant_key, merchant_name FROM charges WHERE id = ? AND user_id = ? AND status = 'pending'"
+  )
     .bind(id, user.id)
     .first();
   if (!charge) return json({ error: "Ese pago ya no está pendiente." }, 404);
   const cat = await env.DB.prepare("SELECT id FROM categories WHERE id = ? AND user_id = ?").bind(Number.isInteger(categoryId) ? categoryId : -1, user.id).first();
   if (!cat) return json({ error: "Elige una categoría." }, 400);
+  const newName = name === undefined ? null : cleanMerchantName(name);
+  if (name !== undefined && !newName) return json({ error: "Escribe el nombre del comercio." }, 400);
 
-  await env.DB.prepare("UPDATE charges SET status = 'done', category_id = ? WHERE id = ?").bind(cat.id, charge.id).run();
+  const stmts = [env.DB.prepare("UPDATE charges SET status = 'done', category_id = ? WHERE id = ?").bind(cat.id, charge.id)];
+  if (newName && newName !== charge.merchant_name) {
+    // Recordando el comercio, el nombre vale para todos sus pagos; si no, solo para este.
+    if (remember) stmts.push(...renameMerchantStmts(env, user.id, charge.merchant_key, newName));
+    else stmts.push(env.DB.prepare("UPDATE charges SET merchant_name = ? WHERE id = ?").bind(newName, charge.id));
+  }
+  await env.DB.batch(stmts);
 
   let appliedIds = [];
   if (remember) {

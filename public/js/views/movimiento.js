@@ -1,15 +1,15 @@
-// Pantalla "Pago" (nueva, acordada): cambiar la categoría o la tarjeta de un pago, o borrarlo.
+// Pantalla "Pago" (nueva, acordada): cambiar la categoría, la tarjeta o el nombre del comercio de un pago, o borrarlo.
 import { api } from "../api.js";
 import { back } from "../nav.js";
 import { busy, html, ICON } from "../dom.js";
 import { euros, when } from "../format.js";
-import { cardChips } from "../components.js";
+import { cardChips, merchantEditor, penButton, rawLine } from "../components.js";
 
 const LABEL = "font-size:13px;font-weight:700;color:#5A5470";
 
 export function renderMovimiento(params) {
   const id = Number(params.get("id"));
-  const st = { sel: null, original: null, card: null, originalCard: null, categories: [], cards: [], charge: null, confirmDelete: false };
+  const st = { sel: null, original: null, card: null, originalCard: null, categories: [], cards: [], charge: null, confirmDelete: false, name: "", originalName: "", editing: false, merchants: [] };
 
   const el = html(`
     <div class="screen">
@@ -22,13 +22,12 @@ export function renderMovimiento(params) {
         <div data-del-hint class="hint-danger" style="margin-bottom:10px"></div>
         <div data-card class="card-box" style="border-radius:28px;padding:16px 18px" hidden>
           <div data-amount style="font-size:52px;font-weight:800;line-height:1;letter-spacing:-2px"></div>
-          <div data-merchant style="margin-top:10px;font-size:22px;font-weight:800;letter-spacing:-.4px"></div>
-          <div data-raw style="margin-top:2px;font-size:13px;font-weight:600;color:#5A5470;overflow-wrap:anywhere"></div>
+          <div data-merchant style="margin-top:10px"></div>
           <div data-sub style="margin-top:8px;font-size:14px;font-weight:600;color:#5A5470"></div>
         </div>
         <div data-cats-wrap hidden style="margin-top:14px">
           <div style="${LABEL}">Categoría</div>
-          <div data-chips style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"></div>
+          <div data-cats style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"></div>
         </div>
         <div data-cards-wrap hidden style="margin-top:14px">
           <div style="${LABEL}">Tarjeta</div>
@@ -45,7 +44,55 @@ export function renderMovimiento(params) {
   const del = q("[data-delete]");
   const error = q(".error");
 
-  const changed = () => (st.sel !== st.original && st.sel !== null) || st.card !== st.originalCard;
+  const changed = () => (st.sel !== st.original && st.sel !== null) || st.card !== st.originalCard || nameNow() !== st.originalName;
+  // Si guarda sin tocar "Listo", vale lo que haya escrito.
+  const nameNow = () => (st.editing && st.draft ? st.draft : st.name);
+
+  // Nombre del comercio con lápiz; al tocarlo, el campo y las fichas de tus comercios.
+  function drawMerchant() {
+    const c = st.charge;
+    const box = q("[data-merchant]");
+    const raw = c.source === "applepay" ? c.merchantRaw : null;
+    if (st.editing) {
+      box.replaceChildren(
+        merchantEditor({
+          value: st.name,
+          raw,
+          merchants: st.merchants,
+          categories: st.categories,
+          max: 6,
+          note: "Se cambia en todos los pagos de este comercio.",
+          onInput: (text) => {
+            st.draft = text.replace(/\s+/g, " ");
+            save.disabled = !changed();
+          },
+          onPick: (m) => {
+            st.draft = m.name;
+            if (st.categories.some((k) => k.id === m.categoryId)) st.sel = m.categoryId;
+            draw();
+          },
+          onDone: (name) => {
+            if (name) st.name = name;
+            st.editing = false;
+            drawMerchant();
+            draw();
+          },
+        })
+      );
+      return;
+    }
+    const row = html(`<div style="display:flex;align-items:center;gap:8px"><span data-n style="min-width:0;font-size:22px;font-weight:800;letter-spacing:-.4px;overflow-wrap:anywhere"></span></div>`);
+    row.querySelector("[data-n]").textContent = st.name;
+    row.append(
+      penButton(() => {
+        st.editing = true;
+        st.draft = st.name;
+        drawMerchant();
+      })
+    );
+    box.replaceChildren(row);
+    if (raw) box.append(rawLine(raw));
+  }
 
   function drawSub() {
     const c = st.charge;
@@ -59,7 +106,7 @@ export function renderMovimiento(params) {
   }
 
   function draw() {
-    q("[data-chips]").replaceChildren(
+    q("[data-cats]").replaceChildren(
       ...st.categories.map((c) => {
         const b = document.createElement("button");
         b.type = "button";
@@ -92,6 +139,7 @@ export function renderMovimiento(params) {
     const body = {};
     if (st.sel !== st.original && st.sel !== null) body.categoryId = st.sel;
     if (st.card !== st.originalCard) body.cardId = st.card;
+    if (nameNow() !== st.originalName) body.merchant = nameNow();
     busy(save, true);
     try {
       await api(`/charges/${id}`, body);
@@ -119,15 +167,14 @@ export function renderMovimiento(params) {
   });
 
   api(`/charges/${id}`)
-    .then(({ charge, cards, categories }) => {
-      Object.assign(st, { charge, cards, categories, sel: charge.categoryId, original: charge.categoryId, card: charge.cardId, originalCard: charge.cardId });
+    .then(({ charge, cards, categories, merchants }) => {
+      Object.assign(st, { charge, cards, categories, merchants: merchants || [], sel: charge.categoryId, original: charge.categoryId, card: charge.cardId, originalCard: charge.cardId, name: charge.merchant, originalName: charge.merchant });
       q("[data-card]").hidden = false;
       q("[data-cats-wrap]").hidden = false;
       q("[data-cards-wrap]").hidden = false;
       del.hidden = false;
       q("[data-amount]").textContent = euros(charge.amountCents);
-      q("[data-merchant]").textContent = charge.merchant;
-      q("[data-raw]").textContent = charge.merchantRaw !== charge.merchant ? charge.merchantRaw : "";
+      drawMerchant();
       draw();
     })
     .catch((err) => (error.textContent = err.message));
