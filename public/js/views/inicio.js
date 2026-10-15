@@ -186,7 +186,7 @@ export function renderInicio() {
         const spent = spentByCat.get(t.id) || 0;
         const over = t.budgetCents > 0 && spent > t.budgetCents;
         const a = html(`
-          <a data-press style="display:block;position:relative;overflow:hidden;min-height:0;box-sizing:border-box;border:1.5px solid rgba(27,27,31,.22);border-radius:22px;background:#fff">
+          <a data-press style="display:block;position:relative;overflow:hidden;min-height:0;box-sizing:border-box;border:1.5px solid rgba(27,27,31,.1);border-radius:22px;background:#fff">
             <div data-fill class="fill"></div>
             <div style="position:relative;z-index:2;height:100%;box-sizing:border-box;padding:10px 12px;display:flex;flex-direction:column;justify-content:space-between">
               <div style="display:flex;justify-content:space-between;align-items:flex-start">
