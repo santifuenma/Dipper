@@ -15,7 +15,7 @@ export function renderTarjetaForm(params) {
       <div class="topbar">
         <a href="#/" data-back class="icon-btn" aria-label="Volver">${ICON.back}</a>
         <span style="font-size:20px;font-weight:800;letter-spacing:-.3px">${id ? "Editar tarjeta" : "Nueva tarjeta"}</span>
-        ${id ? `<button type="button" data-delete class="round-btn" aria-label="Borrar tarjeta">${ICON.trash}</button>` : `<span style="width:44px"></span>`}
+        ${id ? `<button type="button" data-delete class="round-btn dash" aria-label="Borrar tarjeta">${ICON.trash}</button>` : `<span style="width:44px"></span>`}
       </div>
 
       <div style="flex:1;min-height:0;padding:8px 0 4px">
@@ -39,16 +39,16 @@ export function renderTarjetaForm(params) {
         <form novalidate style="margin-top:12px;display:flex;flex-direction:column;gap:10px">
           <label style="display:block">
             <span style="display:block;font-size:13px;font-weight:700;color:#5A5470;margin-bottom:6px">Nombre</span>
-            <input name="name" type="text" maxlength="22" placeholder="Día a día" style="width:100%;height:48px;box-sizing:border-box;padding:0 16px;border:1.5px solid rgba(27,27,31,.22);border-radius:18px;background:#fff;font-size:17px;font-weight:600;color:#1B1B1F">
+            <input name="name" type="text" maxlength="22" placeholder="Día a día" style="width:100%;height:48px;box-sizing:border-box;padding:0 16px;border:1.5px solid rgba(27,27,31,.22);border-radius:16px;background:#fff;font-size:17px;font-weight:600;color:#1B1B1F">
           </label>
           <label style="display:block">
             <span style="display:block;font-size:13px;font-weight:700;color:#5A5470;margin-bottom:6px">Últimos 4 dígitos</span>
-            <input name="last4" type="text" inputmode="numeric" maxlength="4" placeholder="4821" style="width:100%;height:48px;box-sizing:border-box;padding:0 16px;border:1.5px solid rgba(27,27,31,.22);border-radius:18px;background:#fff;font-size:17px;font-weight:600;letter-spacing:3px;color:#1B1B1F">
+            <input name="last4" type="text" inputmode="numeric" maxlength="4" placeholder="4821" style="width:100%;height:48px;box-sizing:border-box;padding:0 16px;border:1.5px solid rgba(27,27,31,.22);border-radius:16px;background:#fff;font-size:17px;font-weight:600;letter-spacing:3px;color:#1B1B1F">
             <span style="display:block;margin-top:6px;font-size:13px;font-weight:500;color:#5A5470">Solo guardamos los 4 últimos. Nunca el número completo.</span>
           </label>
           <label style="display:block">
             <span style="display:block;font-size:13px;font-weight:700;color:#5A5470;margin-bottom:6px">Nombre en Wallet</span>
-            <input name="walletName" type="text" placeholder="Como aparece en Apple Wallet" style="width:100%;height:48px;box-sizing:border-box;padding:0 16px;border:1.5px solid rgba(27,27,31,.22);border-radius:18px;background:#fff;font-size:17px;font-weight:600;color:#1B1B1F">
+            <input name="walletName" type="text" placeholder="Como aparece en Apple Wallet" style="width:100%;height:48px;box-sizing:border-box;padding:0 16px;border:1.5px solid rgba(27,27,31,.22);border-radius:16px;background:#fff;font-size:17px;font-weight:600;color:#1B1B1F">
             <span style="display:block;margin-top:6px;font-size:13px;font-weight:500;color:#5A5470">Así reconocemos la tarjeta cuando llega un pago de Apple Pay.</span>
           </label>
           <div data-seen hidden>
@@ -95,7 +95,7 @@ export function renderTarjetaForm(params) {
         const on = c.bg === st.color;
         b.setAttribute("aria-label", c.name);
         b.setAttribute("aria-pressed", on ? "true" : "false");
-        b.style.cssText = `width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(27,27,31,.25);cursor:pointer;transition:transform .3s cubic-bezier(.3,1.6,.5,1),box-shadow .2s;background:${c.bg};transform:${on ? "scale(1.1)" : "none"};box-shadow:${on ? "0 0 0 3px #F1EDF9,0 0 0 5px #1B1B1F" : "none"}`;
+        b.style.cssText = `width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(27,27,31,.22);cursor:pointer;transition:transform .3s cubic-bezier(.3,1.6,.5,1),box-shadow .2s;background:${c.bg};transform:${on ? "scale(1.1)" : "none"};box-shadow:${on ? "0 0 0 3px #F1EDF9,0 0 0 5px #1B1B1F" : "none"}`;
         b.addEventListener("click", () => {
           st.color = c.bg;
           draw();

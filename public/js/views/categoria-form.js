@@ -13,11 +13,11 @@ export function renderCategoriaForm(params) {
       <div class="topbar">
         <a href="#/" data-back class="icon-btn" aria-label="Volver">${ICON.back}</a>
         <span style="font-size:20px;font-weight:800;letter-spacing:-.3px">${id ? "Editar categoría" : "Nueva categoría"}</span>
-        ${id ? `<button type="button" data-delete class="round-btn" aria-label="Borrar categoría">${ICON.trash}</button>` : `<span style="width:44px"></span>`}
+        ${id ? `<button type="button" data-delete class="round-btn dash" aria-label="Borrar categoría">${ICON.trash}</button>` : `<span style="width:44px"></span>`}
       </div>
 
       <div style="flex:1;min-height:0;padding:8px 0 4px">
-        <div style="position:relative;overflow:hidden;width:100%;height:min(164px,16dvh);box-sizing:border-box;border:1.5px solid rgba(27,27,31,.22);border-radius:30px;background:#fff">
+        <div style="position:relative;overflow:hidden;width:100%;height:min(164px,16dvh);box-sizing:border-box;border:1.5px solid rgba(27,27,31,.22);border-radius:28px;background:#fff">
           <div data-fill class="fill" style="height:62%"></div>
           <div style="position:relative;z-index:2;height:100%;box-sizing:border-box;padding:14px 18px;display:flex;flex-direction:column;justify-content:space-between">
             <span data-picon></span>
@@ -29,7 +29,7 @@ export function renderCategoriaForm(params) {
         <form novalidate style="margin-top:12px;display:flex;flex-direction:column;gap:12px">
           <label style="display:block">
             <span style="display:block;font-size:13px;font-weight:700;color:#5A5470;margin-bottom:6px">Nombre</span>
-            <input name="name" type="text" maxlength="24" placeholder="Súper" style="width:100%;height:48px;box-sizing:border-box;padding:0 16px;border:1.5px solid rgba(27,27,31,.22);border-radius:18px;background:#fff;font-size:17px;font-weight:600;color:#1B1B1F">
+            <input name="name" type="text" maxlength="24" placeholder="Súper" style="width:100%;height:48px;box-sizing:border-box;padding:0 16px;border:1.5px solid rgba(27,27,31,.22);border-radius:16px;background:#fff;font-size:17px;font-weight:600;color:#1B1B1F">
           </label>
           <div>
             <div style="font-size:13px;font-weight:700;color:#5A5470;margin-bottom:8px">Icono</div>
@@ -73,7 +73,7 @@ export function renderCategoriaForm(params) {
         const on = ic === st.icon;
         b.setAttribute("aria-pressed", on ? "true" : "false");
         b.setAttribute("aria-label", "Icono " + ic);
-        b.style.cssText = `width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(27,27,31,.25);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .3s cubic-bezier(.3,1.6,.5,1),box-shadow .2s;background:${on ? st.color : "#fff"};transform:${on ? "scale(1.1)" : "none"};box-shadow:${ring(on)}`;
+        b.style.cssText = `width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(27,27,31,.22);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .3s cubic-bezier(.3,1.6,.5,1),box-shadow .2s;background:${on ? st.color : "#fff"};transform:${on ? "scale(1.1)" : "none"};box-shadow:${ring(on)}`;
         b.innerHTML = categoryIcon(ic, 20);
         b.addEventListener("click", () => {
           st.icon = ic;
@@ -90,7 +90,7 @@ export function renderCategoriaForm(params) {
         const on = c === st.color;
         b.setAttribute("aria-pressed", on ? "true" : "false");
         b.setAttribute("aria-label", "Color " + c);
-        b.style.cssText = `width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(27,27,31,.25);cursor:pointer;transition:transform .3s cubic-bezier(.3,1.6,.5,1),box-shadow .2s;background:${c};transform:${on ? "scale(1.1)" : "none"};box-shadow:${ring(on)}`;
+        b.style.cssText = `width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(27,27,31,.22);cursor:pointer;transition:transform .3s cubic-bezier(.3,1.6,.5,1),box-shadow .2s;background:${c};transform:${on ? "scale(1.1)" : "none"};box-shadow:${ring(on)}`;
         b.addEventListener("click", () => {
           st.color = c;
           draw();

@@ -1,10 +1,10 @@
 // Pantalla "Conectar Apple Pay" (ApplePay.dc.html). Mismo diseño; textos con los pasos reales (opción A).
 import { api } from "../api.js";
 import { go } from "../app.js";
-import { html } from "../dom.js";
+import { html, ICON } from "../dom.js";
 
 const KEY = "dipper_ap_steps";
-const CHECK = '<svg class="pop" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const CHECK = '<svg class="pop" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 
 const STEPS = [
   { id: 1, title: "Copia tu enlace personal", body: "Une tus pagos con tu cuenta. No lo compartas.", btn: "Copiar enlace", btnDone: "Copiado", color: "#FFC93C", token: true },
@@ -50,8 +50,8 @@ export function renderApplePay() {
 
       <div style="flex:1;min-height:0;margin:12px 0 0;padding:2px 0 0">
         <div data-steps style="display:flex;flex-direction:column;gap:8px"></div>
-        <div style="margin-top:10px;display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1.5px dashed rgba(27,27,31,.35);border-radius:18px">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1B1B1F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+        <div style="margin-top:10px;display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1.5px dashed rgba(27,27,31,.4);border-radius:16px">
+          ${ICON.info}
           <span style="font-size:14px;font-weight:600;line-height:1.35">Solo llegan los pagos con Apple Pay. El efectivo y Bizum, a mano.</span>
         </div>
         <div class="error" role="alert" style="margin-top:10px"></div>
@@ -78,10 +78,10 @@ export function renderApplePay() {
               <span data-title style="display:block;font-size:17px;font-weight:800;letter-spacing:-.2px"></span>
               <span data-body style="display:block;margin-top:2px;font-size:14px;font-weight:500;line-height:1.35;color:#5A5470"></span>
               <span style="display:flex;align-items:center;gap:8px;margin-top:8px">
-                ${s.token ? `<span style="flex:1;min-width:0;display:flex;align-items:center;height:38px;box-sizing:border-box;padding:0 12px;border:1.5px dashed rgba(27,27,31,.4);border-radius:14px;background:#F1EDF9">
+                ${s.token ? `<span style="flex:1;min-width:0;display:flex;align-items:center;height:38px;box-sizing:border-box;padding:0 12px;border:1.5px dashed rgba(27,27,31,.4);border-radius:16px;background:#F1EDF9">
                   <span data-token style="flex:1;min-width:0;font-size:14px;font-weight:700;letter-spacing:.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">…</span>
                 </span>` : ""}
-                <button type="button" data-act data-press style="flex:none;height:38px;box-sizing:border-box;padding:0 16px;border:1.5px solid rgba(27,27,31,.25);border-radius:22px;font-size:14px;font-weight:800;color:#1B1B1F;cursor:pointer"></button>
+                <button type="button" data-act data-press style="flex:none;height:38px;box-sizing:border-box;padding:0 16px;border:1.5px solid rgba(27,27,31,.22);border-radius:99px;font-size:14px;font-weight:800;color:#1B1B1F;cursor:pointer"></button>
               </span>
             </span>
           </div>

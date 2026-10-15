@@ -3,9 +3,6 @@ import { html, ICON } from "./dom.js";
 import { dayKey, dayTitle, euros, timeOf } from "./format.js";
 import { cardBorder, cardFg, categoryIcon } from "./icons.js";
 
-const PENDING_ICON =
-  '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B1B1F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4M12 16h.01"/></svg>';
-
 // Agrupa pagos (ya ordenados del más reciente al más antiguo) por día.
 export function groupByDay(charges) {
   const groups = [];
@@ -29,7 +26,7 @@ export function movementGroups(charges, { cats, cards, mode = "category" }) {
     const group = html(`
       <div style="margin-top:10px">
         <div data-label style="font-size:13px;font-weight:700;color:#5A5470;margin:0 0 6px 4px"></div>
-        <div data-rows style="border:1.5px solid rgba(27,27,31,.22);border-radius:22px;background:#fff;overflow:hidden"></div>
+        <div data-rows style="border:1.5px solid rgba(27,27,31,.22);border-radius:20px;background:#fff;overflow:hidden"></div>
       </div>
     `);
     group.querySelector("[data-label]").textContent = g.label;
@@ -58,7 +55,7 @@ export function movementGroups(charges, { cats, cards, mode = "category" }) {
           lead.innerHTML = categoryIcon(cat.icon, 20);
         } else {
           lead.style.border = "1.5px dashed rgba(27,27,31,.5)";
-          lead.innerHTML = PENDING_ICON;
+          lead.innerHTML = ICON.alert;
         }
         sub.textContent = (cat ? cat.name : "Por revisar") + " · " + timeOf(c.occurredAt);
       } else {
@@ -142,7 +139,7 @@ export function seeAllLink(href) {
 
 export function emptyNote(text) {
   const d = document.createElement("div");
-  d.style.cssText = "margin-top:10px;padding:16px;border:1.5px dashed rgba(27,27,31,.35);border-radius:20px;font-size:15px;font-weight:600;color:#5A5470;text-align:center";
+  d.style.cssText = "margin-top:10px;padding:16px;border:1.5px dashed rgba(27,27,31,.4);border-radius:20px;font-size:15px;font-weight:600;color:#5A5470;text-align:center";
   d.textContent = text;
   return d;
 }
@@ -150,7 +147,7 @@ export function emptyNote(text) {
 // Botón redondo con lápiz para cambiar el nombre del comercio.
 export function penButton(onClick) {
   const b = html(
-    `<button type="button" aria-label="Cambiar el nombre del comercio" style="flex:none;width:30px;height:30px;box-sizing:border-box;padding:0;border-radius:50%;border:1.5px solid rgba(27,27,31,.22);background:#fff;color:#1B1B1F;display:flex;align-items:center;justify-content:center;cursor:pointer">${ICON.pen}</button>`
+    `<button type="button" class="round-btn sm" aria-label="Cambiar el nombre del comercio">${ICON.edit}</button>`
   );
   b.addEventListener("click", onClick);
   return b;
@@ -159,7 +156,7 @@ export function penButton(onClick) {
 // Línea gris con el nombre tal cual lo mandó Apple Pay.
 export function rawLine(raw) {
   const d = document.createElement("div");
-  d.style.cssText = "margin-top:2px;font-size:12px;font-weight:600;color:#8A83A3;overflow-wrap:anywhere";
+  d.style.cssText = "margin-top:2px;font-size:12px;font-weight:600;color:var(--faint);overflow-wrap:anywhere";
   d.textContent = "Apple Pay: " + raw;
   return d;
 }
@@ -251,17 +248,15 @@ export function merchantEditor({ value, raw, merchants, categories, max = 8, not
 // Deslizar una fila hacia la izquierda (como en las apps de Apple) deja ver Editar y Borrar,
 // en botones redondos como los del resto de Dipper (la papelera con borde punteado).
 // Borrar pide confirmación como en Editar tarjeta: el primer toque la pone en rojo, el segundo borra.
-const ACT_W = 114; // dos botones de 52 px y un hueco de 10
+const ACT_W = 98; // dos botones redondos de 44 px y un hueco de 10
 const OPEN = ACT_W + 12; // lo que se aparta la tarjeta (con su hueco antes de los botones)
-const PEN =
-  '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>';
 
 export function swipeRow(card, { editHref, onDelete, onError }) {
   const row = html(`
     <div style="position:relative">
       <div data-acts style="position:absolute;top:0;right:0;bottom:0;width:${ACT_W}px;display:flex;align-items:center;justify-content:flex-end;gap:10px;opacity:0">
-        <a data-edit class="round-btn" aria-label="Editar" style="width:52px;height:52px">${PEN}</a>
-        <button type="button" data-del class="round-btn" aria-label="Borrar" style="width:52px;height:52px;border-style:dashed;border-color:rgba(27,27,31,.4)">${ICON.trash}</button>
+        <a data-edit class="round-btn" aria-label="Editar">${ICON.edit}</a>
+        <button type="button" data-del class="round-btn dash" aria-label="Borrar">${ICON.trash}</button>
       </div>
     </div>
   `);
@@ -286,8 +281,6 @@ export function swipeRow(card, { editHref, onDelete, onError }) {
   function setConfirm(v) {
     confirming = v;
     del.classList.toggle("danger", v);
-    del.style.borderStyle = v ? "solid" : "dashed";
-    del.style.borderColor = v ? "" : "rgba(27,27,31,.4)";
     del.setAttribute("aria-label", v ? "Toca otra vez para borrar" : "Borrar");
   }
   row.close = () => {

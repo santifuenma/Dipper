@@ -7,10 +7,10 @@ import { categoryIcon } from "../icons.js";
 import { view } from "./inicio.js";
 
 const MINUS = (s) =>
-  `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"/></svg>`;
+  `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>`;
 const PLUS = (s) =>
-  `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg>`;
-const ROUND = "flex:none;border-radius:50%;border:1.5px solid rgba(27,27,31,.25);background:#F1EDF9;color:#1B1B1F;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0";
+  `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>`;
+const ROUND = "flex:none;border-radius:50%;border:1.5px solid rgba(27,27,31,.22);background:#F1EDF9;color:#1B1B1F;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0";
 
 export function renderPresupuesto() {
   const st = { monthly: 0, bud: new Map(), cats: [], spent: new Map(), loaded: false };
@@ -36,7 +36,7 @@ export function renderPresupuesto() {
           </div>
           <div data-segs style="display:flex;gap:3px;height:14px;margin-top:12px"></div>
           <div style="display:flex;justify-content:center;margin-top:10px">
-            <span data-free style="font-size:15px;font-weight:800;padding:5px 14px;border-radius:99px;border:1.5px solid rgba(27,27,31,.25);transition:background .2s"></span>
+            <span data-free style="font-size:15px;font-weight:800;padding:5px 14px;border-radius:99px;border:1.5px solid rgba(27,27,31,.22);transition:background .2s"></span>
           </div>
         </div>
       </div>
@@ -76,7 +76,7 @@ export function renderPresupuesto() {
 
   function rowFor(c) {
     const r = html(`
-      <div class="card-box" style="border-radius:22px;padding:8px 10px 8px 12px;display:flex;align-items:center;gap:10px">
+      <div class="card-box" style="padding:8px 10px 8px 12px;display:flex;align-items:center;gap:10px">
         <span data-ic style="flex:none;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center"></span>
         <span style="flex:1;min-width:0">
           <span data-name style="display:block;font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>

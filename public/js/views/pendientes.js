@@ -1,11 +1,11 @@
 // Pantalla "Por revisar" (Pendientes.dc.html): pagos de Apple Pay sin categoría.
 import { api } from "../api.js";
 import { go } from "../app.js";
-import { html, ICON } from "../dom.js";
+import { html, ICON, iconSize } from "../dom.js";
 import { euros, when } from "../format.js";
 import { cardChips, merchantEditor, penButton, rawLine } from "../components.js";
 
-const CHECK_WHITE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const CHECK_WHITE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 
 export function renderPendientes() {
   // Estado de cada pago: { sel, rem, card, name, editing, draft, done, appliedIds, saving }
@@ -40,21 +40,21 @@ export function renderPendientes() {
     const card = html(`
       <div class="card-box" style="margin-bottom:14px;overflow:hidden">
         <div data-head style="padding:16px 16px 14px"></div>
-        <a data-newcard data-press hidden style="margin:0 16px 14px;height:44px;box-sizing:border-box;padding:0 14px;border:1.5px dashed rgba(27,27,31,.45);border-radius:16px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true" style="flex:none"><path d="M12 5v14M5 12h14"/></svg>
+        <a data-newcard data-press hidden style="margin:0 16px 14px;height:44px;box-sizing:border-box;padding:0 14px;border:1.5px dashed rgba(27,27,31,.4);border-radius:16px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700">
+          ${iconSize(ICON.plus, 20)}
           <span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Tarjeta nueva · Guardarla en Dipper</span>
         </a>
         <div data-cardpick hidden style="padding:0 16px 10px">
           <div style="font-size:13px;font-weight:700;color:#5A5470">Tienes varias tarjetas con este nombre. ¿Con cuál pagaste?</div>
           <div data-cardchips class="noscroll" style="display:flex;gap:8px;overflow-x:auto;margin:2px -16px 0;padding:8px 16px"></div>
         </div>
-        <div style="padding:12px 16px 14px;border-top:1.5px solid rgba(27,27,31,.1);background:#FAF8FD">
+        <div style="padding:12px 16px 14px;border-top:1.5px solid rgba(27,27,31,.1);background:var(--surface-2)">
           <div data-hint style="font-size:13px;font-weight:700;color:#5A5470"></div>
           <div data-cats class="chips-fill" style="margin-top:10px"></div>
         </div>
         <div data-foot style="padding:10px 16px 16px;border-top:1.5px solid rgba(27,27,31,.1)">
           <button type="button" role="switch" data-rem style="width:100%;display:flex;align-items:center;gap:10px;border:0;background:transparent;padding:6px 0;font-size:14px;font-weight:700;color:#1B1B1F;cursor:pointer;text-align:left">
-            <span aria-hidden="true" data-sw style="position:relative;flex:none;width:44px;height:26px;border-radius:99px;box-sizing:border-box;border:1.5px solid rgba(27,27,31,.3);transition:background .2s">
+            <span aria-hidden="true" data-sw style="position:relative;flex:none;width:44px;height:26px;border-radius:99px;box-sizing:border-box;border:1.5px solid rgba(27,27,31,.22);transition:background .2s">
               <span data-knob style="position:absolute;top:2px;width:18px;height:18px;border-radius:50%;background:#1B1B1F;transition:left .25s cubic-bezier(.3,1.6,.5,1)"></span>
             </span>
             Recordar este comercio
@@ -202,7 +202,7 @@ export function renderPendientes() {
   function doneCard(it, st) {
     const cat = catById(st.sel);
     const card = html(`
-      <div class="stick" style="margin-bottom:14px;box-sizing:border-box;border:1.5px solid rgba(27,27,31,.22);border-radius:22px;padding:12px 16px;display:flex;align-items:center;gap:12px">
+      <div class="stick" style="margin-bottom:14px;box-sizing:border-box;border:1.5px solid rgba(27,27,31,.22);border-radius:24px;padding:12px 16px;display:flex;align-items:center;gap:12px">
         <span style="flex:none;width:34px;height:34px;border-radius:50%;background:#1B1B1F;display:flex;align-items:center;justify-content:center">${CHECK_WHITE}</span>
         <span data-txt style="flex:1;min-width:0;font-size:16px;font-weight:700"></span>
         <button type="button" data-undo style="border:0;background:transparent;font-size:14px;font-weight:700;text-decoration:underline;color:#1B1B1F;cursor:pointer;padding:8px 0">Deshacer</button>

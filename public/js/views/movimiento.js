@@ -16,7 +16,7 @@ export function renderMovimiento(params) {
       <div class="topbar">
         <a href="#/" data-back class="icon-btn" aria-label="Volver">${ICON.back}</a>
         <span style="font-size:20px;font-weight:800;letter-spacing:-.3px">Pago</span>
-        <button type="button" data-delete class="round-btn" aria-label="Borrar pago" hidden>${ICON.trash}</button>
+        <button type="button" data-delete class="round-btn dash" aria-label="Borrar pago" hidden>${ICON.trash}</button>
       </div>
       <div style="flex:1;min-height:0;padding:8px 0 12px">
         <div data-del-hint class="hint-danger" style="margin-bottom:10px"></div>

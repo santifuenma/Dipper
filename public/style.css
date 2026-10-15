@@ -1,10 +1,14 @@
-/* Dipper: estilos base portados del diseño (dipper-diseno.zip) */
+/* Dipper: estilos base portados del diseño (dipper-diseno.zip). Reglas de uso en DISENO.md */
 :root {
   --bg: #F1EDF9;
   --ink: #1B1B1F;
   --muted: #5A5470;
   --line: rgba(27, 27, 31, .22);
-  --line-strong: rgba(27, 27, 31, .25);
+  --line-soft: rgba(27, 27, 31, .1);
+  --line-dash: rgba(27, 27, 31, .4);
+  --surface: #FFFFFF;
+  --surface-2: #FAF8FD;
+  --faint: #8A83A3;
   --lima: #CDF56B;
   --danger: #B3261E;
 }
@@ -39,7 +43,7 @@ input, textarea { -webkit-user-select: text; user-select: text; }
 .deco { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
 a { color: inherit; text-decoration: none; }
 button, input { font-family: inherit; }
-input::placeholder { color: #8A83A3; }
+input::placeholder { color: var(--faint); }
 input:focus { outline: 2px solid var(--ink); outline-offset: 1px; }
 .noscroll { scrollbar-width: none; }
 .noscroll::-webkit-scrollbar { display: none; }
@@ -71,7 +75,7 @@ input:focus { outline: 2px solid var(--ink); outline-offset: 1px; }
 .icon-btn { width: 44px; height: 44px; margin-left: -12px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--ink); }
 
 /* Campos */
-.field { display: flex; align-items: center; gap: 10px; height: 54px; box-sizing: border-box; padding: 0 16px; border: 1.5px solid var(--line); border-radius: 18px; background: #fff; }
+.field { display: flex; align-items: center; gap: 10px; height: 54px; box-sizing: border-box; padding: 0 16px; border: 1.5px solid var(--line); border-radius: 16px; background: #fff; }
 .field.has-btn { padding: 0 8px 0 16px; }
 .field input { flex: 1; min-width: 0; border: 0; background: transparent; font-size: 17px; font-weight: 600; color: var(--ink); }
 .field input:focus { outline: none; }
@@ -80,7 +84,7 @@ input:focus { outline: 2px solid var(--ink); outline-offset: 1px; }
 
 /* Botones */
 /* Todos los botones anchos miden y pesan lo mismo; solo cambia el color */
-.btn { flex: none; height: 56px; box-sizing: border-box; border-radius: 28px; border: 1.5px solid var(--line-strong); font-size: 18px; font-weight: 800; display: flex; align-items: center; justify-content: center; cursor: pointer; width: 100%; color: var(--ink); }
+.btn { flex: none; height: 56px; box-sizing: border-box; border-radius: 28px; border: 1.5px solid var(--line); font-size: 18px; font-weight: 800; display: flex; align-items: center; justify-content: center; cursor: pointer; width: 100%; color: var(--ink); }
 .btn-lima { background: var(--lima); }
 .btn-dark { background: var(--ink); border-color: var(--ink); color: #fff; }
 .btn-white { background: #fff; }
@@ -88,7 +92,12 @@ input:focus { outline: 2px solid var(--ink); outline-offset: 1px; }
 
 /* Botón redondo de la cabecera para borrar; en rojo cuando pide confirmación */
 .round-btn { width: 44px; height: 44px; box-sizing: border-box; border-radius: 50%; border: 1.5px solid var(--line); background: #fff; color: var(--ink); display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
-.round-btn.danger { background: #B3261E; border-color: #B3261E; color: #fff; }
+.round-btn.sm { width: 30px; height: 30px; flex: none; }
+.round-btn.sm svg { width: 14px; height: 14px; }
+/* Punteado: Ajustes y papelera. Al pedir confirmación la papelera se rellena de rojo y su punteado se aclara */
+.round-btn.dash { border-style: dashed; border-color: var(--line-dash); }
+.round-btn.danger { background: var(--danger); border-color: var(--danger); color: #fff; }
+.round-btn.dash.danger { border-color: #E8928C; }
 .hint-danger { font-size: 14px; font-weight: 700; color: var(--danger); }
 .hint-danger:empty { display: none; }
 
@@ -148,7 +157,7 @@ input:focus { outline: 2px solid var(--ink); outline-offset: 1px; }
 
 /* Chips y tarjetas comunes */
 .chip { flex: none; height: 38px; box-sizing: border-box; padding: 0 14px; border-radius: 99px; font-size: 14px; font-weight: 700; color: var(--ink); cursor: pointer; background: #fff; border: 1.5px solid var(--line); transition: background .2s, transform .3s cubic-bezier(.3, 1.6, .5, 1); }
-.chip.sug { border: 1.5px dashed rgba(27, 27, 31, .6); }
+.chip.sug { border: 1.5px dashed rgba(27, 27, 31, .4); }
 .chip.on { border: 1.5px solid var(--ink); transform: translateY(-2px); }
 /* Fichas de categoría: rejilla de dos columnas iguales, sin huecos sueltos */
 .chips-fill { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }

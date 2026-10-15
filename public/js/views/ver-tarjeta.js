@@ -6,8 +6,6 @@ import { eurosInt, monthLabel } from "../format.js";
 import { cardBorder, cardFg } from "../icons.js";
 import { view } from "./inicio.js";
 
-const PENCIL =
-  '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/></svg>';
 
 export function renderVerTarjeta(params) {
   const id = Number(params.get("id"));
@@ -16,7 +14,7 @@ export function renderVerTarjeta(params) {
       <div class="topbar">
         <a href="#/" data-back class="icon-btn" aria-label="Volver">${ICON.back}</a>
         <span style="font-size:20px;font-weight:800;letter-spacing:-.3px">Tarjeta</span>
-        <a href="#/tarjeta?id=${id}" data-press aria-label="Editar tarjeta" style="width:44px;height:44px;box-sizing:border-box;border-radius:50%;border:1.5px solid rgba(27,27,31,.22);background:#fff;display:flex;align-items:center;justify-content:center">${PENCIL}</a>
+        <a href="#/tarjeta?id=${id}" data-press aria-label="Editar tarjeta" class="round-btn">${ICON.edit}</a>
       </div>
       <div data-body style="padding:8px 0 max(16px, env(safe-area-inset-bottom))"></div>
       <div class="error" role="alert"></div>
@@ -54,7 +52,7 @@ export function renderVerTarjeta(params) {
                 <span data-last style="font-size:24px;font-weight:700;letter-spacing:3px"></span>
               </span>
               <span data-ap hidden style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;padding:6px 11px;border-radius:99px;background:#fff;color:#1B1B1F">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1B1B1F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1B1B1F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
                 Apple Pay activo
               </span>
             </span>

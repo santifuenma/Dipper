@@ -172,7 +172,7 @@ export function renderNuevoGasto() {
         const b = document.createElement("button");
         b.type = "button";
         b.setAttribute("aria-label", k === "del" ? "Borrar" : k === "," ? "Coma decimal" : k);
-        b.style.cssText = "min-height:0;border:1.5px solid rgba(27,27,31,.18);border-radius:16px;background:#fff;color:#1B1B1F;font-size:22px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer";
+        b.style.cssText = "min-height:0;border:1.5px solid rgba(27,27,31,.22);border-radius:16px;background:#fff;color:#1B1B1F;font-size:22px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer";
         b.setAttribute("data-press", "");
         if (k === "del") b.innerHTML = DEL;
         else b.textContent = k;

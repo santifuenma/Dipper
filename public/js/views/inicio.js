@@ -1,7 +1,7 @@
 // Pantalla "Inicio" (Inicio.dc.html).
 import { api } from "../api.js";
 import { session } from "../app.js";
-import { html, busy } from "../dom.js";
+import { busy, html, ICON, iconSize } from "../dom.js";
 import { eurosInt, monthLabel, shiftMonth } from "../format.js";
 import { cardBorder, cardFg, categoryIcon } from "../icons.js";
 import { enableFaceId, faceIdEnabledHere, faceIdError, passkeySupported } from "../passkey.js";
@@ -27,8 +27,8 @@ export function renderInicio() {
           <button type="button" data-next class="icon-btn" style="margin-left:0" aria-label="Mes siguiente">${CHEVRON("M9 5l7 7-7 7")}</button>
         </div>
         <div style="display:flex;gap:8px">
-          <a href="#/presupuesto" data-press aria-label="Presupuesto" style="width:44px;height:44px;box-sizing:border-box;border-radius:50%;border:1.5px solid rgba(27,27,31,.22);background:#fff;display:flex;align-items:center;justify-content:center">${SLIDERS}</a>
-          <a href="#/ajustes" data-press aria-label="Ajustes" style="width:44px;height:44px;box-sizing:border-box;border-radius:50%;border:1.5px dashed rgba(27,27,31,.4);background:#fff;display:flex;align-items:center;justify-content:center">${GEAR}</a>
+          <a href="#/presupuesto" data-press aria-label="Presupuesto" class="round-btn">${SLIDERS}</a>
+          <a href="#/ajustes" data-press aria-label="Ajustes" class="round-btn dash">${GEAR}</a>
         </div>
       </div>
 
@@ -49,7 +49,7 @@ export function renderInicio() {
       <div data-tiles style="margin-top:12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;flex:1 1 0;min-height:0"></div>
 
       <div style="display:flex;gap:12px;margin-top:12px;flex:none">
-        <a href="#/por-revisar" data-press style="flex:1;min-width:0;height:min(64px,7.6dvh);box-sizing:border-box;border:1.5px dashed rgba(27,27,31,.4);border-radius:22px;display:flex;align-items:center;gap:14px;padding:0 16px">
+        <a href="#/por-revisar" data-press style="flex:1;min-width:0;height:min(64px,7.6dvh);box-sizing:border-box;border:1.5px dashed rgba(27,27,31,.4);border-radius:24px;display:flex;align-items:center;gap:14px;padding:0 16px">
           <span aria-hidden="true" style="display:flex;padding-left:8px">
             <span class="wig" style="width:24px;height:24px;box-sizing:border-box;border-radius:50%;background:#FFC93C;border:1.5px solid rgba(27,27,31,.4);margin-left:-8px"></span>
             <span class="wig" style="width:24px;height:24px;box-sizing:border-box;border-radius:50%;background:#CDB6FF;border:1.5px solid rgba(27,27,31,.4);margin-left:-8px;animation-delay:.25s"></span>
@@ -60,8 +60,8 @@ export function renderInicio() {
             <span style="display:block;font-size:13px;font-weight:500;color:#5A5470">Pagos nuevos sin categoría</span>
           </span>
         </a>
-        <a href="#/nuevo-gasto" data-press aria-label="Añadir gasto" style="flex:none;width:min(64px,7.6dvh);height:min(64px,7.6dvh);box-sizing:border-box;border-radius:50%;border:1.5px solid rgba(27,27,31,.3);background:#CDF56B;display:flex;align-items:center;justify-content:center">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        <a href="#/nuevo-gasto" data-press aria-label="Añadir gasto" style="flex:none;width:min(64px,7.6dvh);height:min(64px,7.6dvh);box-sizing:border-box;border-radius:50%;border:1.5px solid rgba(27,27,31,.22);background:#CDF56B;display:flex;align-items:center;justify-content:center">
+          ${iconSize(ICON.plus, 28)}
         </a>
       </div>
       <div class="error" role="alert" style="text-align:center"></div>
@@ -162,8 +162,8 @@ export function renderInicio() {
     if (!cardEls.length) {
       // Sin tarjetas: un hueco para añadir la primera (el resto se añade desde Ajustes).
       const add = html(`
-        <a href="#/tarjeta" data-press style="position:absolute;top:0;left:0;width:${CARD_W}px;height:100%;box-sizing:border-box;border:1.5px dashed rgba(27,27,31,.35);border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:14px;font-weight:700">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        <a href="#/tarjeta" data-press style="position:absolute;top:0;left:0;width:${CARD_W}px;height:100%;box-sizing:border-box;border:1.5px dashed rgba(27,27,31,.4);border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:14px;font-weight:700">
+          ${iconSize(ICON.plus, 24)}
           Añadir tu primera tarjeta
         </a>
       `);
@@ -188,7 +188,7 @@ export function renderInicio() {
         const spent = spentByCat.get(t.id) || 0;
         const over = t.budgetCents > 0 && spent > t.budgetCents;
         const a = html(`
-          <a data-press style="display:block;position:relative;overflow:hidden;min-height:0;box-sizing:border-box;border:1.5px solid rgba(27,27,31,.1);border-radius:22px;background:#fff">
+          <a data-press style="display:block;position:relative;overflow:hidden;min-height:0;box-sizing:border-box;border:1.5px solid rgba(27,27,31,.1);border-radius:20px;background:#fff">
             <div data-fill class="fill"></div>
             <div style="position:relative;z-index:2;height:100%;box-sizing:border-box;padding:10px 12px;display:flex;flex-direction:column;justify-content:space-between">
               <div style="display:flex;justify-content:space-between;align-items:flex-start">
