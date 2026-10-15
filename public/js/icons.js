@@ -25,3 +25,5 @@ export const CARD_COLORS = [
   { bg: "#6FE0AA", fg: "#1B1B1F", name: "Menta" },
 ];
 export const cardFg = (bg) => (CARD_COLORS.find((c) => c.bg === bg) || CARD_COLORS[0]).fg;
+// Borde de la tarjeta: en las negras, gris claro para que dos seguidas se distingan.
+export const cardBorder = (bg) => (bg === "#1B1B1F" ? "#6A6A74" : "rgba(27,27,31,.22)");

@@ -3,7 +3,7 @@ import { api } from "../api.js";
 import { session } from "../app.js";
 import { html, busy } from "../dom.js";
 import { eurosInt, monthLabel, shiftMonth } from "../format.js";
-import { cardFg, categoryIcon } from "../icons.js";
+import { cardBorder, cardFg, categoryIcon } from "../icons.js";
 import { enableFaceId, faceIdEnabledHere, faceIdError, passkeySupported } from "../passkey.js";
 
 // Mes que se está viendo; se conserva al ir y volver de otras pantallas.
@@ -144,6 +144,7 @@ export function renderInicio() {
       a.style.zIndex = String(sorted.length - i);
       a.style.background = c.color;
       a.style.color = cardFg(c.color);
+      a.style.borderColor = cardBorder(c.color);
       a.querySelector("[data-name]").textContent = c.name;
       a.querySelector("[data-last]").textContent = "···· " + c.last4;
       a.querySelector("[data-spent]").textContent = eurosInt(spentByCard.get(c.id) || 0) + " €";

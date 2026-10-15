@@ -3,7 +3,7 @@ import { api } from "../api.js";
 import { emptyNote, fitMovements, movementGroups, seeAllLink } from "../components.js";
 import { html, ICON } from "../dom.js";
 import { eurosInt, monthLabel } from "../format.js";
-import { cardFg } from "../icons.js";
+import { cardBorder, cardFg } from "../icons.js";
 import { view } from "./inicio.js";
 
 const PENCIL =
@@ -77,6 +77,7 @@ export function renderVerTarjeta(params) {
       const cardEl = top.querySelector("[data-card]");
       cardEl.style.background = card.color;
       cardEl.style.color = cardFg(card.color);
+      cardEl.style.borderColor = cardBorder(card.color);
       top.querySelector("[data-name]").textContent = card.name;
       top.querySelector("[data-last]").textContent = "···· " + card.last4;
       top.querySelector("[data-ap]").hidden = !card.walletName;

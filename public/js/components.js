@@ -1,7 +1,7 @@
 // Piezas compartidas entre Inicio, Tarjeta, Categoría y Movimientos.
 import { html, ICON } from "./dom.js";
 import { dayKey, dayTitle, euros, timeOf } from "./format.js";
-import { cardFg, categoryIcon } from "./icons.js";
+import { cardBorder, cardFg, categoryIcon } from "./icons.js";
 
 const PENDING_ICON =
   '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B1B1F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4M12 16h.01"/></svg>';
@@ -102,6 +102,7 @@ export function cardChips(cards, selectedId, onPick, firstId, { cash = true } = 
     b.setAttribute("aria-pressed", on ? "true" : "false");
     b.style.background = o.bg;
     b.style.color = o.fg;
+    b.style.borderColor = cardBorder(o.bg);
     b.style.opacity = on ? "1" : ".55";
     b.style.transform = on ? "translateY(-2px)" : "none";
     b.style.boxShadow = on ? "0 0 0 2px #F1EDF9,0 0 0 4px #1B1B1F" : "none";

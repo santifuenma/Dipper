@@ -2,7 +2,7 @@
 import { api } from "../api.js";
 import { back } from "../nav.js";
 import { busy, html, ICON } from "../dom.js";
-import { CARD_COLORS } from "../icons.js";
+import { CARD_COLORS, cardBorder } from "../icons.js";
 
 export function renderTarjetaForm(params) {
   const id = Number(params.get("id")) || null;
@@ -83,6 +83,7 @@ export function renderTarjetaForm(params) {
     const col = CARD_COLORS.find((c) => c.bg === st.color) || CARD_COLORS[0];
     preview.style.background = col.bg;
     preview.style.color = col.fg;
+    preview.style.borderColor = cardBorder(col.bg);
     pname.textContent = st.name.trim() || "Nombre de la tarjeta";
     pname.style.opacity = st.name.trim() ? "1" : ".55";
     plast.textContent = "···· " + (st.last4 + "••••").slice(0, 4);

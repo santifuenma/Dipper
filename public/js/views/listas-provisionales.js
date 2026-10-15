@@ -2,7 +2,7 @@
 // En el paso 4 las sustituyen el carrusel de tarjetas y los mosaicos de categoría del Inicio.
 import { api } from "../api.js";
 import { html, ICON } from "../dom.js";
-import { cardFg, categoryIcon } from "../icons.js";
+import { cardBorder, cardFg, categoryIcon } from "../icons.js";
 
 function shell(title, addHref, addLabel) {
   return html(`
@@ -38,6 +38,7 @@ export function renderTarjetas() {
           a.href = "#/tarjeta?id=" + c.id;
           a.style.background = c.color;
           a.style.color = cardFg(c.color);
+          a.style.borderColor = cardBorder(c.color);
           a.querySelector("[data-name]").textContent = c.name;
           a.querySelector("[data-last]").textContent = "···· " + c.last4 + (c.walletName ? "  ·  " + c.walletName : "");
           return a;
