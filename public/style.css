@@ -150,6 +150,9 @@ input:focus { outline: 2px solid var(--ink); outline-offset: 1px; }
 .chip { flex: none; height: 38px; box-sizing: border-box; padding: 0 14px; border-radius: 99px; font-size: 14px; font-weight: 700; color: var(--ink); cursor: pointer; background: #fff; border: 1.5px solid var(--line); transition: background .2s, transform .3s cubic-bezier(.3, 1.6, .5, 1); }
 .chip.sug { border: 1.5px dashed rgba(27, 27, 31, .6); }
 .chip.on { border: 1.5px solid var(--ink); transform: translateY(-2px); }
+/* Fichas de categoría: rejilla de dos columnas iguales, sin huecos sueltos */
+.chips-fill { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.chips-fill > .chip { min-width: 0; padding: 0 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .card-box { box-sizing: border-box; border: 1.5px solid var(--line); border-radius: 24px; background: #fff; }
 
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }

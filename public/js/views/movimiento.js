@@ -27,7 +27,7 @@ export function renderMovimiento(params) {
         </div>
         <div data-cats-wrap hidden style="margin-top:14px">
           <div style="${LABEL}">Categoría</div>
-          <div data-cats style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"></div>
+          <div data-cats class="chips-fill" style="margin-top:8px"></div>
         </div>
         <div data-cards-wrap hidden style="margin-top:14px">
           <div style="${LABEL}">Tarjeta</div>
@@ -62,6 +62,7 @@ export function renderMovimiento(params) {
           categories: st.categories,
           max: 6,
           note: "Se cambia en todos los pagos de este comercio.",
+          fits: () => q("[data-cards-wrap]").getBoundingClientRect().bottom <= save.getBoundingClientRect().top - 8,
           onInput: (text) => {
             st.draft = text.replace(/\s+/g, " ");
             save.disabled = !changed();
@@ -123,10 +124,15 @@ export function renderMovimiento(params) {
       })
     );
     q("[data-cards]").replaceChildren(
-      ...cardChips(st.cards, st.card, (cid) => {
-        st.card = cid;
-        draw();
-      })
+      ...cardChips(
+        st.cards,
+        st.card,
+        (cid) => {
+          st.card = cid;
+          draw();
+        },
+        st.originalCard
+      )
     );
     drawSub();
     save.disabled = !changed();

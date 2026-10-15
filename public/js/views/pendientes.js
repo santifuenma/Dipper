@@ -46,7 +46,7 @@ export function renderPendientes() {
         </a>
         <div style="padding:12px 16px 14px;border-top:1.5px solid rgba(27,27,31,.1);background:#FAF7FF">
           <div data-hint style="font-size:13px;font-weight:700;color:#5A5470"></div>
-          <div data-cats style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px"></div>
+          <div data-cats class="chips-fill" style="margin-top:10px"></div>
         </div>
         <div data-foot style="padding:10px 16px 16px;border-top:1.5px solid rgba(27,27,31,.1)">
           <button type="button" role="switch" data-rem style="width:100%;display:flex;align-items:center;gap:10px;border:0;background:transparent;padding:6px 0;font-size:14px;font-weight:700;color:#1B1B1F;cursor:pointer;text-align:left">

@@ -81,11 +81,16 @@ export function movementGroups(charges, { cats, cards, mode = "category" }) {
 }
 
 // Fichas de tarjeta (estilo de Nuevo gasto): tus tarjetas y al final "Efectivo / Otros" (id null).
-export function cardChips(cards, selectedId, onPick) {
+// firstId: la tarjeta con la que se pagó va la primera (en Pago).
+export function cardChips(cards, selectedId, onPick, firstId) {
   const opts = [
     ...cards.map((k) => ({ id: k.id, name: k.name, sub: "···· " + k.last4, bg: k.color, fg: cardFg(k.color) })),
     { id: null, name: "Efectivo", sub: "Otros", bg: "#fff", fg: "#1B1B1F" },
   ];
+  if (firstId !== undefined) {
+    const i = opts.findIndex((o) => o.id === firstId);
+    if (i > 0) opts.unshift(...opts.splice(i, 1));
+  }
   return opts.map((o) => {
     const on = selectedId === o.id;
     const b = html(`
@@ -162,7 +167,8 @@ const fold = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().tri
 
 // Editor del nombre del comercio: campo + "Listo", el nombre de Apple Pay y las fichas "Tus comercios".
 // Tocar una ficha pone su nombre y avisa con su categoría (onPick). onDone recibe el nombre escrito.
-export function merchantEditor({ value, raw, merchants, categories, max = 8, note, onInput, onPick, onDone }) {
+// fits(): en pantallas sin scroll, se quitan fichas del final hasta que todo quepa.
+export function merchantEditor({ value, raw, merchants, categories, max = 8, note, fits, onInput, onPick, onDone }) {
   const el = html(`
     <div>
       <form data-form class="field has-btn" style="margin-top:8px;height:50px">
@@ -214,6 +220,13 @@ export function merchantEditor({ value, raw, merchants, categories, max = 8, not
         return b;
       })
     );
+    if (fits) {
+      const trim = () => {
+        while (chipsEl.children.length > 1 && !fits()) chipsEl.lastElementChild.remove();
+      };
+      if (el.isConnected) trim();
+      else setTimeout(trim, 0);
+    }
   }
 
   input.addEventListener("input", () => {
