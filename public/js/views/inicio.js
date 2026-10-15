@@ -84,10 +84,11 @@ export function renderInicio() {
   }
 
   // Tarjetas en abanico: plegadas, la de más gasto del mes va a la izquierda y encima y las
-  // demás asoman por su derecha. Al tocarlas se despliegan en fila; tocar fuera las pliega.
+  // demás asoman por su derecha, repartidas hasta el borde. Al tocarlas se despliegan en fila; tocar fuera las pliega.
   const CARD_W = 204;
   const CARD_GAP = 12;
-  const PEEK = 26;
+  // Plegadas, lo que asoma cada tarjeta de detrás: el hueco a la derecha repartido entre ellas.
+  const peek = (n) => (n > 1 ? Math.max(26, (Math.min(window.innerWidth, 480) - 40 - CARD_W) / (n - 1)) : 0);
   let expanded = false;
   let cardEls = [];
 
@@ -96,6 +97,7 @@ export function renderInicio() {
     const open = expanded || n <= 1;
     const wrap = q("[data-cards]");
     const track = q("[data-track]");
+    const PEEK = peek(n);
     track.style.width = (open ? n * CARD_W + (n - 1) * CARD_GAP : CARD_W + (n - 1) * PEEK) + "px";
     wrap.style.overflowX = open ? "auto" : "hidden";
     wrap.style.scrollSnapType = open ? "x mandatory" : "none";
