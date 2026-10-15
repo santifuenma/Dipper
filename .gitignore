@@ -2,3 +2,17 @@ node_modules
 .wrangler
 .dev.vars
 Claude outputs
+
+# Herramientas de IA (configuración local de asistentes)
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+.cursor/
+.cursorrules
+.windsurf/
+.windsurfrules
+.aider*
+.continue/
+.codeium/
+.copilot/
+AGENTS.md
