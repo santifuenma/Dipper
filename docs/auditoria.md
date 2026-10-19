@@ -93,9 +93,9 @@ Swift serán una sola vista o estilo:
 | Acción de Atajos (App Intent) | Cola + atajo aparte | Al migrar; un punto de la API con sesión para recibir pagos, **antes** |
 | Icono de la app | En pausa | **Decidir** |
 
-## 8. Pruebas
+## 8. Pruebas ✅ 19-10-2026
 
-No hay pruebas automáticas. Las reglas de [`flujos.md`](flujos.md) que viven en el servidor
+Hecho: `npm test` con 33 pruebas (ver [README](../README.md#pruebas)). Antes no había pruebas automáticas. Las reglas de [`flujos.md`](flujos.md) que viven en el servidor
 (importes, huella de repetidos, normalización de comercios, tarjetas iguales, recordar y deshacer)
 son las que más conviene cubrir **antes** de migrar: así, al cambiar la API para la app nativa se
 sabe que nada se ha roto.

@@ -30,6 +30,7 @@ App personal para iPhone que recoge sola los pagos de Apple Pay y los reparte po
 - [Puesta en marcha](#puesta-en-marcha)
 - [Entornos y despliegue](#entornos-y-despliegue)
 - [Scripts](#scripts)
+- [Pruebas](#pruebas)
 - [Estructura del repositorio](#estructura-del-repositorio)
 - [Guía de diseño y especificación](#guía-de-diseño-y-especificación)
 - [Decisiones de diseño](#decisiones-de-diseño)
@@ -262,8 +263,27 @@ Los registros de cada petición (incluido un `ingest` por envío del atajo) se v
 | `npm run db:pruebas` | Aplica las migraciones a la base de datos de pruebas |
 | `npm run deploy` | Publica en el entorno real |
 | `npm run deploy:pruebas` | Publica en el entorno de pruebas |
+| `npm test` | Ejecuta las pruebas del servidor |
 | `npm run reset-password` | Pone una contraseña nueva a la cuenta real desde el ordenador ⚠️ cierra todas las sesiones |
 | `npm run icons` | Regenera los iconos PNG de la app |
+
+## Pruebas
+
+```bash
+npm test
+```
+
+Las pruebas corren el Worker dentro del mismo runtime de Cloudflare (con
+[`@cloudflare/vitest-plugin`](https://developers.cloudflare.com/workers/testing/vitest-integration/))
+y una base D1 local que se crea con las migraciones y se vacía antes de cada prueba.
+
+| Archivo | Pruebas | Qué comprueba |
+|---|---|---|
+| [`test/unidad.test.js`](test/unidad.test.js) | 14 | Lectura de importes en sus distintos formatos, colas de Atajos y normalización de comercios |
+| [`test/api.test.js`](test/api.test.js) | 19 | La API de punta a punta: una sola cuenta, bloqueo tras 5 fallos, cola sin duplicados, recordar y deshacer, nombre propio, reconocimiento de tarjetas y tarjetas iguales, borrar tarjetas y categorías, gastos a mano y presupuesto |
+
+Cubren las reglas de [`docs/flujos.md`](docs/flujos.md) que viven en el servidor: si un cambio para la
+app nativa rompe alguna, salta una prueba.
 
 ## Estructura del repositorio
 
@@ -288,6 +308,8 @@ public/
 migrations/        # Esquema de D1, una migración por cambio
 scripts/           # Iconos y cambio de contraseña desde el ordenador
 wrangler.toml      # Worker, bases D1 y entorno de pruebas
+test/              # Pruebas del servidor (npm test)
+vitest.config.mjs  # Configuración de las pruebas
 DISENO.md          # Guía de diseño
 docs/              # Especificación: componentes, pantallas, flujos y auditoría
 ```
