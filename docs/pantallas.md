@@ -184,8 +184,12 @@ Movimientos y Presupuesto.
 - **Barra**: volver, "Ajustes".
 - **Muestra**: caja de cuenta (bolitas, nombre y correo); filas **Tarjetas**, **Categorías**,
   **Conectar Apple Pay**, **Cambiar contraseña** y, si el iPhone lo admite, **Face ID** con pastilla
-  Activar / Activado; abajo, botón blanco **Salir** con texto `--danger`.
-- **API**: `POST /api/auth/logout`, registro de Face ID.
+  Activar / Activado; abajo, botón blanco **Salir** con texto `--danger` y el enlace **Borrar cuenta**
+  en `--danger`.
+- **Borrar cuenta**: hoja "¿Borrar tu cuenta?" que explica que se borra todo para siempre, pide la
+  contraseña (no si se entró con Face ID) y ofrece **Borrar mi cuenta** (botón blanco con texto
+  `--danger`) y **Cancelar** (lima). Al terminar, vuelve a Entrar.
+- **API**: `POST /api/auth/logout`, `POST /api/auth/delete-account`, registro de Face ID.
 
 ## Tarjetas
 

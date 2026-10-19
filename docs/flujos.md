@@ -22,10 +22,11 @@ pantalla, se indica con 📱 (ver [`auditoria.md`](auditoria.md)).
 
 | Regla | Detalle | Dónde |
 |---|---|---|
-| Una sola cuenta | El registro solo funciona si no hay ninguna cuenta. Al crearla se añaden las 6 categorías de partida (Súper, Comida fuera, Transporte, Ocio, Ropa, Suscripciones) con su presupuesto. | `auth.js`, `categories.js` |
+| Registro | Con `REGISTRO_ABIERTO = "no"` (app real hoy) solo funciona si no hay ninguna cuenta; con `"si"` (pruebas y la futura app pública), cualquiera, sin repetir correo. Al crear una cuenta se añaden las 6 categorías de partida (Súper, Comida fuera, Transporte, Ocio, Ropa, Suscripciones) con su presupuesto. | `auth.js`, `categories.js` |
 | Contraseña | Mínimo 8 caracteres. PBKDF2-SHA256, 100.000 iteraciones, sal de 16 bytes. | `auth.js` |
 | Entrar | Correo en minúsculas. Error único "Correo o contraseña incorrectos." exista o no la cuenta. 5 fallos en 15 minutos bloquean ese correo 15 minutos. | `auth.js` |
-| Sesión | Token aleatorio de 32 bytes en cookie de 30 días; en la base solo su SHA-256 y si se entró con contraseña o Face ID. | `auth.js` |
+| Sesión | Token aleatorio de 32 bytes, 30 días; en la base solo su SHA-256 y si se entró con contraseña o Face ID. La web lo lleva en una cookie `HttpOnly`; la app nativa lo pide con `X-Dipper-Client: app`, lo guarda en el llavero y lo manda como `Authorization: Bearer`. | `auth.js` |
+| Borrar la cuenta | Pide la contraseña salvo si se entró con Face ID. Borra pagos, reglas y nombres de comercio, tarjetas, categorías, Face ID, sesiones y la cuenta; el correo queda libre. | `auth.js` |
 | Face ID | Passkey (WebAuthn) con verificación obligatoria; retos de un solo uso de 5 minutos. El iPhone recuerda que la tiene activada. | `auth.js`, `passkey.js` |
 | Ofrecer Face ID | Tras entrar con contraseña, una sola vez, si el iPhone lo admite y no está activado. 📱 | `inicio.js` |
 | Cambiar contraseña | Pide la actual salvo si se entró con Face ID. Cierra las demás sesiones. | `auth.js` |
@@ -58,7 +59,8 @@ flowchart LR
 | Respuesta | `201 {recibidos, nuevos}`; cola vacía: `200` (sirve para un envío nocturno programado); sin importe: `400`. |
 | Enlace | `dpr_` + 18 bytes aleatorios, creado la primera vez que se pide. Identifica la cuenta sin sesión. |
 
-**En la app nativa (propuesta):** la app ofrece un **App Intent** "Registrar pago en Dipper" con
+**En la app nativa (propuesta):** el servidor ya tiene `POST /api/pagos`, que recibe pagos con la
+sesión del usuario en los mismos formatos y con las mismas reglas que el enlace. La app ofrece un **App Intent** "Registrar pago en Dipper" con
 parámetros importe, comercio, tarjeta y fecha. La automatización *Transacción* lo llama
 directamente, sin cola en iCloud ni atajo aparte, y la propia acción guarda el pago si no hay
 conexión y lo envía después. iOS no deja crear la automatización desde la app: la pantalla Conectar

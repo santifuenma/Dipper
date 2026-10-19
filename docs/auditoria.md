@@ -94,12 +94,12 @@ Hecho: cada archivo de `public/js/views/` se llama como su pantalla, y la ruta d
 
 | Qué | Estado | Cuándo |
 |---|---|---|
-| Varias cuentas (registro abierto) | Hoy solo la primera | **Antes**, en el servidor |
-| Borrar la cuenta desde la app | No existe | **Antes**, en el servidor y en Ajustes |
-| Sesión por token (además de cookie) | Solo cookie | **Antes**, en el servidor |
+| Varias cuentas (registro abierto) | ✅ 19-10-2026: con `REGISTRO_ABIERTO = "si"`; abierto en pruebas, cerrado en la app real | **Decidir** cuándo abrirlo en la real |
+| Borrar la cuenta desde la app | ✅ 19-10-2026: en el servidor y en Ajustes | — |
+| Sesión por token (además de cookie) | ✅ 19-10-2026 | — |
 | Política de privacidad | No existe | Antes de publicar |
 | Face ID nativo | Passkeys web | Al migrar: `LocalAuthentication` sobre el token guardado |
-| Acción de Atajos (App Intent) | Cola + atajo aparte | Al migrar; un punto de la API con sesión para recibir pagos, **antes** |
+| Acción de Atajos (App Intent) | ✅ 19-10-2026: `POST /api/pagos` con sesión listo en el servidor | La acción en sí, al migrar |
 | Icono de la app | En pausa | **Decidir** |
 
 ## 8. Pruebas ✅ 19-10-2026

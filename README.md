@@ -187,7 +187,9 @@ exigen sesión.
 | `POST` | `/api/auth/passkey/register/options` · `/verify` | Activar Face ID |
 | `GET` | `/api/auth/me` | Usuario actual y cómo entró |
 | `POST` | `/api/auth/password` | Cambiar la contraseña |
+| `POST` | `/api/auth/delete-account` | Borrar la cuenta y todos sus datos (pide la contraseña salvo si se entró con Face ID) |
 | `GET` | `/api/applepay` | Enlace personal para el atajo |
+| `POST` | `/api/pagos` | Recibe pagos con la sesión del usuario, en los mismos formatos que `/api/ingest/` (para la acción de Atajos de la app nativa) |
 | `GET` | `/api/pending` · `/api/pending/count` | Pagos por revisar (con sugerencias y "Tus comercios") y su número |
 | `POST` | `/api/pending/:id/confirm` · `/undo` | Confirmar categoría, nombre y tarjeta, o deshacerlo |
 | `GET` | `/api/month?month=AAAA-MM` | Datos de un mes ya calculados: pagos, total, lo que queda, gasto por tarjeta y por categoría y lo que toca al día. `&tarjeta=` o `&categoria=` filtran la lista de pagos |
@@ -203,9 +205,13 @@ exigen sesión.
   la comparación es de tiempo constante.
 - **Sin enumeración de cuentas**: con un correo inexistente se calcula igualmente un hash y el error es el mismo.
 - **Freno a la fuerza bruta**: 5 intentos fallidos por correo bloquean 15 minutos.
-- **Sesiones**: token aleatorio en cookie `HttpOnly`, `SameSite=Lax` y `Secure` en HTTPS; en la base
-  de datos solo se guarda su SHA-256. Duran 30 días y cambiar la contraseña cierra las demás.
-- **Registro cerrado**: solo se puede crear la primera cuenta.
+- **Sesiones**: token aleatorio en cookie `HttpOnly`, `SameSite=Lax` y `Secure` en HTTPS, o en la
+  cabecera `Authorization: Bearer` para la app nativa (que lo pide con `X-Dipper-Client: app`; la web no
+  lo recibe nunca). En la base de datos solo se guarda su SHA-256. Duran 30 días y cambiar la
+  contraseña cierra las demás.
+- **Registro controlado**: con `REGISTRO_ABIERTO = "no"` solo se puede crear la primera cuenta; con
+  `"si"`, cualquiera, sin repetir correo.
+- **Borrar la cuenta** elimina, tabla a tabla, todo lo del usuario.
 - **Face ID con WebAuthn**: retos de un solo uso que caducan a los 5 minutos y verificación de usuario obligatoria.
 - **Aislamiento por usuario**: cada consulta filtra por `user_id`, también al mover pagos entre tarjetas o categorías.
 - **Enlace de ingesta secreto** (`dpr_` + 18 bytes aleatorios); sin él no se puede enviar ningún pago.
@@ -232,8 +238,11 @@ Para probar la ingesta en local, copia el enlace de **Ajustes › Conectar Apple
 curl -X POST http://localhost:8787/api/ingest/dpr_TU_ENLACE -H "content-type: application/json" -d '{"importe":"12,50","comercio":"MERCADONA VALENCIA","tarjeta":"Mi Visa","fecha":"2026-10-15T12:00:00Z"}'
 ```
 
-Dipper no necesita variables de entorno: la configuración (nombre del Worker y bases D1) está en
-[`wrangler.toml`](wrangler.toml).
+La configuración está en [`wrangler.toml`](wrangler.toml), sin secretos:
+
+| Variable | Real | Pruebas | Qué hace |
+|---|---|---|---|
+| `REGISTRO_ABIERTO` | `no` | `si` | `si` deja crear cuentas a cualquiera; `no`, solo la primera (app personal) |
 
 ## Entornos y despliegue
 
@@ -281,6 +290,7 @@ y una base D1 local que se crea con las migraciones y se vacía antes de cada pr
 |---|---|---|
 | [`test/unidad.test.js`](test/unidad.test.js) | 18 | Lectura de importes en sus distintos formatos, colas de Atajos, normalización de comercios y las cifras del resumen del mes |
 | [`test/api.test.js`](test/api.test.js) | 20 | La API de punta a punta: una sola cuenta, bloqueo tras 5 fallos, cola sin duplicados, recordar y deshacer, nombre propio, reconocimiento de tarjetas y tarjetas iguales, borrar tarjetas y categorías, gastos a mano, resumen y filtros del mes y presupuesto |
+| [`test/app-store.test.js`](test/app-store.test.js) | 12 | Lo que pide la app nativa y el App Store: sesión por token, registro abierto o cerrado, borrar la cuenta y recibir pagos con la sesión |
 
 Cubren las reglas de [`docs/flujos.md`](docs/flujos.md) que viven en el servidor: si un cambio para la
 app nativa rompe alguna, salta una prueba.
@@ -337,8 +347,10 @@ docs/              # Especificación: componentes, pantallas, flujos y auditorí
 - **Recordar por comercio.** La categoría y el nombre propio se guardan por comercio normalizado
   (`MERCADONA VALENCIA` → `MERCADONA`): en las cadenas que Dipper reconoce, una tienda nueva ya entra
   colocada.
-- **Una sola cuenta.** Es una app personal: el registro se cierra tras la primera cuenta y no hay
-  recuperación por correo, sino `npm run reset-password` desde el ordenador.
+- **Una sola cuenta, de momento.** Hoy es una app personal: en el entorno real el registro se cierra
+  tras la primera cuenta y no hay recuperación por correo, sino `npm run reset-password` desde el
+  ordenador. El servidor ya admite varias cuentas (`REGISTRO_ABIERTO`) para cuando Dipper pase a ser
+  una app nativa en el App Store.
 - **Sin framework ni compilación.** Módulos ES servidos tal cual: se publica con un solo comando y
   no hay dependencias de cliente que mantener.
 - **Entorno de pruebas aparte.** Las ramas se prueban con su propia base de datos, sin tocar los pagos reales.

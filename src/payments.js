@@ -105,15 +105,24 @@ async function guessCard(env, userId, merchantKey, candidates) {
   return row ? row.card_id : null;
 }
 
+// Entrada de pagos con el enlace personal (atajo de la PWA, sin sesión).
 export async function ingest(request, env, token) {
   if (request.method !== "POST") return json({ error: "Usa POST." }, 405);
   if (!token || !token.startsWith("dpr_")) return json({ error: "Enlace no válido." }, 401);
   const user = await env.DB.prepare("SELECT id FROM users WHERE ingest_token = ?").bind(token).first();
   if (!user) return json({ error: "Enlace no válido." }, 401);
+  return ingestFor(request, env, user, "enlace");
+}
 
+// Lo mismo con la sesión del usuario: lo usará la acción de Atajos de la app nativa (App Intent).
+async function ingestWithSession(request, env, user) {
+  return ingestFor(request, env, user, "sesion");
+}
+
+async function ingestFor(request, env, user, via) {
   const all = await readPayments(request);
   const payments = all.slice(0, 200);
-  console.log("ingest", { contentType: request.headers.get("content-type"), objetos: payments.length });
+  console.log("ingest", { via, contentType: request.headers.get("content-type"), objetos: payments.length });
   const { results: cards } = await env.DB.prepare("SELECT id, wallet_name, last4 FROM cards WHERE user_id = ?").bind(user.id).all();
   let received = 0;
   let added = 0;
@@ -333,6 +342,7 @@ export async function handlePayments(request, env, url, user) {
   const p = url.pathname;
   const m = request.method;
   if (m === "GET" && p === "/api/applepay") return applePayLink(env, url, user);
+  if (m === "POST" && p === "/api/pagos") return ingestWithSession(request, env, user);
   if (m === "GET" && p === "/api/pending") return pending(env, user);
   if (m === "GET" && p === "/api/pending/count") return pendingCount(env, user);
   const match = p.match(/^\/api\/pending\/(\d+)\/(confirm|undo)$/);

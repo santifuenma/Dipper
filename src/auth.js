@@ -26,7 +26,18 @@ async function hashPassword(password, salt) {
   return new Uint8Array(bits);
 }
 
-async function sessionResponse(env, url, user, status = 200, method = "password") {
+// La sesión llega en la cookie (PWA) o como "Authorization: Bearer <token>" (app nativa).
+function sessionToken(request) {
+  const auth = request.headers.get("authorization") || "";
+  if (auth.startsWith("Bearer ")) return auth.slice(7).trim() || null;
+  return getCookie(request, COOKIE);
+}
+
+// La app nativa se identifica con "X-Dipper-Client: app": recibe el token en la respuesta para
+// guardarlo en el llavero del iPhone. La web no lo recibe nunca (solo la cookie HttpOnly).
+const wantsToken = (request) => (request.headers.get("x-dipper-client") || "").toLowerCase() === "app";
+
+async function sessionResponse(env, url, user, status = 200, method = "password", request = null) {
   const token = randomToken();
   const now = Date.now();
   await env.DB.prepare("INSERT INTO sessions (token_hash, user_id, expires_at, created_at, method) VALUES (?, ?, ?, ?, ?)")
@@ -34,7 +45,9 @@ async function sessionResponse(env, url, user, status = 200, method = "password"
     .run();
   const secure = url.protocol === "https:" ? "; Secure" : "";
   const cookie = `${COOKIE}=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${SESSION_DAYS * 86400}${secure}`;
-  return json({ user: publicUser(user) }, status, [["set-cookie", cookie]]);
+  const body = { user: publicUser(user) };
+  if (request && wantsToken(request)) body.token = token;
+  return json(body, status, [["set-cookie", cookie]]);
 }
 
 function publicUser(u) {
@@ -42,7 +55,7 @@ function publicUser(u) {
 }
 
 export async function currentUser(request, env) {
-  const token = getCookie(request, COOKIE);
+  const token = sessionToken(request);
   if (!token) return null;
   return env.DB.prepare(
     `SELECT u.id, u.name, u.email, s.method AS authMethod, s.token_hash AS sessionHash
@@ -100,9 +113,14 @@ async function register(request, env, url) {
   if (!/^\S+@\S+\.\S+$/.test(cleanEmail)) return json({ error: "Ese correo no parece válido." }, 400);
   if (typeof password !== "string" || password.length < 8) return json({ error: "La contraseña necesita mínimo 8 caracteres." }, 400);
 
-  // La app es personal: solo se puede crear la primera cuenta.
-  const { c } = await env.DB.prepare("SELECT COUNT(*) AS c FROM users").first();
-  if (c > 0) return json({ error: "Ya hay una cuenta creada. Entra con ella." }, 403);
+  // Con REGISTRO_ABIERTO = "si" (entorno de pruebas, y la app pública cuando llegue) cualquiera puede
+  // crear su cuenta; si no, solo la primera, como en la app personal de hoy.
+  if (env.REGISTRO_ABIERTO !== "si") {
+    const { c } = await env.DB.prepare("SELECT COUNT(*) AS c FROM users").first();
+    if (c > 0) return json({ error: "Ya hay una cuenta creada. Entra con ella." }, 403);
+  }
+  const taken = await env.DB.prepare("SELECT 1 FROM users WHERE email = ?").bind(cleanEmail).first();
+  if (taken) return json({ error: "Ya hay una cuenta con ese correo. Entra con ella." }, 409);
 
   const salt = crypto.getRandomValues(new Uint8Array(16));
   const hash = await hashPassword(password, salt);
@@ -113,7 +131,7 @@ async function register(request, env, url) {
     .run();
   const userId = res.meta.last_row_id;
   await seedCategories(env, userId);
-  return sessionResponse(env, url, { id: userId, name: cleanName, email: cleanEmail }, 201);
+  return sessionResponse(env, url, { id: userId, name: cleanName, email: cleanEmail }, 201, "password", request);
 }
 
 async function login(request, env, url) {
@@ -137,11 +155,39 @@ async function login(request, env, url) {
     return json({ error: BAD_LOGIN }, 401);
   }
   await env.DB.prepare("DELETE FROM login_failures WHERE email = ?").bind(cleanEmail).run();
-  return sessionResponse(env, url, user);
+  return sessionResponse(env, url, user, 200, "password", request);
+}
+
+// Borrar la cuenta (lo exige el App Store): todo lo del usuario desaparece. Pide la contraseña,
+// salvo si se entró con Face ID, igual que al cambiarla.
+async function deleteAccount(request, env, user) {
+  const { password } = await readJson(request);
+  if (user.authMethod !== "passkey") {
+    const row = await env.DB.prepare("SELECT password_hash, password_salt FROM users WHERE id = ?").bind(user.id).first();
+    const hash = await hashPassword(String(password || ""), fromB64url(row.password_salt));
+    if (!crypto.subtle.timingSafeEqual(hash, fromB64url(row.password_hash))) {
+      return json({ error: "La contraseña no es correcta." }, 401);
+    }
+  }
+  // Tabla a tabla y en orden, sin depender de que la base aplique los ON DELETE CASCADE.
+  const id = user.id;
+  await env.DB.batch([
+    env.DB.prepare("DELETE FROM charges WHERE user_id = ?").bind(id),
+    env.DB.prepare("DELETE FROM merchant_rules WHERE user_id = ?").bind(id),
+    env.DB.prepare("DELETE FROM merchant_names WHERE user_id = ?").bind(id),
+    env.DB.prepare("DELETE FROM cards WHERE user_id = ?").bind(id),
+    env.DB.prepare("DELETE FROM categories WHERE user_id = ?").bind(id),
+    env.DB.prepare("DELETE FROM passkeys WHERE user_id = ?").bind(id),
+    env.DB.prepare("DELETE FROM challenges WHERE user_id = ?").bind(id),
+    env.DB.prepare("DELETE FROM sessions WHERE user_id = ?").bind(id),
+    env.DB.prepare("DELETE FROM login_failures WHERE email = ?").bind(user.email),
+    env.DB.prepare("DELETE FROM users WHERE id = ?").bind(id),
+  ]);
+  return json({ ok: true }, 200, [["set-cookie", `${COOKIE}=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0`]]);
 }
 
 async function logout(request, env) {
-  const token = getCookie(request, COOKIE);
+  const token = sessionToken(request);
   if (token) await env.DB.prepare("DELETE FROM sessions WHERE token_hash = ?").bind(await sha256(token)).run();
   return json({ ok: true }, 200, [["set-cookie", `${COOKIE}=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0`]]);
 }
@@ -220,7 +266,7 @@ async function passkeyLoginVerify(request, env, url) {
 
   await env.DB.prepare("UPDATE passkeys SET counter = ? WHERE id = ?").bind(authenticationInfo.newCounter, pk.id).run();
   const user = await env.DB.prepare("SELECT * FROM users WHERE id = ?").bind(pk.user_id).first();
-  return sessionResponse(env, url, user, 200, "passkey");
+  return sessionResponse(env, url, user, 200, "passkey", request);
 }
 
 export async function handleAuth(request, env, url) {
@@ -240,6 +286,7 @@ export async function handleAuth(request, env, url) {
   switch (route) {
     case "GET /me": return json({ user: publicUser(user), authMethod: user.authMethod });
     case "POST /password": return changePassword(request, env, user);
+    case "POST /delete-account": return deleteAccount(request, env, user);
     case "POST /passkey/register/options": return passkeyRegisterOptions(env, url, user);
     case "POST /passkey/register/verify": return passkeyRegisterVerify(request, env, url, user);
   }

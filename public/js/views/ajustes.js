@@ -1,8 +1,8 @@
-// Pantalla "Ajustes" (nueva, acordada; estilo del zip): cuenta, categorías, Apple Pay, Face ID y salir.
+// Pantalla "Ajustes" (nueva, acordada; estilo del zip): cuenta, categorías, Apple Pay, Face ID, salir y borrar la cuenta.
 import { dots } from "../components.js";
 import { api } from "../api.js";
 import { go, session } from "../app.js";
-import { busy, html, ICON } from "../dom.js";
+import { busy, html, ICON, passwordToggle } from "../dom.js";
 import { enableFaceId, faceIdEnabledHere, faceIdError, passkeySupported } from "../passkey.js";
 
 function row(icon, color, title, sub) {
@@ -45,6 +45,7 @@ export function renderAjustes() {
       </div>
 
       <button type="button" data-logout class="btn btn-white" style="flex:none;margin-top:10px;color:#B3261E">Salir</button>
+      <button type="button" data-delete-account class="link-u" style="flex:none;align-self:center;margin-top:6px;font-size:14px;color:var(--danger)">Borrar cuenta</button>
     </div>
   `);
 
@@ -90,6 +91,63 @@ export function renderAjustes() {
     });
     rows.append(face);
   }
+
+  // Borrar la cuenta: hoja con la explicación y, si se entró con contraseña, la contraseña.
+  el.querySelector("[data-delete-account]").addEventListener("click", () => {
+    const faceId = session.authMethod === "passkey";
+    const bg = html(`
+      <div class="sheet-bg">
+        <form class="sheet" novalidate role="dialog" aria-modal="true" aria-labelledby="del-title">
+          <div id="del-title" style="font-size:28px;font-weight:800;letter-spacing:-.8px;line-height:1.05">¿Borrar tu cuenta?</div>
+          <div style="margin-top:10px;font-size:16px;font-weight:500;line-height:1.4;color:var(--muted)">Se borran para siempre tus pagos, tarjetas, categorías y presupuesto. No se puede deshacer.</div>
+          ${faceId ? "" : `
+          <label class="field has-btn" style="margin-top:16px">
+            ${ICON.lock}
+            <input name="password" data-pw type="password" autocomplete="current-password" aria-label="Contraseña" placeholder="Tu contraseña">
+            <button type="button" class="toggle" aria-label="Mostrar contraseña">Mostrar</button>
+          </label>`}
+          <div class="error" role="alert" style="margin-top:10px"></div>
+          <button type="submit" data-confirm class="btn btn-white" style="margin-top:18px;color:var(--danger)">Borrar mi cuenta</button>
+          <button type="button" data-cancel class="btn btn-lima" style="margin-top:10px">Cancelar</button>
+        </form>
+      </div>
+    `);
+    const form = bg.querySelector("form");
+    const err = bg.querySelector(".error");
+    const confirm = bg.querySelector("[data-confirm]");
+    if (!faceId) passwordToggle(bg);
+    const close = () => {
+      bg.style.transition = "opacity .25s";
+      bg.style.opacity = "0";
+      setTimeout(() => bg.remove(), 260);
+    };
+    bg.querySelector("[data-cancel]").addEventListener("click", close);
+    bg.addEventListener("click", (e) => {
+      if (e.target === bg) close();
+    });
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      err.textContent = "";
+      if (!faceId && !form.password.value) {
+        err.textContent = "Escribe tu contraseña.";
+        return;
+      }
+      busy(confirm, true);
+      try {
+        await api("/auth/delete-account", { password: faceId ? undefined : form.password.value });
+        try {
+          localStorage.clear();
+        } catch {}
+        session.user = null;
+        bg.remove();
+        go("/entrar");
+      } catch (error) {
+        err.textContent = error.message;
+        busy(confirm, false);
+      }
+    });
+    document.getElementById("app").append(bg);
+  });
 
   el.querySelector("[data-logout]").addEventListener("click", async () => {
     try {

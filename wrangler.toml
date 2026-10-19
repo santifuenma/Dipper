@@ -7,6 +7,10 @@ compatibility_flags = ["nodejs_compat"]
 [observability]
 enabled = true
 
+# Registro: "si" deja crear cuentas a cualquiera; "no", solo la primera (app personal).
+[vars]
+REGISTRO_ABIERTO = "no"
+
 [assets]
 directory = "./public"
 binding = "ASSETS"
@@ -25,6 +29,9 @@ name = "dipper-pruebas"
 
 [env.pruebas.observability]
 enabled = true
+
+[env.pruebas.vars]
+REGISTRO_ABIERTO = "si"
 
 [env.pruebas.assets]
 directory = "./public"
