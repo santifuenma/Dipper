@@ -145,7 +145,7 @@ export function renderPresupuesto() {
       st.monthly = data.monthlyBudgetCents;
       st.cats = data.categories;
       for (const c of data.categories) st.bud.set(c.id, c.budgetCents);
-      for (const ch of data.charges) if (ch.categoryId) st.spent.set(ch.categoryId, (st.spent.get(ch.categoryId) || 0) + ch.amountCents);
+      for (const c of data.categories) st.spent.set(c.id, c.spentCents);
       st.loaded = true;
       q("[data-rows]").replaceChildren(...st.cats.map(rowFor));
       drawTotal();

@@ -50,10 +50,3 @@ export function shiftMonth(m, delta) {
   const d = new Date(Date.UTC(y, mo - 1 + delta, 1));
   return d.getUTCFullYear() + "-" + String(d.getUTCMonth() + 1).padStart(2, "0");
 }
-
-// Días que quedan del mes después de hoy (para "tocan X € al día").
-export function daysLeftInMonth() {
-  const [y, mo, d] = dayKey(Date.now()).split("-").map(Number);
-  const days = new Date(Date.UTC(y, mo, 0)).getUTCDate();
-  return days - d;
-}

@@ -122,8 +122,8 @@ iOS pasa los datos de la transacción a la acción solo o hay que asignarlos con
 
 | Regla | Detalle | Dónde |
 |---|---|---|
-| Mes | Se calcula en hora de Madrid. El servidor devuelve los pagos del mes, tarjetas, categorías, presupuesto y pendientes. | `charges.js` |
-| Totales | Total del mes, gasto por tarjeta y por categoría, % de la tarjeta sobre el total. 📱 | `inicio.js`, `ver-*.js` |
-| "Tocan X al día" | Lo que queda del presupuesto de la categoría ÷ días que quedan del mes (sin contar hoy), redondeado hacia abajo. 📱 | `ver-categoria.js` |
+| Mes | Se calcula en hora de Madrid. El servidor devuelve los pagos del mes, tarjetas, categorías, presupuesto y pendientes. Con `?tarjeta=` o `?categoria=` la lista de pagos viene filtrada (y su total en `chargesTotalCents`), pero los totales siguen siendo del mes entero. | `charges.js` |
+| Totales | `totalCents` del mes; por tarjeta `spentCents`, `percentOfTotal` (redondeado) y su reparto por categoría; por categoría `spentCents`, `leftCents` y su reparto por tarjeta. | `monthSummary()` en `charges.js` |
+| "Tocan X al día" | `perDayCents` = lo que queda del presupuesto de la categoría ÷ `daysLeft` (días que quedan del mes sin contar hoy), redondeado hacia abajo. Solo en el mes actual, con presupuesto, sin pasarse y si quedan días; si no, `null`. | `monthSummary()` en `charges.js` |
 | Presupuesto | Total mensual y uno por categoría, iguales para todos los meses. Se ajustan de 50 en 50 € (total) y de 10 en 10 € (categoría); nunca por debajo de 0 ni por encima de 1.000.000 €. | `budget.js`, `presupuesto.js` |
-| Aire | "quedan X € de aire" si el total no supera el presupuesto; si no, "te pasaste X €". 📱 | `inicio.js` |
+| Aire | `leftCents` = presupuesto del mes − total. Positivo: "quedan X € de aire"; negativo: "te pasaste X €". | `monthSummary()` en `charges.js` |

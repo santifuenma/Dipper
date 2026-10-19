@@ -124,7 +124,7 @@ Movimientos y Presupuesto.
 - **Muestra**: "Todos · 24 pagos" (o el nombre de la tarjeta o categoría filtrada) y el total;
   lista completa por días (modo tarjeta si se filtra por categoría; si no, modo categoría). Con scroll.
 - **Vacía**: "No hay pagos este mes."
-- **API**: `GET /api/month` (el filtro se aplica en la app).
+- **API**: `GET /api/month?tarjeta=` o `?categoria=` (lista y total ya filtrados).
 
 ## Pago
 

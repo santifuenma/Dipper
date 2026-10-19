@@ -190,7 +190,7 @@ exigen sesión.
 | `GET` | `/api/applepay` | Enlace personal para el atajo |
 | `GET` | `/api/pending` · `/api/pending/count` | Pagos por revisar (con sugerencias y "Tus comercios") y su número |
 | `POST` | `/api/pending/:id/confirm` · `/undo` | Confirmar categoría, nombre y tarjeta, o deshacerlo |
-| `GET` | `/api/month?month=AAAA-MM` | Datos de un mes: pagos, tarjetas, categorías y presupuesto |
+| `GET` | `/api/month?month=AAAA-MM` | Datos de un mes ya calculados: pagos, total, lo que queda, gasto por tarjeta y por categoría y lo que toca al día. `&tarjeta=` o `&categoria=` filtran la lista de pagos |
 | `GET` · `POST` | `/api/charges/:id` | Ver un pago o cambiar su categoría, tarjeta o nombre de comercio |
 | `POST` | `/api/charges` · `/api/charges/:id/delete` | Añadir un gasto a mano o borrar un pago |
 | `GET` · `POST` | `/api/cards` · `/api/cards/:id` · `/delete` | Listar, crear, editar y borrar tarjetas |
@@ -279,8 +279,8 @@ y una base D1 local que se crea con las migraciones y se vacía antes de cada pr
 
 | Archivo | Pruebas | Qué comprueba |
 |---|---|---|
-| [`test/unidad.test.js`](test/unidad.test.js) | 14 | Lectura de importes en sus distintos formatos, colas de Atajos y normalización de comercios |
-| [`test/api.test.js`](test/api.test.js) | 19 | La API de punta a punta: una sola cuenta, bloqueo tras 5 fallos, cola sin duplicados, recordar y deshacer, nombre propio, reconocimiento de tarjetas y tarjetas iguales, borrar tarjetas y categorías, gastos a mano y presupuesto |
+| [`test/unidad.test.js`](test/unidad.test.js) | 18 | Lectura de importes en sus distintos formatos, colas de Atajos, normalización de comercios y las cifras del resumen del mes |
+| [`test/api.test.js`](test/api.test.js) | 20 | La API de punta a punta: una sola cuenta, bloqueo tras 5 fallos, cola sin duplicados, recordar y deshacer, nombre propio, reconocimiento de tarjetas y tarjetas iguales, borrar tarjetas y categorías, gastos a mano, resumen y filtros del mes y presupuesto |
 
 Cubren las reglas de [`docs/flujos.md`](docs/flujos.md) que viven en el servidor: si un cambio para la
 app nativa rompe alguna, salta una prueba.

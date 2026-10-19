@@ -27,23 +27,22 @@ export function renderMovimientos(params) {
     </div>
   `);
 
-  api("/month?month=" + (view.month || ""))
+  const filtro = cardId ? `&tarjeta=${cardId}` : catId ? `&categoria=${catId}` : "";
+  api(`/month?month=${view.month || ""}${filtro}`)
     .then((data) => {
       el.querySelector("[data-month]").textContent = monthLabel(data.month);
-      let list = data.charges;
+      const list = data.charges; // ya filtrados por el servidor
       let title = "Todos";
       if (cardId) {
-        list = list.filter((c) => c.cardId === cardId);
         const k = data.cards.find((x) => x.id === cardId);
         title = k ? k.name : "Tarjeta";
       }
       if (catId) {
-        list = list.filter((c) => c.categoryId === catId);
         const t = data.categories.find((x) => x.id === catId);
         title = t ? t.name : "Categoría";
       }
       el.querySelector("[data-filter]").textContent = `${title} · ${list.length} ${list.length === 1 ? "pago" : "pagos"}`;
-      el.querySelector("[data-total]").textContent = euros(list.reduce((a, c) => a + c.amountCents, 0));
+      el.querySelector("[data-total]").textContent = euros(data.chargesTotalCents);
       el.querySelector("[data-list]").replaceChildren(
         list.length
           ? movementGroups(list, { cats: data.categories, cards: data.cards, mode: catId ? "card" : "category" })

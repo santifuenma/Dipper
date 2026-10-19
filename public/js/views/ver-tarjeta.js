@@ -22,17 +22,14 @@ export function renderVerTarjeta(params) {
   `);
   const body = el.querySelector("[data-body]");
 
-  api("/month?month=" + (view.month || ""))
+  api(`/month?month=${view.month || ""}&tarjeta=${id}`)
     .then((data) => {
       const card = data.cards.find((c) => c.id === id);
       if (!card) {
         el.querySelector(".error").textContent = "Esa tarjeta ya no existe.";
         return;
       }
-      const mine = data.charges.filter((c) => c.cardId === id);
-      const total = data.charges.reduce((a, c) => a + c.amountCents, 0);
-      const spent = mine.reduce((a, c) => a + c.amountCents, 0);
-      const pct = total > 0 ? Math.round((spent / total) * 100) : 0;
+      const mine = data.charges; // ya vienen solo los de esta tarjeta
 
       const top = html(`
         <div>
@@ -80,11 +77,10 @@ export function renderVerTarjeta(params) {
       top.querySelector("[data-last]").textContent = "···· " + card.last4;
       top.querySelector("[data-ap]").hidden = !card.walletName;
       top.querySelector("[data-label]").textContent = "con esta tarjeta en " + monthLabel(data.month);
-      top.querySelector("[data-spent]").textContent = eurosInt(spent);
-      top.querySelector("[data-pct]").textContent = pct + " % de lo gastado";
+      top.querySelector("[data-spent]").textContent = eurosInt(card.spentCents);
+      top.querySelector("[data-pct]").textContent = card.percentOfTotal + " % de lo gastado";
 
-      const byCat = new Map();
-      for (const c of mine) if (c.categoryId) byCat.set(c.categoryId, (byCat.get(c.categoryId) || 0) + c.amountCents);
+      const byCat = new Map(card.byCategory.map((x) => [x.categoryId, x.spentCents]));
       const tiles = data.categories.filter((t) => byCat.get(t.id));
       top.querySelector("[data-tiles-wrap]").hidden = tiles.length === 0;
       top.querySelector("[data-tiles]").replaceChildren(

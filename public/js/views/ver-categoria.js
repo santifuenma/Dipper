@@ -2,7 +2,7 @@
 import { api } from "../api.js";
 import { emptyNote, fitMovements, movementGroups, seeAllLink } from "../components.js";
 import { html, ICON } from "../dom.js";
-import { daysLeftInMonth, euros, eurosInt, monthLabel } from "../format.js";
+import { euros, eurosInt, monthLabel } from "../format.js";
 import { categoryIcon } from "../icons.js";
 import { view } from "./inicio.js";
 
@@ -24,7 +24,7 @@ export function renderVerCategoria(params) {
   `);
   const body = el.querySelector("[data-body]");
 
-  api("/month?month=" + (view.month || ""))
+  api(`/month?month=${view.month || ""}&categoria=${id}`)
     .then((data) => {
       const cat = data.categories.find((c) => c.id === id);
       if (!cat) {
@@ -32,10 +32,10 @@ export function renderVerCategoria(params) {
         return;
       }
       el.querySelector("[data-title]").textContent = cat.name;
-      const mine = data.charges.filter((c) => c.categoryId === id);
-      const spent = mine.reduce((a, c) => a + c.amountCents, 0);
+      const mine = data.charges; // ya vienen solo los de esta categoría
+      const spent = cat.spentCents;
       const budget = cat.budgetCents;
-      const left = budget - spent;
+      const left = cat.leftCents;
       const isCurrent = data.month === data.current;
 
       const top = html(`
@@ -85,23 +85,22 @@ export function renderVerCategoria(params) {
       if (isCurrent && budget > 0) {
         const hint = top.querySelector("[data-hint]");
         const txt = top.querySelector("[data-hint-txt]");
-        const days = daysLeftInMonth();
+        const days = data.daysLeft;
         hint.hidden = false;
         if (left <= 0) {
           txt.textContent = `Te has pasado ${eurosInt(-left)} € este mes.`;
-        } else if (days === 0) {
+        } else if (cat.perDayCents === null) {
           txt.textContent = `Último día del mes. Te quedan ${eurosInt(left)} €.`;
         } else {
           txt.append(`Te quedan ${days} ${days === 1 ? "día" : "días"}. Para llegar a fin de mes, tocan unos `);
           const b = document.createElement("b");
           b.style.fontWeight = "800";
-          b.textContent = euros(Math.floor(left / days)) + " al día";
+          b.textContent = euros(cat.perDayCents) + " al día";
           txt.append(b, ".");
         }
       }
 
-      const byCard = new Map();
-      for (const c of mine) if (c.cardId) byCard.set(c.cardId, (byCard.get(c.cardId) || 0) + c.amountCents);
+      const byCard = new Map(cat.byCard.map((x) => [x.cardId, x.spentCents]));
       const cardsWith = data.cards.filter((k) => byCard.get(k.id));
       top.querySelector("[data-bycard-wrap]").hidden = cardsWith.length === 0;
       top.querySelector("[data-bycard]").replaceChildren(

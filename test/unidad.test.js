@@ -2,6 +2,7 @@
 import { describe, expect, it } from "vitest";
 import { cleanMerchantName, parseAmount, parseObjects } from "../src/payments.js";
 import { merchantInfo, normalize } from "../src/merchants.js";
+import { daysLeftInMonth, monthSummary } from "../src/charges.js";
 
 describe("parseAmount", () => {
   it.each([
@@ -60,5 +61,55 @@ describe("comercios", () => {
     expect(cleanMerchantName("")).toBeNull();
     expect(cleanMerchantName("x".repeat(61))).toBeNull();
     expect(cleanMerchantName(42)).toBeNull();
+  });
+});
+
+describe("resumen del mes", () => {
+  const now = Date.UTC(2026, 9, 19, 12); // 19 de octubre: quedan 12 días
+  const base = {
+    month: "2026-10",
+    current: "2026-10",
+    now,
+    monthlyBudgetCents: 100000,
+    cards: [{ id: 1, name: "Visa" }, { id: 2, name: "Amex" }],
+    categories: [
+      { id: 10, name: "Súper", budgetCents: 30000 },
+      { id: 11, name: "Ocio", budgetCents: 5000 },
+      { id: 12, name: "Ropa", budgetCents: 0 },
+    ],
+    charges: [
+      { amountCents: 12000, cardId: 1, categoryId: 10 },
+      { amountCents: 3000, cardId: 2, categoryId: 10 },
+      { amountCents: 6000, cardId: 1, categoryId: 11 },
+      { amountCents: 1000, cardId: null, categoryId: null },
+    ],
+  };
+
+  it("total, lo que queda y los días que faltan", () => {
+    const s = monthSummary(base);
+    expect(s).toMatchObject({ totalCents: 22000, leftCents: 78000, daysLeft: 12 });
+    expect(daysLeftInMonth(now)).toBe(12);
+    expect(daysLeftInMonth(Date.UTC(2026, 9, 31, 12))).toBe(0);
+  });
+
+  it("gasto y porcentaje por tarjeta, con su reparto por categoría", () => {
+    const [visa, amex] = monthSummary(base).cards;
+    expect(visa).toMatchObject({ spentCents: 18000, percentOfTotal: 82 });
+    expect(visa.byCategory).toEqual([{ categoryId: 10, spentCents: 12000 }, { categoryId: 11, spentCents: 6000 }]);
+    expect(amex).toMatchObject({ spentCents: 3000, percentOfTotal: 14 });
+  });
+
+  it("por categoría: lo que queda, lo que toca al día y su reparto por tarjeta", () => {
+    const [sup, ocio, ropa] = monthSummary(base).categories;
+    expect(sup).toMatchObject({ spentCents: 15000, leftCents: 15000, perDayCents: 1250 });
+    expect(sup.byCard).toEqual([{ cardId: 1, spentCents: 12000 }, { cardId: 2, spentCents: 3000 }]);
+    expect(ocio).toMatchObject({ spentCents: 6000, leftCents: -1000, perDayCents: null }); // pasada
+    expect(ropa.perDayCents).toBeNull(); // sin presupuesto
+  });
+
+  it("en un mes pasado no hay días ni importe por día", () => {
+    const s = monthSummary({ ...base, current: "2026-11" });
+    expect(s.daysLeft).toBe(0);
+    expect(s.categories[0].perDayCents).toBeNull();
   });
 });

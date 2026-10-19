@@ -9,14 +9,16 @@ plano. Cada punto dice **qué**, **por qué importa** y **cuándo** hacerlo:
 
 Al resolver un punto, se marca ✅ con la fecha.
 
-## 1. Lógica que vive en la pantalla
+## 1. Lógica que vive en la pantalla ✅ 19-10-2026
 
-| Qué | Dónde | Cuándo |
+Hecho: `GET /api/month` devuelve el total, lo que queda, los días que faltan, el gasto y el reparto
+por tarjeta y por categoría y "lo que toca al día", y filtra por tarjeta o categoría (ver
+[`flujos.md`](flujos.md#mes-y-presupuesto)). Las pantallas solo ponen esas cifras en su texto.
+
+| Qué queda | Dónde | Cuándo |
 |---|---|---|
-| Total del mes, gasto por tarjeta y por categoría, % de la tarjeta sobre el total, "Por tarjeta" de una categoría | `inicio.js`, `ver-tarjeta.js`, `ver-categoria.js`, `presupuesto.js` | **Antes**: que `GET /api/month` los devuelva ya calculados |
-| "quedan X € de aire / te pasaste X €" y "tocan X € al día" | `inicio.js`, `ver-categoria.js` | **Antes**: el servidor devuelve las cifras y la app solo pone el texto |
-| Filtrar movimientos por tarjeta o categoría | `movimientos.js` | **Antes**: aceptar `?tarjeta=` y `?categoria=` en la API |
 | Fuerza de la contraseña | `registro.js` | Al migrar (es solo una ayuda visual) |
+| Cuántos segmentos se encienden y la altura del líquido (proporciones para dibujar) | Inicio, Presupuesto, recuadros | Al migrar: es dibujo, no regla |
 
 **Por qué importa:** cada cálculo que se queda en la pantalla habría que reescribirlo en Swift y
 mantener los dos iguales. En el servidor se escribe una vez.

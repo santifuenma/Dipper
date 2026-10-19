@@ -224,6 +224,25 @@ describe("categorías, pagos a mano y presupuesto", () => {
     expect(mes.data.charges[0]).toMatchObject({ amountCents: 1250, merchant: "Ocio", status: "done", source: "manual" });
   });
 
+  it("el mes trae los totales calculados y se puede filtrar por tarjeta o categoría", async () => {
+    const a = await cuenta();
+    const { card } = (await a.call("/cards", { name: "Visa", last4: "1111", walletName: "Mi Visa", color: "#1B1B1F" })).data;
+    const ocio = a.cat("Ocio");
+    await a.call("/charges", { amountCents: 1000, categoryId: ocio, cardId: card.id, date: Date.now() });
+    await a.call("/charges", { amountCents: 500, categoryId: a.cat("Ropa"), cardId: null, date: Date.now() });
+    const mes = (await a.call("/month")).data;
+    expect(mes.totalCents).toBe(1500);
+    expect(mes.leftCents).toBe(mes.monthlyBudgetCents - 1500);
+    expect(mes.cards[0]).toMatchObject({ spentCents: 1000, percentOfTotal: 67 });
+    expect(mes.categories.find((c) => c.id === ocio)).toMatchObject({ spentCents: 1000, byCard: [{ cardId: card.id, spentCents: 1000 }] });
+
+    const deTarjeta = (await a.call(`/month?tarjeta=${card.id}`)).data;
+    expect(deTarjeta.charges).toHaveLength(1);
+    expect(deTarjeta.chargesTotalCents).toBe(1000);
+    expect(deTarjeta.totalCents).toBe(1500); // los totales siguen siendo del mes
+    expect((await a.call(`/month?categoria=${a.cat("Ropa")}`)).data.chargesTotalCents).toBe(500);
+  });
+
   it("el presupuesto no admite importes negativos", async () => {
     const a = await cuenta();
     expect((await a.call("/budget", { monthlyBudgetCents: -1, categories: [] })).status).toBe(400);

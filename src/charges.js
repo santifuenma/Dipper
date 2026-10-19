@@ -6,6 +6,57 @@ import { json, readJson } from "./util.js";
 
 const monthKeyFmt = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Madrid", year: "numeric", month: "2-digit" });
 export const monthKey = (ts) => monthKeyFmt.format(ts).slice(0, 7); // "2026-10"
+const dayKeyFmt = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Madrid", year: "numeric", month: "2-digit", day: "2-digit" });
+
+// Días que quedan del mes después de hoy, en hora de Madrid (para "tocan X € al día").
+export function daysLeftInMonth(now = Date.now()) {
+  const [y, mo, d] = dayKeyFmt.format(now).split("-").map(Number);
+  return new Date(Date.UTC(y, mo, 0)).getUTCDate() - d;
+}
+
+const sumBy = (list, key) => {
+  const m = new Map();
+  for (const c of list) if (c[key]) m.set(c[key], (m.get(c[key]) || 0) + c.amountCents);
+  return m;
+};
+
+// Las cifras que enseñan las pantallas, calculadas aquí para que la app (web o nativa) solo las muestre.
+// Los totales son siempre del mes entero; `charges` puede venir filtrada por tarjeta o categoría.
+export function monthSummary({ month, current, charges, cards, categories, monthlyBudgetCents, now = Date.now() }) {
+  const total = charges.reduce((a, c) => a + c.amountCents, 0);
+  const byCard = sumBy(charges, "cardId");
+  const byCat = sumBy(charges, "categoryId");
+  const isCurrent = month === current;
+  const daysLeft = isCurrent ? daysLeftInMonth(now) : 0;
+  return {
+    totalCents: total,
+    // Positivo: lo que queda del presupuesto ("quedan X € de aire"); negativo: lo que se ha pasado.
+    leftCents: monthlyBudgetCents - total,
+    daysLeft,
+    cards: cards.map((k) => {
+      const mine = charges.filter((c) => c.cardId === k.id);
+      return {
+        ...k,
+        spentCents: byCard.get(k.id) || 0,
+        percentOfTotal: total > 0 ? Math.round(((byCard.get(k.id) || 0) / total) * 100) : 0,
+        byCategory: [...sumBy(mine, "categoryId")].map(([categoryId, spentCents]) => ({ categoryId, spentCents })),
+      };
+    }),
+    categories: categories.map((t) => {
+      const spent = byCat.get(t.id) || 0;
+      const left = t.budgetCents - spent;
+      const mine = charges.filter((c) => c.categoryId === t.id);
+      return {
+        ...t,
+        spentCents: spent,
+        leftCents: left,
+        // "Para llegar a fin de mes, tocan unos X € al día": solo en el mes actual, con presupuesto y aire.
+        perDayCents: isCurrent && t.budgetCents > 0 && left > 0 && daysLeft > 0 ? Math.floor(left / daysLeft) : null,
+        byCard: [...sumBy(mine, "cardId")].map(([cardId, spentCents]) => ({ cardId, spentCents })),
+      };
+    }),
+  };
+}
 
 const CHARGE_COLS = `ch.id, ch.amount_cents AS amountCents, ch.merchant_name AS merchant, ch.merchant_raw AS merchantRaw,
   ch.card_id AS cardId, ch.wallet_card AS walletCard, ch.category_id AS categoryId, ch.status, ch.source,
@@ -22,7 +73,7 @@ async function month(env, url, user) {
   )
     .bind(user.id, from, to)
     .all();
-  const charges = results.filter((c) => monthKey(c.occurredAt) === m);
+  const all = results.filter((c) => monthKey(c.occurredAt) === m);
 
   const { results: cards } = await env.DB.prepare(
     "SELECT id, name, last4, wallet_name AS walletName, color FROM cards WHERE user_id = ? ORDER BY id"
@@ -35,7 +86,23 @@ async function month(env, url, user) {
     .bind(user.id)
     .first();
 
-  return json({ month: m, current: monthKey(Date.now()), charges, cards, categories, monthlyBudgetCents: u.b, pendingCount });
+  const current = monthKey(Date.now());
+  const summary = monthSummary({ month: m, current, charges: all, cards, categories, monthlyBudgetCents: u.b });
+
+  // ?tarjeta= o ?categoria= dejan solo esos pagos en la lista (los totales siguen siendo del mes).
+  const cardId = Number(url.searchParams.get("tarjeta")) || null;
+  const categoryId = Number(url.searchParams.get("categoria")) || null;
+  const charges = all.filter((c) => (!cardId || c.cardId === cardId) && (!categoryId || c.categoryId === categoryId));
+
+  return json({
+    month: m,
+    current,
+    charges,
+    chargesTotalCents: charges.reduce((a, c) => a + c.amountCents, 0),
+    monthlyBudgetCents: u.b,
+    pendingCount,
+    ...summary,
+  });
 }
 
 async function getOne(env, user, id) {

@@ -121,8 +121,8 @@ export function renderInicio() {
     layoutCards(true);
   }
 
-  function drawCards(spentByCard) {
-    const sorted = [...data.cards].sort((a, b) => (spentByCard.get(b.id) || 0) - (spentByCard.get(a.id) || 0) || a.id - b.id);
+  function drawCards() {
+    const sorted = [...data.cards].sort((a, b) => b.spentCents - a.spentCents || a.id - b.id);
     cardEls = sorted.map((c, i) => {
       const a = html(`
         <a data-card style="position:absolute;top:0;width:${CARD_W}px;height:100%;scroll-snap-align:start;box-sizing:border-box;padding:14px;border:1.5px solid rgba(27,27,31,.22);border-radius:20px;display:flex;flex-direction:column;justify-content:space-between">
@@ -149,7 +149,7 @@ export function renderInicio() {
       a.style.borderColor = cardBorder(c.color);
       a.querySelector("[data-name]").textContent = c.name;
       a.querySelector("[data-last]").textContent = "···· " + c.last4;
-      a.querySelector("[data-spent]").textContent = eurosInt(spentByCard.get(c.id) || 0) + " €";
+      a.querySelector("[data-spent]").textContent = eurosInt(c.spentCents) + " €";
       a.addEventListener("click", (e) => {
         // Plegadas, el primer toque solo las despliega.
         if (!expanded && sorted.length > 1) {
@@ -180,12 +180,12 @@ export function renderInicio() {
     if (expanded && !e.target.closest("[data-card]")) setExpanded(false);
   });
 
-  function drawTiles(spentByCat) {
+  function drawTiles() {
     const tiles = q("[data-tiles]");
     tiles.style.gridTemplateRows = `repeat(${Math.max(3, Math.ceil(data.categories.length / 2))},minmax(84px,1fr))`;
     tiles.replaceChildren(
       ...data.categories.map((t) => {
-        const spent = spentByCat.get(t.id) || 0;
+        const spent = t.spentCents;
         const over = t.budgetCents > 0 && spent > t.budgetCents;
         const a = html(`
           <a data-press style="display:block;position:relative;overflow:hidden;min-height:0;box-sizing:border-box;border:1.5px solid rgba(27,27,31,.1);border-radius:20px;background:#fff">
@@ -233,20 +233,13 @@ export function renderInicio() {
     next.style.opacity = next.disabled ? ".25" : "1";
     if (!data) return;
 
-    const total = data.charges.reduce((a, c) => a + c.amountCents, 0);
-    const spentByCard = new Map();
-    const spentByCat = new Map();
-    for (const c of data.charges) {
-      if (c.cardId) spentByCard.set(c.cardId, (spentByCard.get(c.cardId) || 0) + c.amountCents);
-      if (c.categoryId) spentByCat.set(c.categoryId, (spentByCat.get(c.categoryId) || 0) + c.amountCents);
-    }
-    const budget = data.monthlyBudgetCents;
-    q("[data-total]").textContent = eurosInt(total);
-    q("[data-sub]").textContent = total <= budget ? `quedan ${eurosInt(budget - total)} € de aire` : `te pasaste ${eurosInt(total - budget)} €`;
-    q("[data-segs]").replaceChildren(...segs(total, budget));
+    // Las cifras vienen calculadas del servidor; aquí solo se ponen en pantalla.
+    q("[data-total]").textContent = eurosInt(data.totalCents);
+    q("[data-sub]").textContent = data.leftCents >= 0 ? `quedan ${eurosInt(data.leftCents)} € de aire` : `te pasaste ${eurosInt(-data.leftCents)} €`;
+    q("[data-segs]").replaceChildren(...segs(data.totalCents, data.monthlyBudgetCents));
     q("[data-pending]").textContent = data.pendingCount ? `${data.pendingCount} por revisar` : "Nada por revisar";
-    drawCards(spentByCard);
-    drawTiles(spentByCat);
+    drawCards();
+    drawTiles();
   }
 
   async function load() {
