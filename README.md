@@ -128,7 +128,7 @@ flowchart TB
 - Todo lo que no empieza por `/api/` lo sirven los *static assets*; el Worker solo atiende la API.
 - `/api/ingest/` se identifica con el enlace personal (`dpr_…`), no con la sesión, porque lo llama Atajos.
 - El resto de `/api/*` exige la cookie de sesión y, en los `POST`, cuerpo `application/json`.
-- El cliente es una SPA con rutas por *hash* (`#/por-revisar`, `#/movimiento?id=…`) definidas en
+- El cliente es una SPA con rutas por *hash* (`#/por-revisar`, `#/pago?id=…`) definidas en
   [`public/js/app.js`](public/js/app.js).
 
 ## Modelo de datos

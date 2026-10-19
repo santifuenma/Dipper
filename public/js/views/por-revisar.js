@@ -6,7 +6,7 @@ import { euros, when } from "../format.js";
 import { cardChips, merchantEditor, penButton, rawLine } from "../components.js";
 
 
-export function renderPendientes() {
+export function renderPorRevisar() {
   // Estado de cada pago: { sel, rem, card, name, editing, draft, done, appliedIds, saving }
   const state = new Map();
   let items = [];

@@ -7,7 +7,7 @@ import { cardChips, merchantEditor, penButton, rawLine } from "../components.js"
 
 const LABEL = "font-size:13px;font-weight:700;color:#5A5470";
 
-export function renderMovimiento(params) {
+export function renderPago(params) {
   const id = Number(params.get("id"));
   const st = { sel: null, original: null, card: null, originalCard: null, categories: [], cards: [], charge: null, confirmDelete: false, name: "", originalName: "", editing: false, merchants: [] };
 

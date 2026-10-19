@@ -20,7 +20,7 @@ function row(icon, color, title, sub) {
   return r;
 }
 
-export function renderHome() {
+export function renderAjustes() {
   const el = html(`
     <div class="screen">
       <div class="topbar">

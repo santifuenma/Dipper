@@ -34,7 +34,7 @@ tabla de [`DISENO.md`](../DISENO.md#iconos) es la lista completa para Swift. Los
 | Reloj | `ver-categoria.js` |
 | Borrar tecla, calendario, tienda, check grande | `nuevo-gasto.js` |
 | Check del paso hecho | `applepay.js` |
-| Categorías, candado (repetido) y Face ID de las filas | `home.js` |
+| Categorías, candado (repetido) y Face ID de las filas | `ajustes.js` |
 
 **Cuándo: Antes.** Pasarlos a `ICON` deja la lista completa de iconos que hay que dibujar (o elegir
 como SF Symbols) en Swift.
@@ -64,7 +64,11 @@ Swift serán una sola vista o estilo:
 **Cuándo: Antes**, por partes y sin cambiar el aspecto. Así cada pieza aparece una vez en
 [`componentes.md`](componentes.md) con su equivalente en SwiftUI.
 
-## 5. Nombres de archivo
+## 5. Nombres de archivo ✅ 19-10-2026
+
+Hecho: cada archivo de `public/js/views/` se llama como su pantalla, y la ruta del Pago pasa a
+`#/pago`. Las piezas comunes de las dos listas de Ajustes (`listScreen`, `swipeList`) están en
+`components.js`. Era así:
 
 | Archivo | Contiene | Propuesta |
 |---|---|---|

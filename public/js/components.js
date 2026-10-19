@@ -44,7 +44,7 @@ export function movementGroups(charges, { cats, cards, mode = "category" }) {
           <span data-amount style="font-size:17px;font-weight:800;white-space:nowrap"></span>
         </a>
       `);
-      row.href = "#/movimiento?id=" + c.id;
+      row.href = "#/pago?id=" + c.id;
       if (i < g.rows.length - 1) row.style.borderBottom = "1px solid rgba(27,27,31,.08)";
       const lead = row.querySelector("[data-lead]");
       const sub = row.querySelector("[data-sub]");
@@ -355,4 +355,32 @@ export function swipeRow(card, { editHref, onDelete, onError }) {
     }
   });
   return row;
+}
+
+// Pantalla de lista de Ajustes (Tarjetas, Categorías): título, filas y recuadro punteado para añadir.
+export function listScreen(title, addHref, addLabel) {
+  return html(`
+    <div class="screen">
+      <div class="topbar">
+        <a href="#/" data-back class="icon-btn" aria-label="Volver">${ICON.back}</a>
+        <span style="font-size:20px;font-weight:800;letter-spacing:-.3px">${title}</span>
+        <span style="width:44px"></span>
+      </div>
+      <div data-list style="margin-top:8px;display:flex;flex-direction:column;gap:10px"></div>
+      <div class="error" role="alert" style="margin-top:10px"></div>
+      <a href="${addHref}" style="margin-top:12px;height:64px;box-sizing:border-box;border:1.5px dashed rgba(27,27,31,.4);border-radius:20px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:700" data-press>
+        ${ICON.plus}
+        ${addLabel}
+      </a>
+    </div>
+  `);
+}
+
+// Filas deslizables: abrir una cierra las demás; tocar fuera de las filas abiertas las cierra.
+export function swipeList(el, list) {
+  const rows = [];
+  const openRows = (except) => rows.filter((r) => r !== except && r.isOpen());
+  list.addEventListener("swipestart", (e) => openRows(e.target).forEach((r) => r.close()));
+  el.addEventListener("click", (e) => openRows(e.target.closest("[data-list] > div")).forEach((r) => r.close()));
+  return rows;
 }

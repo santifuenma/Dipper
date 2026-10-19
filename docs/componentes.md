@@ -111,9 +111,9 @@ El líquido sube al aparecer (900 ms).
 | Pieza | Especificación | Código |
 |---|---|---|
 | **Caja** | Blanca, borde `--line`, radio 24. Base de filas, tarjetas de contenido y paneles. | `.card-box` |
-| **Fila de Ajustes** | Caja con padding 10 12: círculo de 40 del color del apartado con icono de 20, título 16/700, subtítulo 13/500 `--muted`, y al final `ICON.chevron` o una pastilla. | `home.js` |
-| **Caja de cuenta** | Caja con radio 28: tres bolitas de color + nombre 22/800 y correo 14/500. | `home.js` |
-| **Fila de categoría (Ajustes)** | Caja: círculo de 40 con el icono de la categoría, nombre 16/700, `ICON.chevron`. | `listas-provisionales.js` |
+| **Fila de Ajustes** | Caja con padding 10 12: círculo de 40 del color del apartado con icono de 20, título 16/700, subtítulo 13/500 `--muted`, y al final `ICON.chevron` o una pastilla. | `ajustes.js` |
+| **Caja de cuenta** | Caja con radio 28: tres bolitas de color + nombre 22/800 y correo 14/500. | `ajustes.js` |
+| **Fila de categoría (Ajustes)** | Caja: círculo de 40 con el icono de la categoría, nombre 16/700, `ICON.chevron`. | `categorias.js` |
 | **Fila de categoría (Presupuesto)** | Caja con padding 8 10 8 12: círculo de 38 con icono, nombre 16/700, "gastado X €" 13/500 (en `--danger` y 700 si se pasa), contador − importe + (ver *Contador*). | `presupuesto.js` |
 | **Paso numerado** | Caja: círculo de 34 con el número sobre un pastel (hecho: `--ink` con `ICON.check`), título 17/800, texto 14/500, y debajo un botón-pastilla de 38 (blanco; hecho: lima). Opcionalmente un recuadro punteado con el enlace enmascarado. | `applepay.js` |
 

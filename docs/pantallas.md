@@ -38,7 +38,7 @@ flowchart LR
 | [Ver tarjeta](#ver-tarjeta) | `#/ver-tarjeta?id=` | Sí | Normal |
 | [Ver categoría](#ver-categoría) | `#/ver-categoria?id=` | Sí | Normal |
 | [Movimientos](#movimientos) | `#/movimientos?tarjeta=&categoria=` | Sí | Normal, con scroll |
-| [Pago](#pago) | `#/movimiento?id=` | Sí | Normal |
+| [Pago](#pago) | `#/pago?id=` | Sí | Normal |
 | [Por revisar](#por-revisar) | `#/por-revisar` | Sí | Normal, con scroll |
 | [Nuevo gasto](#nuevo-gasto) | `#/nuevo-gasto` | Sí | Sube desde abajo |
 | [Presupuesto](#presupuesto) | `#/presupuesto` | Sí | Normal |
