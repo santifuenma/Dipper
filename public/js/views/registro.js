@@ -1,4 +1,5 @@
 // Pantalla "Crear cuenta" (Registro.dc.html). Sin "Registrarme con Apple".
+import { dots } from "../components.js";
 import { api } from "../api.js";
 import { go, session } from "../app.js";
 import { busy, html, ICON, passwordToggle } from "../dom.js";
@@ -27,9 +28,7 @@ export function renderRegistro() {
       <div class="topbar">
         <a href="#/entrar" data-back class="icon-btn" aria-label="Volver">${ICON.back}</a>
         <span aria-hidden="true" style="display:flex;padding-right:8px">
-          <span class="wig" style="width:22px;height:22px;border-radius:50%;background:#FFC93C;box-shadow:0 0 0 2px #F1EDF9;margin-left:-8px"></span>
-          <span class="wig" style="width:22px;height:22px;border-radius:50%;background:#FFA8D2;box-shadow:0 0 0 2px #F1EDF9;margin-left:-8px;animation-delay:.25s"></span>
-          <span class="wig" style="width:22px;height:22px;border-radius:50%;background:#98EBC6;box-shadow:0 0 0 2px #F1EDF9;margin-left:-8px;animation-delay:.5s"></span>
+          ${dots(22, { ring: "#F1EDF9" })}
         </span>
       </div>
 

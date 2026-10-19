@@ -13,8 +13,8 @@ export function renderMovimientos(params) {
     <div class="screen" style="padding-bottom:0">
       <div class="topbar">
         <a href="#/" data-back class="icon-btn" aria-label="Volver">${ICON.back}</a>
-        <span style="font-size:20px;font-weight:800;letter-spacing:-.3px">Movimientos</span>
-        <span data-month style="font-size:13px;font-weight:700;padding:7px 12px;border-radius:99px;background:#fff;border:1.5px solid rgba(27,27,31,.22)"></span>
+        <span class="title">Movimientos</span>
+        <span data-month class="pill"></span>
       </div>
       <div style="padding:8px 0 max(16px, env(safe-area-inset-bottom))">
         <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin:0 4px">

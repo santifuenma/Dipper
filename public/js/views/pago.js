@@ -5,8 +5,6 @@ import { busy, html, ICON } from "../dom.js";
 import { euros, when } from "../format.js";
 import { cardChips, merchantEditor, penButton, rawLine } from "../components.js";
 
-const LABEL = "font-size:13px;font-weight:700;color:#5A5470";
-
 export function renderPago(params) {
   const id = Number(params.get("id"));
   const st = { sel: null, original: null, card: null, originalCard: null, categories: [], cards: [], charge: null, confirmDelete: false, name: "", originalName: "", editing: false, merchants: [] };
@@ -15,7 +13,7 @@ export function renderPago(params) {
     <div class="screen">
       <div class="topbar">
         <a href="#/" data-back class="icon-btn" aria-label="Volver">${ICON.back}</a>
-        <span style="font-size:20px;font-weight:800;letter-spacing:-.3px">Pago</span>
+        <span class="title">Pago</span>
         <button type="button" data-delete class="round-btn dash" aria-label="Borrar pago" hidden>${ICON.trash}</button>
       </div>
       <div style="flex:1;min-height:0;padding:8px 0 12px">
@@ -26,11 +24,11 @@ export function renderPago(params) {
           <div data-sub style="margin-top:8px;font-size:14px;font-weight:600;color:#5A5470"></div>
         </div>
         <div data-cats-wrap hidden style="margin-top:14px">
-          <div style="${LABEL}">Categoría</div>
+          <div class="label">Categoría</div>
           <div data-cats class="chips-fill" style="margin-top:8px"></div>
         </div>
         <div data-cards-wrap hidden style="margin-top:14px">
-          <div style="${LABEL}">Tarjeta</div>
+          <div class="label">Tarjeta</div>
           <div data-cards class="noscroll" style="display:flex;gap:8px;overflow-x:auto;margin:2px -20px 0;padding:8px 20px"></div>
         </div>
         <div class="error" role="alert" style="margin-top:8px"></div>

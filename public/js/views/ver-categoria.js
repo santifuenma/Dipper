@@ -13,7 +13,7 @@ export function renderVerCategoria(params) {
     <div class="screen" style="padding-bottom:0">
       <div class="topbar">
         <a href="#/" data-back class="icon-btn" aria-label="Volver">${ICON.back}</a>
-        <span data-title style="font-size:20px;font-weight:800;letter-spacing:-.3px"></span>
+        <span data-title class="title"></span>
         <a href="#/categoria?id=${id}" data-press aria-label="Editar categoría" class="round-btn">${ICON.edit}</a>
       </div>
       <div data-body style="padding:8px 0 max(16px, env(safe-area-inset-bottom))"></div>

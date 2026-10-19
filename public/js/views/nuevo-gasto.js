@@ -6,7 +6,6 @@ import { dayLabel } from "../format.js";
 import { categoryIcon } from "../icons.js";
 import { cardChips } from "../components.js";
 
-const LABEL = "font-size:13px;font-weight:700;color:#5A5470;margin-bottom:6px";
 
 export function renderNuevoGasto() {
   const st = { amount: "", cat: null, card: null, date: "hoy", other: null, cats: [], cards: [], saving: false };
@@ -15,7 +14,7 @@ export function renderNuevoGasto() {
     <div class="screen" style="gap:10px">
       <div class="topbar">
         <a href="#/" data-back class="icon-btn" aria-label="Cerrar">${ICON.close}</a>
-        <span style="font-size:20px;font-weight:800;letter-spacing:-.3px">Nuevo gasto</span>
+        <span class="title">Nuevo gasto</span>
         <span style="width:44px"></span>
       </div>
 
@@ -34,17 +33,17 @@ export function renderNuevoGasto() {
       </label>
 
       <div style="flex:none">
-        <div style="${LABEL}">Categoría</div>
+        <div class="label" style="margin-bottom:6px">Categoría</div>
         <div data-cats class="noscroll" style="display:flex;gap:8px;overflow-x:auto;margin:0 -20px;padding:2px 20px"></div>
       </div>
 
       <div style="flex:none">
-        <div style="${LABEL}">Tarjeta</div>
+        <div class="label" style="margin-bottom:6px">Tarjeta</div>
         <div data-cards class="noscroll" style="display:flex;gap:8px;overflow-x:auto;margin:-4px -20px 0;padding:8px 20px"></div>
       </div>
 
       <div style="flex:none">
-        <div style="${LABEL}">Fecha</div>
+        <div class="label" style="margin-bottom:6px">Fecha</div>
         <div data-dates style="display:flex;gap:8px"></div>
       </div>
 

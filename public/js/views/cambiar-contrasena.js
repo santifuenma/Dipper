@@ -12,7 +12,7 @@ export function renderCambiarContrasena() {
     <div class="screen">
       <div class="topbar">
         <a href="#/ajustes" data-back class="icon-btn" aria-label="Volver">${ICON.back}</a>
-        <span style="font-size:20px;font-weight:800;letter-spacing:-.3px">Contraseña</span>
+        <span class="title">Contraseña</span>
         <span style="width:44px"></span>
       </div>
 

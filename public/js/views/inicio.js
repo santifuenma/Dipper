@@ -1,4 +1,5 @@
 // Pantalla "Inicio" (Inicio.dc.html).
+import { dots } from "../components.js";
 import { api } from "../api.js";
 import { session } from "../app.js";
 import { busy, html, ICON, iconSize } from "../dom.js";
@@ -17,7 +18,7 @@ export function renderInicio() {
       <div class="topbar">
         <div style="display:flex;align-items:center;gap:2px">
           <button type="button" data-prev class="icon-btn" aria-label="Mes anterior">${ICON.back}</button>
-          <span data-month style="font-size:20px;font-weight:800;letter-spacing:-.3px"></span>
+          <span data-month class="title"></span>
           <button type="button" data-next class="icon-btn" style="margin-left:0" aria-label="Mes siguiente">${ICON.forward}</button>
         </div>
         <div style="display:flex;gap:8px">
@@ -45,9 +46,7 @@ export function renderInicio() {
       <div style="display:flex;gap:12px;margin-top:12px;flex:none">
         <a href="#/por-revisar" data-press style="flex:1;min-width:0;height:min(64px,7.6dvh);box-sizing:border-box;border:1.5px dashed rgba(27,27,31,.4);border-radius:24px;display:flex;align-items:center;gap:14px;padding:0 16px">
           <span aria-hidden="true" style="display:flex;padding-left:8px">
-            <span class="wig" style="width:24px;height:24px;box-sizing:border-box;border-radius:50%;background:#FFC93C;border:1.5px solid rgba(27,27,31,.4);margin-left:-8px"></span>
-            <span class="wig" style="width:24px;height:24px;box-sizing:border-box;border-radius:50%;background:#CDB6FF;border:1.5px solid rgba(27,27,31,.4);margin-left:-8px;animation-delay:.25s"></span>
-            <span class="wig" style="width:24px;height:24px;box-sizing:border-box;border-radius:50%;background:#98EBC6;border:1.5px solid rgba(27,27,31,.4);margin-left:-8px;animation-delay:.5s"></span>
+            ${dots(24, { outline: true, colors: ["#FFC93C", "#CDB6FF", "#98EBC6"] })}
           </span>
           <span style="display:block;min-width:0">
             <span data-pending style="display:block;font-size:17px;font-weight:800"></span>
@@ -279,9 +278,7 @@ function maybeAskFaceId(screen) {
     <div class="sheet-bg">
       <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="faceid-title">
         <span aria-hidden="true" style="display:flex;padding-left:8px;margin-bottom:14px">
-          <span class="wig" style="width:26px;height:26px;border-radius:50%;background:#FFC93C;box-shadow:0 0 0 2px #fff;margin-left:-8px"></span>
-          <span class="wig" style="width:26px;height:26px;border-radius:50%;background:#FFA8D2;box-shadow:0 0 0 2px #fff;margin-left:-8px;animation-delay:.25s"></span>
-          <span class="wig" style="width:26px;height:26px;border-radius:50%;background:#98EBC6;box-shadow:0 0 0 2px #fff;margin-left:-8px;animation-delay:.5s"></span>
+          ${dots(26)}
         </span>
         <div id="faceid-title" style="font-size:28px;font-weight:800;letter-spacing:-.8px;line-height:1.05">¿Entrar con Face ID la próxima vez?</div>
         <div style="margin-top:8px;font-size:16px;font-weight:500;line-height:1.35;color:#5A5470">Así no tendrás que escribir la contraseña.</div>

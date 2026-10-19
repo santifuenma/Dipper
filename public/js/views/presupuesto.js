@@ -15,8 +15,8 @@ export function renderPresupuesto() {
     <div class="screen">
       <div class="topbar">
         <a href="#/" data-back class="icon-btn" aria-label="Volver">${ICON.back}</a>
-        <span style="font-size:20px;font-weight:800;letter-spacing:-.3px">Presupuesto</span>
-        <span data-month style="font-size:13px;font-weight:700;padding:7px 12px;border-radius:99px;background:#fff;border:1.5px solid rgba(27,27,31,.22)"></span>
+        <span class="title">Presupuesto</span>
+        <span data-month class="pill"></span>
       </div>
 
       <div style="flex:none;margin-top:8px" class="card-box" data-total-card>
@@ -73,7 +73,7 @@ export function renderPresupuesto() {
   function rowFor(c) {
     const r = html(`
       <div class="card-box" style="padding:8px 10px 8px 12px;display:flex;align-items:center;gap:10px">
-        <span data-ic style="flex:none;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center"></span>
+        <span data-ic class="ic-circle" style="width:38px;height:38px"></span>
         <span style="flex:1;min-width:0">
           <span data-name style="display:block;font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>
           <span data-spent style="display:block;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>

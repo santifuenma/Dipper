@@ -12,7 +12,7 @@ export function renderCategoriaForm(params) {
     <div class="screen">
       <div class="topbar">
         <a href="#/" data-back class="icon-btn" aria-label="Volver">${ICON.back}</a>
-        <span style="font-size:20px;font-weight:800;letter-spacing:-.3px">${id ? "Editar categoría" : "Nueva categoría"}</span>
+        <span class="title">${id ? "Editar categoría" : "Nueva categoría"}</span>
         ${id ? `<button type="button" data-delete class="round-btn dash" aria-label="Borrar categoría">${ICON.trash}</button>` : `<span style="width:44px"></span>`}
       </div>
 
@@ -28,15 +28,15 @@ export function renderCategoriaForm(params) {
         <div data-delete-hint class="hint-danger" style="margin-top:10px"></div>
         <form novalidate style="margin-top:12px;display:flex;flex-direction:column;gap:12px">
           <label style="display:block">
-            <span style="display:block;font-size:13px;font-weight:700;color:#5A5470;margin-bottom:6px">Nombre</span>
-            <input name="name" type="text" maxlength="24" placeholder="Súper" style="width:100%;height:48px;box-sizing:border-box;padding:0 16px;border:1.5px solid rgba(27,27,31,.22);border-radius:16px;background:#fff;font-size:17px;font-weight:600;color:#1B1B1F">
+            <span class="label" style="margin-bottom:6px">Nombre</span>
+            <input name="name" type="text" maxlength="24" placeholder="Súper" class="input">
           </label>
           <div>
-            <div style="font-size:13px;font-weight:700;color:#5A5470;margin-bottom:8px">Icono</div>
+            <div class="label" style="margin-bottom:8px">Icono</div>
             <div data-icons style="display:flex;gap:10px;flex-wrap:wrap"></div>
           </div>
           <div>
-            <div style="font-size:13px;font-weight:700;color:#5A5470;margin-bottom:8px">Color</div>
+            <div class="label" style="margin-bottom:8px">Color</div>
             <div data-swatches style="display:flex;gap:10px;flex-wrap:wrap"></div>
           </div>
           <div class="error" role="alert"></div>

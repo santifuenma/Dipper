@@ -1,4 +1,5 @@
 // Pantalla "Ajustes" (nueva, acordada; estilo del zip): cuenta, categorías, Apple Pay, Face ID y salir.
+import { dots } from "../components.js";
 import { api } from "../api.js";
 import { go, session } from "../app.js";
 import { busy, html, ICON } from "../dom.js";
@@ -7,7 +8,7 @@ import { enableFaceId, faceIdEnabledHere, faceIdError, passkeySupported } from "
 function row(icon, color, title, sub) {
   const r = html(`
     <a data-press class="card-box" style="padding:10px 12px;display:flex;align-items:center;gap:12px">
-      <span style="flex:none;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${color}">${icon}</span>
+      <span class="ic-circle" style="background:${color}">${icon}</span>
       <span style="flex:1;min-width:0">
         <span data-title style="display:block;font-size:16px;font-weight:700"></span>
         <span data-sub style="display:block;font-size:13px;font-weight:500;color:#5A5470"></span>
@@ -25,16 +26,14 @@ export function renderAjustes() {
     <div class="screen">
       <div class="topbar">
         <a href="#/" data-back class="icon-btn" aria-label="Volver">${ICON.back}</a>
-        <span style="font-size:20px;font-weight:800;letter-spacing:-.3px">Ajustes</span>
+        <span class="title">Ajustes</span>
         <span style="width:44px"></span>
       </div>
 
       <div style="flex:1;min-height:0;padding-top:8px;display:flex;flex-direction:column;gap:10px">
         <div class="card-box" style="border-radius:28px;padding:16px 18px;display:flex;align-items:center;gap:14px">
           <span aria-hidden="true" style="display:flex;padding-left:8px;flex:none">
-            <span class="wig" style="width:26px;height:26px;border-radius:50%;background:#FFC93C;box-shadow:0 0 0 2px #fff;margin-left:-8px"></span>
-            <span class="wig" style="width:26px;height:26px;border-radius:50%;background:#FFA8D2;box-shadow:0 0 0 2px #fff;margin-left:-8px;animation-delay:.25s"></span>
-            <span class="wig" style="width:26px;height:26px;border-radius:50%;background:#98EBC6;box-shadow:0 0 0 2px #fff;margin-left:-8px;animation-delay:.5s"></span>
+            ${dots(26)}
           </span>
           <span style="min-width:0">
             <span data-name style="display:block;font-size:22px;font-weight:800;letter-spacing:-.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>

@@ -3,7 +3,7 @@ import { api } from "../api.js";
 import { go } from "../app.js";
 import { html, ICON, iconSize } from "../dom.js";
 import { euros, when } from "../format.js";
-import { cardChips, merchantEditor, penButton, rawLine } from "../components.js";
+import { cardChips, dots, merchantEditor, penButton, rawLine } from "../components.js";
 
 
 export function renderPorRevisar() {
@@ -18,7 +18,7 @@ export function renderPorRevisar() {
     <div class="screen" style="padding-bottom:0">
       <div class="topbar">
         <a href="#/" data-back class="icon-btn" aria-label="Volver">${ICON.back}</a>
-        <span style="font-size:20px;font-weight:800;letter-spacing:-.3px">Por revisar</span>
+        <span class="title">Por revisar</span>
         <span data-count style="min-width:44px;height:32px;box-sizing:border-box;padding:0 12px;border-radius:99px;background:#1B1B1F;color:#fff;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center">·</span>
       </div>
       <div style="flex:1;min-height:0;padding:10px 0 max(24px, env(safe-area-inset-bottom))">
@@ -44,11 +44,11 @@ export function renderPorRevisar() {
           <span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Tarjeta nueva · Guardarla en Dipper</span>
         </a>
         <div data-cardpick hidden style="padding:0 16px 10px">
-          <div style="font-size:13px;font-weight:700;color:#5A5470">Tienes varias tarjetas con este nombre. ¿Con cuál pagaste?</div>
+          <div class="label">Tienes varias tarjetas con este nombre. ¿Con cuál pagaste?</div>
           <div data-cardchips class="noscroll" style="display:flex;gap:8px;overflow-x:auto;margin:2px -16px 0;padding:8px 16px"></div>
         </div>
         <div style="padding:12px 16px 14px;border-top:1.5px solid rgba(27,27,31,.1);background:var(--surface-2)">
-          <div data-hint style="font-size:13px;font-weight:700;color:#5A5470"></div>
+          <div data-hint class="label"></div>
           <div data-cats class="chips-fill" style="margin-top:10px"></div>
         </div>
         <div data-foot style="padding:10px 16px 16px;border-top:1.5px solid rgba(27,27,31,.1)">
@@ -75,7 +75,7 @@ export function renderPorRevisar() {
       // Cambiando el nombre: campo con "Listo" y las fichas de tus comercios.
       const top = html(`
         <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">
-          <div style="font-size:13px;font-weight:700;color:#5A5470">Nombre del comercio</div>
+          <div class="label">Nombre del comercio</div>
           <div data-amount style="font-size:26px;font-weight:800;letter-spacing:-.6px;white-space:nowrap"></div>
         </div>
       `);
@@ -222,9 +222,7 @@ export function renderPorRevisar() {
       <div style="margin-top:10px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:20px 10px">
         <div class="stick" style="width:120px;height:120px;border-radius:40px;border:1.5px solid rgba(27,27,31,.22);background:#fff;display:flex;align-items:center;justify-content:center;margin-bottom:8px">
           <span aria-hidden="true" style="display:flex;padding-left:8px">
-            <span class="wig" style="width:28px;height:28px;border-radius:50%;background:#FFC93C;box-shadow:0 0 0 2px #fff;margin-left:-8px"></span>
-            <span class="wig" style="width:28px;height:28px;border-radius:50%;background:#FFA8D2;box-shadow:0 0 0 2px #fff;margin-left:-8px;animation-delay:.25s"></span>
-            <span class="wig" style="width:28px;height:28px;border-radius:50%;background:#98EBC6;box-shadow:0 0 0 2px #fff;margin-left:-8px;animation-delay:.5s"></span>
+            ${dots(28)}
           </span>
         </div>
         <div style="font-size:28px;font-weight:800;letter-spacing:-.6px">Todo al día</div>

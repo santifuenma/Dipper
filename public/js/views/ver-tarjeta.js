@@ -13,7 +13,7 @@ export function renderVerTarjeta(params) {
     <div class="screen" style="padding-bottom:0">
       <div class="topbar">
         <a href="#/" data-back class="icon-btn" aria-label="Volver">${ICON.back}</a>
-        <span style="font-size:20px;font-weight:800;letter-spacing:-.3px">Tarjeta</span>
+        <span class="title">Tarjeta</span>
         <a href="#/tarjeta?id=${id}" data-press aria-label="Editar tarjeta" class="round-btn">${ICON.edit}</a>
       </div>
       <div data-body style="padding:8px 0 max(16px, env(safe-area-inset-bottom))"></div>

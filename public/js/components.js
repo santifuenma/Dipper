@@ -25,7 +25,7 @@ export function movementGroups(charges, { cats, cards, mode = "category" }) {
   for (const g of groupByDay(charges)) {
     const group = html(`
       <div style="margin-top:10px">
-        <div data-label style="font-size:13px;font-weight:700;color:#5A5470;margin:0 0 6px 4px"></div>
+        <div data-label class="label" style="margin:0 0 6px 4px"></div>
         <div data-rows style="border:1.5px solid rgba(27,27,31,.22);border-radius:20px;background:#fff;overflow:hidden"></div>
       </div>
     `);
@@ -49,7 +49,8 @@ export function movementGroups(charges, { cats, cards, mode = "category" }) {
       const lead = row.querySelector("[data-lead]");
       const sub = row.querySelector("[data-sub]");
       if (mode === "category") {
-        lead.style.cssText = "flex:none;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-sizing:border-box";
+        lead.className = "ic-circle";
+        lead.style.boxSizing = "border-box";
         if (cat) {
           lead.style.background = cat.color;
           lead.innerHTML = categoryIcon(cat.icon, 20);
@@ -175,7 +176,7 @@ export function merchantEditor({ value, raw, merchants, categories, max = 8, not
       </form>
       <div data-raw></div>
       <div data-note style="margin-top:4px;font-size:12px;font-weight:600;color:#5A5470"></div>
-      <div data-label style="font-size:13px;font-weight:700;color:#5A5470;margin-top:12px">Tus comercios</div>
+      <div data-label class="label" style="margin-top:12px">Tus comercios</div>
       <div data-chips style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"></div>
     </div>
   `);
@@ -363,7 +364,7 @@ export function listScreen(title, addHref, addLabel) {
     <div class="screen">
       <div class="topbar">
         <a href="#/" data-back class="icon-btn" aria-label="Volver">${ICON.back}</a>
-        <span style="font-size:20px;font-weight:800;letter-spacing:-.3px">${title}</span>
+        <span class="title">${title}</span>
         <span style="width:44px"></span>
       </div>
       <div data-list style="margin-top:8px;display:flex;flex-direction:column;gap:10px"></div>
@@ -383,4 +384,16 @@ export function swipeList(el, list) {
   list.addEventListener("swipestart", (e) => openRows(e.target).forEach((r) => r.close()));
   el.addEventListener("click", (e) => openRows(e.target.closest("[data-list] > div")).forEach((r) => r.close()));
   return rows;
+}
+
+// Tres bolitas de color que suben y bajan: la "firma" de Dipper (cuenta, registro, éxito, Por revisar).
+// ring: anillo del color del fondo que las separa; outline: borde fino en lugar de anillo (recuadro del Inicio).
+export function dots(size, { ring = "#fff", outline = false, colors = ["#FFC93C", "#FFA8D2", "#98EBC6"] } = {}) {
+  const edge = outline ? "box-sizing:border-box;border:1.5px solid rgba(27,27,31,.4)" : `box-shadow:0 0 0 2px ${ring}`;
+  return colors
+    .map(
+      (c, i) =>
+        `<span class="wig" style="width:${size}px;height:${size}px;border-radius:50%;background:${c};${edge};margin-left:-8px${i ? `;animation-delay:${i * 0.25}s` : ""}"></span>`
+    )
+    .join("");
 }

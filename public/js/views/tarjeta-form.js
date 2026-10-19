@@ -14,7 +14,7 @@ export function renderTarjetaForm(params) {
     <div class="screen">
       <div class="topbar">
         <a href="#/" data-back class="icon-btn" aria-label="Volver">${ICON.back}</a>
-        <span style="font-size:20px;font-weight:800;letter-spacing:-.3px">${id ? "Editar tarjeta" : "Nueva tarjeta"}</span>
+        <span class="title">${id ? "Editar tarjeta" : "Nueva tarjeta"}</span>
         ${id ? `<button type="button" data-delete class="round-btn dash" aria-label="Borrar tarjeta">${ICON.trash}</button>` : `<span style="width:44px"></span>`}
       </div>
 
@@ -38,26 +38,26 @@ export function renderTarjetaForm(params) {
         <div data-del-hint class="hint-danger" style="margin-top:10px"></div>
         <form novalidate style="margin-top:12px;display:flex;flex-direction:column;gap:10px">
           <label style="display:block">
-            <span style="display:block;font-size:13px;font-weight:700;color:#5A5470;margin-bottom:6px">Nombre</span>
-            <input name="name" type="text" maxlength="22" placeholder="Día a día" style="width:100%;height:48px;box-sizing:border-box;padding:0 16px;border:1.5px solid rgba(27,27,31,.22);border-radius:16px;background:#fff;font-size:17px;font-weight:600;color:#1B1B1F">
+            <span class="label" style="margin-bottom:6px">Nombre</span>
+            <input name="name" type="text" maxlength="22" placeholder="Día a día" class="input">
           </label>
           <label style="display:block">
-            <span style="display:block;font-size:13px;font-weight:700;color:#5A5470;margin-bottom:6px">Últimos 4 dígitos</span>
-            <input name="last4" type="text" inputmode="numeric" maxlength="4" placeholder="4821" style="width:100%;height:48px;box-sizing:border-box;padding:0 16px;border:1.5px solid rgba(27,27,31,.22);border-radius:16px;background:#fff;font-size:17px;font-weight:600;letter-spacing:3px;color:#1B1B1F">
+            <span class="label" style="margin-bottom:6px">Últimos 4 dígitos</span>
+            <input name="last4" type="text" inputmode="numeric" maxlength="4" placeholder="4821" class="input" style="letter-spacing:3px">
             <span style="display:block;margin-top:6px;font-size:13px;font-weight:500;color:#5A5470">Solo guardamos los 4 últimos. Nunca el número completo.</span>
           </label>
           <label style="display:block">
-            <span style="display:block;font-size:13px;font-weight:700;color:#5A5470;margin-bottom:6px">Nombre en Wallet</span>
-            <input name="walletName" type="text" placeholder="Como aparece en Apple Wallet" style="width:100%;height:48px;box-sizing:border-box;padding:0 16px;border:1.5px solid rgba(27,27,31,.22);border-radius:16px;background:#fff;font-size:17px;font-weight:600;color:#1B1B1F">
+            <span class="label" style="margin-bottom:6px">Nombre en Wallet</span>
+            <input name="walletName" type="text" placeholder="Como aparece en Apple Wallet" class="input">
             <span style="display:block;margin-top:6px;font-size:13px;font-weight:500;color:#5A5470">Así reconocemos la tarjeta cuando llega un pago de Apple Pay.</span>
           </label>
           <div data-seen hidden>
-            <div style="font-size:13px;font-weight:700;color:#5A5470;margin-bottom:8px">Llegaron en tus pagos</div>
+            <div class="label" style="margin-bottom:8px">Llegaron en tus pagos</div>
             <div data-seen-chips style="display:flex;flex-wrap:wrap;gap:8px"></div>
           </div>
 
           <div>
-            <div style="font-size:13px;font-weight:700;color:#5A5470;margin-bottom:8px">Color</div>
+            <div class="label" style="margin-bottom:8px">Color</div>
             <div data-swatches style="display:flex;gap:10px;flex-wrap:wrap"></div>
           </div>
           <div class="error" role="alert"></div>

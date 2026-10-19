@@ -15,7 +15,7 @@ export function renderCategorias() {
       rows.push(...categories.map((c) => {
         const a = html(`
           <a data-press class="card-box" style="padding:10px 12px;display:flex;align-items:center;gap:12px">
-            <span data-ic style="flex:none;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center"></span>
+            <span data-ic class="ic-circle"></span>
             <span data-name style="flex:1;min-width:0;font-size:16px;font-weight:700"></span>
             <span style="flex:none;display:flex">${ICON.chevron}</span>
           </a>
