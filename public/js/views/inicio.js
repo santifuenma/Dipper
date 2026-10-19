@@ -41,7 +41,7 @@ export function renderInicio() {
         <div data-track style="position:relative;height:min(120px,14dvh)"></div>
       </div>
 
-      <div data-tiles style="margin-top:12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;flex:1 1 0;min-height:0"></div>
+      <div data-tiles style="margin-top:12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;flex:1 1 0;min-height:0"></div>
 
       <div style="display:flex;gap:12px;margin-top:12px;flex:none">
         <a href="#/por-revisar" data-press style="flex:1;min-width:0;height:min(64px,7.6dvh);box-sizing:border-box;border:1.5px dashed rgba(27,27,31,.4);border-radius:24px;display:flex;align-items:center;gap:14px;padding:0 16px">
@@ -183,7 +183,7 @@ export function renderInicio() {
         const a = html(`
           <a data-press style="display:block;position:relative;overflow:hidden;min-height:0;box-sizing:border-box;border:1.5px solid rgba(27,27,31,.1);border-radius:20px;background:#fff">
             <div data-fill class="fill"></div>
-            <div style="position:relative;z-index:2;height:100%;box-sizing:border-box;padding:10px 12px;display:flex;flex-direction:column;justify-content:space-between">
+            <div style="position:relative;z-index:2;height:100%;box-sizing:border-box;padding:8px 10px;display:flex;flex-direction:column;justify-content:space-between">
               <div style="display:flex;align-items:flex-start;gap:6px">
                 <div data-name style="flex:1;min-width:0;font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
                 <span data-over hidden style="flex:none;font-size:12px;font-weight:800;padding:3px 8px;border-radius:99px;background:#1B1B1F;color:#FFC2A1"></span>
