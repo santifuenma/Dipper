@@ -194,6 +194,7 @@ export function renderInicio() {
                   <span data-amount style="font-size:25px;font-weight:800;letter-spacing:-.6px;line-height:1.1"></span>
                   <span data-of style="font-size:13px;font-weight:600;opacity:.75"></span>
                 </div>
+                <div data-left hidden style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
               </div>
             </div>
           </a>
@@ -208,6 +209,13 @@ export function renderInicio() {
         a.querySelector("[data-name]").textContent = t.name;
         a.querySelector("[data-amount]").textContent = eurosInt(spent) + " €";
         a.querySelector("[data-of]").textContent = t.budgetCents > 0 ? "de " + eurosInt(t.budgetCents) : "";
+        // Lo que queda (calculado en el servidor): "Quedan 22 €" o, si se ha llegado o pasado, "Sin margen".
+        // Con menos de 0,50 € el redondeo daría "Quedan 0 €": también es "Sin margen".
+        if (t.budgetCents > 0) {
+          const left = a.querySelector("[data-left]");
+          left.hidden = false;
+          left.textContent = t.leftCents >= 50 ? `Quedan ${eurosInt(t.leftCents)} €` : "Sin margen";
+        }
         if (over) {
           const pill = a.querySelector("[data-over]");
           pill.hidden = false;
