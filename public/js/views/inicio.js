@@ -184,12 +184,12 @@ export function renderInicio() {
           <a data-press style="display:block;position:relative;overflow:hidden;min-height:0;box-sizing:border-box;border:1.5px solid rgba(27,27,31,.1);border-radius:20px;background:#fff">
             <div data-fill class="fill"></div>
             <div style="position:relative;z-index:2;height:100%;box-sizing:border-box;padding:8px 10px;display:flex;flex-direction:column;justify-content:space-between">
-              <div style="display:flex;align-items:flex-start;gap:6px">
-                <div data-name style="flex:1;min-width:0;font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+              <div data-top style="display:flex;align-items:flex-start;gap:6px">
+                <div data-name class="halo" style="flex:1;min-width:0;font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
                 <span data-over hidden style="flex:none;font-size:12px;font-weight:800;padding:3px 8px;border-radius:99px;background:#1B1B1F;color:#FFC2A1"></span>
                 <span data-ic class="ic-circle" style="width:32px;height:32px"></span>
               </div>
-              <div data-bottom>
+              <div data-bottom class="halo">
                 <div style="display:flex;align-items:baseline;gap:5px">
                   <span data-amount style="font-size:25px;font-weight:800;letter-spacing:-.6px;line-height:1.1"></span>
                   <span data-of style="font-size:13px;font-weight:600;color:var(--muted)"></span>
@@ -229,38 +229,29 @@ export function renderInicio() {
       })
     );
     tiles.resetOrder();
-    keepWavesOffText(tiles);
+    placeEmptyWave(tiles);
   }
 
-  // El borde del líquido (con su ola) nunca cae sobre el importe ni sobre "Quedan…": si caería en ese
-  // bloque, sube justo por encima o baja a la franja de debajo del texto, lo que quede más cerca; así
-  // siempre se ve la ola, también sin gasto. Las cifras exactas ya las dice el texto.
+  // El líquido marca exactamente lo gastado; el texto lleva un halo (.halo) para leerse aunque la ola
+  // pase por detrás. Sin gasto, la ola queda en la franja de debajo de "Quedan…" para que se vea.
   // Hace falta el tamaño real del recuadro, así que espera a que esté en pantalla.
-  function keepWavesOffText(tiles, tries = 0) {
+  function placeEmptyWave(tiles, tries = 0) {
     const first = tiles.firstElementChild;
     if (!first || !first.isConnected || !first.clientHeight) {
-      if (tries < 40) setTimeout(() => keepWavesOffText(tiles, tries + 1), 25);
+      if (tries < 40) setTimeout(() => placeEmptyWave(tiles, tries + 1), 25);
       return;
     }
     for (const a of tiles.children) {
+      if (Number(a.dataset.pct) > 0) continue;
       const fill = a.querySelector("[data-fill]");
-      const pct = Number(a.dataset.pct);
-      const h = a.clientHeight;
       const box = a.getBoundingClientRect();
       const text = a.querySelector("[data-bottom]").getBoundingClientRect();
-      const zone = box.bottom - text.top + 3; // alto del bloque de texto de abajo, con 3 px de aire
-      const under = box.bottom - text.bottom - 10; // la ola (10 px) cabe en la franja de debajo del texto
-      const edge = (pct / 100) * h;
-      fill.style.bottom = "";
-      if (pct >= 100 || edge >= zone) fill.style.height = pct + "%";
-      else if (edge >= zone / 2) fill.style.height = zone + "px";
-      else if (under >= 0) fill.style.height = under + "px";
-      else {
-        fill.style.height = "0px";
-        fill.style.bottom = under + "px";
-      }
+      const under = box.bottom - text.bottom - 10; // la ola (10 px) cabe bajo "Quedan…"
+      fill.style.height = Math.max(0, under) + "px";
+      fill.style.bottom = Math.min(0, under) + "px";
     }
   }
+
 
   // Mantener pulsada una categoría y arrastrarla cambia el orden en toda la app.
   makeReorderable(q("[data-tiles]"), {

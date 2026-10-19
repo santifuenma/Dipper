@@ -169,6 +169,8 @@ input:focus { outline: 2px solid var(--ink); outline-offset: 1px; }
 .label { display: block; font-size: 13px; font-weight: 700; color: var(--muted); }
 .pill { font-size: 13px; font-weight: 700; padding: 7px 12px; border-radius: 99px; background: #fff; border: 1.5px solid var(--line); }
 .ic-circle { flex: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+/* Texto sobre el líquido de las categorías: halo del fondo para leerse aunque pase la ola por detrás */
+.halo { text-shadow: 0 0 1px #fff, 0 0 2px #fff, 0 0 3px #fff; }
 .input { width: 100%; height: 48px; box-sizing: border-box; padding: 0 16px; border: 1.5px solid var(--line); border-radius: 16px; background: #fff; font-size: 17px; font-weight: 600; color: var(--ink); }
 
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
