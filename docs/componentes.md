@@ -142,7 +142,7 @@ El líquido sube al aparecer (900 ms).
 | **Barra de 20 segmentos** | 20 segmentos iguales de alto 14, hueco 3, radio 4. Encendidos en `--ink` (o `#FF6B4A` si se supera, en Presupuesto), apagados al 14 %. Encendidos = gastado (o asignado) ÷ presupuesto × 20. | Inicio, Presupuesto |
 | **Fuerza de contraseña** | 4 segmentos de alto 8 y un texto 13/600 `--muted`. Puntos: ≥ 8 caracteres, un número, una mayúscula, ≥ 12 caracteres. Colores por nivel: `#FF6B4A`, `#FFC93C`, `#98EBC6`, `#CDF56B`. | `registro.js` |
 | **Interruptor** | Pista de 44×26 con borde `--line`, bolita de 18 en `--ink` que salta con rebote. Encendido: pista lima. Texto 14/700 a la derecha. | Por revisar |
-| **Contador ± (Presupuesto)** | Botones redondos con fondo `--bg`: 48 para el total (paso 50 €) y 38 para cada categoría (paso 10 €), con − y + de trazo 2,6. Importe en el centro. Nunca baja de 0. | `presupuesto.js` |
+| **Contador ± (Presupuesto)** | Botones redondos con fondo `--bg`: 48 para el total (paso 50 €) y 38 para cada categoría (paso 10 €), con − y + de trazo 2,6. Importe en el centro. Nunca baja de 0. **Tocar el importe** abre la *hoja de importe*: título (con el icono de la categoría si es una), importe grande "al mes" vacío, teclado sin decimales y **Listo**; lo escrito sustituye al importe y sin escribir nada no cambia. | `presupuesto.js` |
 
 ## Hojas y avisos
 
@@ -159,8 +159,8 @@ El líquido sube al aparecer (900 ms).
 
 | Pieza | Especificación | Código |
 |---|---|---|
-| **Importe grande** | "importe" 14/600 `--muted`, número `min(72, 8,6 %)`/800 con interletra −3 (gris al 28 % si está vacío), cursor parpadeante de 4 de ancho y "€" 34/700. | Nuevo gasto |
-| **Teclado numérico** | Rejilla 3×4 con hueco 8 que ocupa el alto libre (mínimo 150): 1–9, coma, 0 y borrar. Teclas blancas, radio 16, borde `--line`, 22/700. Máximo 7 cifras y 2 decimales; un solo separador. | Nuevo gasto |
+| **Importe grande** | "importe" 14/600 `--muted`, número `min(72, 8,6 %)`/800 con interletra −3 (gris al 28 % si está vacío), cursor parpadeante de 4 de ancho y "€" 34/700. | `bigAmount(etiqueta)`: Nuevo gasto y hoja de Presupuesto |
+| **Teclado numérico** | Rejilla 3×4 con hueco 8 que ocupa el alto libre (mínimo 150): 1–9, coma, 0 y borrar. Teclas blancas, radio 16, borde `--line`, 22/700. Máximo 7 caracteres y 2 decimales; un solo separador. **Sin decimales** (Presupuesto): sin coma, el hueco queda vacío, y máximo 6 cifras. | `keypad({ decimals, maxLength })`: Nuevo gasto y hoja de Presupuesto |
 | **Selectores de icono y color** | Círculos de 44 en fila con salto de línea, hueco 10. Elegido: escala 1,1 y anillo de 3 en `--bg` + 2 en `--ink`. Los colores de tarjeta son los 6 de `CARD_COLORS`; los de categoría, los 6 de `CATEGORY_COLORS`. | Formularios |
 
 ## Decoración

@@ -176,6 +176,10 @@ Movimientos y Presupuesto.
   total; en tomate si se pasa) y pastilla "350 € sin asignar" / "Todo asignado" / "Te pasas 40 € del
   total"; "Por categoría · de 10 en 10 €" con una fila por categoría (con scroll propio); nota "Los
   meses siguientes copian este reparto."; botón **Guardar presupuesto**.
+- **Escribir un importe**: tocar el total o el importe de una categoría abre una hoja con el título
+  (y el icono de la categoría), el importe grande "al mes" vacío, el teclado de Nuevo gasto sin
+  decimales (máximo 6 cifras) y **Listo**. Lo escrito sustituye al importe; tocar fuera o Listo sin
+  escribir no cambia nada. Se guarda, como siempre, con **Guardar presupuesto**.
 - **Reglas**: el presupuesto vale para todos los meses; nada baja de 0.
 - **API**: `GET /api/month`, `POST /api/budget`.
 
