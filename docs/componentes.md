@@ -23,12 +23,14 @@ token de [`DISENO.md`](../DISENO.md). La columna **Código** dice dónde vive ho
 
 ---
 
+Etiquetas de sección (13/700 `--muted`): clase `.label`.
+
 ## Estructura de pantalla
 
 | Pieza | Especificación | Código |
 |---|---|---|
 | **Pantalla** | Fondo `--bg`. Márgenes laterales 20. Arriba: zona segura. Abajo: `max(16, zona segura)`. Columna flexible. **Sin scroll** salvo Por revisar, Movimientos y la lista de Presupuesto: lo que no cabe se recorta (ver *Lista de movimientos*). Ancho máximo 480. | `.screen` |
-| **Barra superior** | Alto 44. Tres huecos: izquierda (volver/cerrar), título **centrado en la pantalla** (20/800, interletra −0,3) y derecha (botón redondo de 44, pastilla o hueco vacío de 44). | `.topbar` |
+| **Barra superior** | Alto 44. Tres huecos: izquierda (volver/cerrar), título **centrado en la pantalla** (20/800, interletra −0,3) y derecha (botón redondo de 44, pastilla o hueco vacío de 44). | `.topbar`, título `.title` |
 | **Botón volver / cerrar** | 44×44 sin fondo, desplazado −12 a la izquierda para alinear el icono. `ICON.back` (22, trazo 2,6) o `ICON.close` (24) en pantallas que suben desde abajo. Vuelve a la pantalla anterior; si no hay, a la indicada. | `.icon-btn` + `data-back` |
 | **Navegación** | Avanzar: la nueva entra desde la derecha y la de debajo se desplaza −30 % y se oscurece al 92 %. Volver: al revés. Pantallas *sheet*: suben desde abajo y la de debajo se encoge al 94 %. Entrar o salir de la cuenta: fundido. 420 ms, curva `cubic-bezier(.32,.72,0,1)`. Gesto de volver desde el borde izquierdo (24 px): se completa al pasar el 35 % o con velocidad. | `nav.js` |
 
@@ -48,7 +50,7 @@ token de [`DISENO.md`](../DISENO.md). La columna **Código** dice dónde vive ho
 | Pieza | Especificación | Código |
 |---|---|---|
 | **Campo con icono** | Alto 54, radio 16, blanco, borde `--line`. Icono de 20 en `--muted` a la izquierda, texto 17/600, placeholder en `--faint`. Con el foco: contorno de 2 en `--ink`. Variante con botón "Mostrar/Ocultar" a la derecha para contraseñas. | `.field`, `.field.has-btn` |
-| **Campo con etiqueta** | Etiqueta 13/700 `--muted` encima (margen 6), campo de 48 de alto, radio 16, y opcionalmente una ayuda debajo (13/500 `--muted`). Usado en los formularios de tarjeta y categoría. | `tarjeta-form.js`, `categoria-form.js` |
+| **Campo con etiqueta** | Etiqueta 13/700 `--muted` encima (margen 6), campo de 48 de alto, radio 16, y opcionalmente una ayuda debajo (13/500 `--muted`). Usado en los formularios de tarjeta y categoría. | `.label` + `.input` |
 
 ## Fichas
 
@@ -66,7 +68,7 @@ Etiquetas redondeadas (radio 99) que informan o cambian de estado. No son fichas
 
 | Uso | Especificación |
 |---|---|
-| Mes (Movimientos, Presupuesto) | 13/700, padding 7 12, blanca con borde `--line` |
+| Mes (Movimientos, Presupuesto) | 13/700, padding 7 12, blanca con borde `--line` (`.pill`) |
 | Gasto de la tarjeta (abanico del Inicio) | 15/800, padding 4 10, blanca; en el abanico plegado solo la de delante |
 | Pasado de presupuesto (recuadro de categoría) | 12/800, fondo `--ink`, texto `#FFC2A1`: "+23 €" |
 | "quedan X €" (detalle de categoría) | 14/700, fondo `--ink`, texto blanco |
@@ -111,7 +113,7 @@ El líquido sube al aparecer (900 ms).
 | Pieza | Especificación | Código |
 |---|---|---|
 | **Caja** | Blanca, borde `--line`, radio 24. Base de filas, tarjetas de contenido y paneles. | `.card-box` |
-| **Fila de Ajustes** | Caja con padding 10 12: círculo de 40 del color del apartado con icono de 20, título 16/700, subtítulo 13/500 `--muted`, y al final `ICON.chevron` o una pastilla. | `ajustes.js` |
+| **Fila de Ajustes** | Caja con padding 10 12: círculo de 40 del color del apartado con icono de 20, título 16/700, subtítulo 13/500 `--muted`, y al final `ICON.chevron` o una pastilla. | `ajustes.js`, círculo `.ic-circle` |
 | **Caja de cuenta** | Caja con radio 28: tres bolitas de color + nombre 22/800 y correo 14/500. | `ajustes.js` |
 | **Fila de categoría (Ajustes)** | Caja: círculo de 40 con el icono de la categoría, nombre 16/700, `ICON.chevron`. | `categorias.js` |
 | **Fila de categoría (Presupuesto)** | Caja con padding 8 10 8 12: círculo de 38 con icono, nombre 16/700, "gastado X €" 13/500 (en `--danger` y 700 si se pasa), contador − importe + (ver *Contador*). | `presupuesto.js` |
@@ -165,7 +167,7 @@ El líquido sube al aparecer (900 ms).
 
 | Pieza | Especificación |
 |---|---|
-| **Bolitas** | Tres círculos solapados (−8) amarillo `#FFC93C`, rosa `#FFA8D2` y menta `#98EBC6` (en el Inicio, lila `#CDB6FF` en el centro), con anillo del color de fondo, que suben y bajan 3 de forma desfasada (1,6 s). Señal de "Dipper" en la cuenta, el registro y las pantallas de éxito. |
+| **Bolitas** | Tres círculos solapados (−8) amarillo `#FFC93C`, rosa `#FFA8D2` y menta `#98EBC6` (en el Inicio, lila `#CDB6FF` en el centro), con anillo del color de fondo, que suben y bajan 3 de forma desfasada (1,6 s). Señal de "Dipper" en la cuenta, el registro y las pantallas de éxito. Componente `dots(tamaño)`. |
 | **Olas de Entrar** | Cuatro capas de color (lila, rosa, menta, lima) que ocupan la mitad inferior, cada una con borde de semicírculos, que se mecen y se desplazan a distinto ritmo. |
 | **Borde ondulado** | Semicírculos de radio 9 cada 22, el mismo patrón en las olas, el líquido de las categorías y el icono de la app. |
 

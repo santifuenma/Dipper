@@ -47,10 +47,12 @@ como SF Symbols) en Swift.
 | `#FFC2A1` como texto de la pastilla "+X €" sobre tinta | `inicio.js` | Antes: darle nombre en `DISENO.md` |
 | Colores escritos a mano (`#5A5470`, `#1B1B1F`, `#F1EDF9`) en lugar de su token | Casi todas las pantallas | Al migrar: en Swift solo existirán los tokens |
 
-## 4. Estilos repetidos
+## 4. Estilos repetidos ✅ 19-10-2026
 
-Hay unos 400 estilos escritos dentro del HTML de las pantallas. Los patrones que se repiten y que en
-Swift serán una sola vista o estilo:
+Hecho: los patrones de la tabla son ahora clases (`.title`, `.label`, `.pill`, `.ic-circle`, `.input`)
+y un componente (`dots()`). Se comprobó que el estilo calculado de cada elemento de 15 pantallas es
+idéntico antes y después. Quedan estilos escritos en línea que son propios de una sola pantalla;
+no se repiten, así que no hace falta sacarlos antes de migrar. Los patrones eran:
 
 | Patrón | Veces | Propuesta |
 |---|---|---|
