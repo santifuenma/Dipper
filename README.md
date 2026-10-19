@@ -31,7 +31,7 @@ App personal para iPhone que recoge sola los pagos de Apple Pay y los reparte po
 - [Entornos y despliegue](#entornos-y-despliegue)
 - [Scripts](#scripts)
 - [Estructura del repositorio](#estructura-del-repositorio)
-- [Guía de diseño](#guía-de-diseño)
+- [Guía de diseño y especificación](#guía-de-diseño-y-especificación)
 - [Decisiones de diseño](#decisiones-de-diseño)
 
 ## Qué es
@@ -289,12 +289,16 @@ migrations/        # Esquema de D1, una migración por cambio
 scripts/           # Iconos y cambio de contraseña desde el ordenador
 wrangler.toml      # Worker, bases D1 y entorno de pruebas
 DISENO.md          # Guía de diseño
+docs/              # Especificación: componentes, pantallas, flujos y auditoría
 ```
 
-## Guía de diseño
+## Guía de diseño y especificación
 
-Las reglas visuales (colores, líneas, esquinas, botones, iconos y patrones como editar o borrar)
-están en [`DISENO.md`](DISENO.md). Toda pantalla o pieza nueva reutiliza lo que ya existe allí.
+- [`DISENO.md`](DISENO.md): reglas visuales (colores, líneas, esquinas, botones, iconos y patrones
+  como editar o borrar). Toda pantalla o pieza nueva reutiliza lo que ya existe allí.
+- [`docs/`](docs/README.md): el plano de la app por piezas (componentes, pantallas y flujos con sus
+  reglas) y una auditoría de lo que queda por ordenar. Es la base para llevar Dipper a una app nativa
+  en Swift sin tener que leer el JavaScript.
 
 ## Decisiones de diseño
 
