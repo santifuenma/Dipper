@@ -233,8 +233,9 @@ export function renderInicio() {
   }
 
   // El borde del líquido (con su ola) nunca cae sobre el importe ni sobre "Quedan…": si caería en ese
-  // bloque, sube justo por encima o se esconde por debajo, lo que quede más cerca. Las cifras exactas
-  // ya las dice el texto. Hace falta el tamaño real del recuadro, así que espera a que esté en pantalla.
+  // bloque, sube justo por encima o baja a la franja de debajo del texto, lo que quede más cerca; así
+  // siempre se ve la ola, también sin gasto. Las cifras exactas ya las dice el texto.
+  // Hace falta el tamaño real del recuadro, así que espera a que esté en pantalla.
   function keepWavesOffText(tiles, tries = 0) {
     const first = tiles.firstElementChild;
     if (!first || !first.isConnected || !first.clientHeight) {
@@ -245,15 +246,18 @@ export function renderInicio() {
       const fill = a.querySelector("[data-fill]");
       const pct = Number(a.dataset.pct);
       const h = a.clientHeight;
-      const textTop = a.querySelector("[data-bottom]").getBoundingClientRect().top - a.getBoundingClientRect().top;
-      const zone = h - textTop + 3; // alto del bloque de texto de abajo, con 3 px de aire
+      const box = a.getBoundingClientRect();
+      const text = a.querySelector("[data-bottom]").getBoundingClientRect();
+      const zone = box.bottom - text.top + 3; // alto del bloque de texto de abajo, con 3 px de aire
+      const under = box.bottom - text.bottom - 10; // la ola (10 px) cabe en la franja de debajo del texto
       const edge = (pct / 100) * h;
       fill.style.bottom = "";
       if (pct >= 100 || edge >= zone) fill.style.height = pct + "%";
       else if (edge >= zone / 2) fill.style.height = zone + "px";
+      else if (under >= 0) fill.style.height = under + "px";
       else {
         fill.style.height = "0px";
-        fill.style.bottom = "-10px"; // la ola queda escondida bajo el borde
+        fill.style.bottom = under + "px";
       }
     }
   }
