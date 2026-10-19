@@ -1,5 +1,5 @@
 // Pantalla "Inicio" (Inicio.dc.html).
-import { dots } from "../components.js";
+import { dots, makeReorderable } from "../components.js";
 import { api } from "../api.js";
 import { session } from "../app.js";
 import { busy, html, ICON, iconSize } from "../dom.js";
@@ -199,6 +199,7 @@ export function renderInicio() {
           </a>
         `);
         a.href = `#/ver-categoria?id=${t.id}`;
+        a.dataset.id = t.id;
         if (over) a.classList.add("wob");
         const fill = a.querySelector("[data-fill]");
         fill.style.color = t.color;
@@ -215,7 +216,17 @@ export function renderInicio() {
         return a;
       })
     );
+    tiles.resetOrder();
   }
+
+  // Mantener pulsada una categoría y arrastrarla cambia el orden en toda la app.
+  makeReorderable(q("[data-tiles]"), {
+    onOrder: (els) => {
+      const ids = els.map((a) => Number(a.dataset.id));
+      data.categories.sort((x, y) => ids.indexOf(x.id) - ids.indexOf(y.id));
+      api("/categories/order", { ids }).catch((err) => (q(".error").textContent = err.message));
+    },
+  });
 
   function draw() {
     const m = view.month || (data && data.current);

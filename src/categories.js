@@ -76,11 +76,25 @@ async function remove(env, user, id) {
   return json({ ok: true, movedToPending: moved.meta.changes });
 }
 
+// Nuevo orden (arrastrando en el Inicio): la lista completa de ids de sus categorías, en orden.
+// Es el orden en toda la app: Inicio, Ajustes, Por revisar, Pago, Presupuesto y Nuevo gasto.
+async function reorder(request, env, user) {
+  const { ids } = await readJson(request);
+  const { results } = await env.DB.prepare("SELECT id FROM categories WHERE user_id = ?").bind(user.id).all();
+  const mine = new Set(results.map((r) => r.id));
+  const valid =
+    Array.isArray(ids) && ids.length === mine.size && new Set(ids).size === ids.length && ids.every((id) => mine.has(id));
+  if (!valid) return json({ error: "Ese orden no encaja con tus categorías." }, 400);
+  await env.DB.batch(ids.map((id, i) => env.DB.prepare("UPDATE categories SET position = ? WHERE id = ? AND user_id = ?").bind(i, id, user.id)));
+  return json({ ok: true });
+}
+
 export async function handleCategories(request, env, url, user) {
   const p = url.pathname;
   const m = request.method;
   if (p === "/api/categories" && m === "GET") return json({ categories: await listCategories(env, user.id) });
   if (p === "/api/categories" && m === "POST") return create(request, env, user);
+  if (p === "/api/categories/order" && m === "POST") return reorder(request, env, user);
   const match = p.match(/^\/api\/categories\/(\d+)(\/delete)?$/);
   if (match && m === "POST") {
     const id = Number(match[1]);

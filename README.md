@@ -197,6 +197,7 @@ exigen sesión.
 | `POST` | `/api/charges` · `/api/charges/:id/delete` | Añadir un gasto a mano o borrar un pago |
 | `GET` · `POST` | `/api/cards` · `/api/cards/:id` · `/delete` | Listar, crear, editar y borrar tarjetas |
 | `GET` · `POST` | `/api/categories` · `/api/categories/:id` · `/delete` | Listar, crear, editar y borrar categorías |
+| `POST` | `/api/categories/order` | Guardar el orden de las categorías (todos sus ids, en orden) |
 | `POST` | `/api/budget` | Guardar el presupuesto total y por categoría |
 
 ## Seguridad
@@ -289,7 +290,7 @@ y una base D1 local que se crea con las migraciones y se vacía antes de cada pr
 | Archivo | Pruebas | Qué comprueba |
 |---|---|---|
 | [`test/unidad.test.js`](test/unidad.test.js) | 18 | Lectura de importes en sus distintos formatos, colas de Atajos, normalización de comercios y las cifras del resumen del mes |
-| [`test/api.test.js`](test/api.test.js) | 20 | La API de punta a punta: una sola cuenta, bloqueo tras 5 fallos, cola sin duplicados, recordar y deshacer, nombre propio, reconocimiento de tarjetas y tarjetas iguales, borrar tarjetas y categorías, gastos a mano, resumen y filtros del mes y presupuesto |
+| [`test/api.test.js`](test/api.test.js) | 21 | La API de punta a punta: una sola cuenta, bloqueo tras 5 fallos, cola sin duplicados, recordar y deshacer, nombre propio, reconocimiento de tarjetas y tarjetas iguales, borrar tarjetas y categorías, gastos a mano, resumen y filtros del mes orden de las categorías y presupuesto |
 | [`test/app-store.test.js`](test/app-store.test.js) | 12 | Lo que pide la app nativa y el App Store: sesión por token, registro abierto o cerrado, borrar la cuenta y recibir pagos con la sesión |
 
 Cubren las reglas de [`docs/flujos.md`](docs/flujos.md) que viven en el servidor: si un cambio para la

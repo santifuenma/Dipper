@@ -92,7 +92,8 @@ Movimientos y Presupuesto.
   5. Abajo: recuadro punteado **"3 por revisar · Pagos nuevos sin categoría"** (o "Nada por
      revisar") con bolitas, y el botón + lima.
 - **Acciones**: cambiar de mes; tocar tarjeta (despliega / abre Ver tarjeta); tocar categoría →
-  Ver categoría; Por revisar; + → Nuevo gasto; Presupuesto; Ajustes.
+  Ver categoría; **mantener pulsada una categoría y arrastrarla** la cambia de sitio (cuadrícula
+  ordenable) y ese orden se usa en toda la app; Por revisar; + → Nuevo gasto; Presupuesto; Ajustes.
 - **Una sola vez tras entrar con contraseña**: hoja "¿Entrar con Face ID la próxima vez?" con
   **Activar** y **Ahora no** (no se vuelve a preguntar).
 - **API**: `GET /api/month?month=AAAA-MM`.

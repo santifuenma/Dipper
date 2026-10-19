@@ -461,3 +461,143 @@ export function keypad({ decimals = true, maxLength = 7, style = "", onChange })
   grid.setValue = set;
   return grid;
 }
+
+// Cuadrícula que se ordena arrastrando, como los iconos del iPhone: mantener pulsado HOLD ms levanta
+// la pieza; al moverla, las demás se apartan con rebote para dejarle hueco; al soltar encaja y se
+// avisa con el nuevo orden. Un toque normal sigue funcionando (abre la pieza).
+// Las piezas se colocan con grid-row / grid-column (no se mueven en el DOM, así no se reinician
+// sus animaciones). Tras rellenar la cuadrícula hay que llamar a grid.resetOrder().
+export function makeReorderable(grid, { columns = 2, hold = 350, onOrder }) {
+  const SPRING = "cubic-bezier(.3,1.35,.5,1)";
+  const LIFT = "0 14px 30px rgba(27,27,31,.18)";
+  let items = [];
+  let press = null;
+  let drag = null;
+  let suppressUntil = 0; // el "click" que llega justo después de soltar no abre la pieza
+
+  const place = () =>
+    items.forEach((el, i) => {
+      el.style.gridColumn = String((i % columns) + 1);
+      el.style.gridRow = String(Math.floor(i / columns) + 1);
+    });
+
+  grid.resetOrder = () => {
+    items = [...grid.children];
+    for (const el of items) {
+      el.style.webkitTouchCallout = "none"; // sin la vista previa de enlace de iOS al mantener pulsado
+      el.style.webkitUserSelect = "none";
+      el.style.userSelect = "none";
+    }
+    place();
+  };
+
+  // Las demás piezas se deslizan desde donde estaban a su sitio nuevo (técnica FLIP).
+  function flip(change, except) {
+    const before = new Map(items.map((el) => [el, el.getBoundingClientRect()]));
+    change();
+    for (const el of items) {
+      if (el === except) continue;
+      const a = before.get(el);
+      const b = el.getBoundingClientRect();
+      const dx = a.left - b.left;
+      const dy = a.top - b.top;
+      if (dx || dy) el.animate([{ transform: `translate(${dx}px,${dy}px)` }, { transform: "none" }], { duration: 420, easing: SPRING });
+    }
+  }
+
+  function start() {
+    const el = press.el;
+    const slots = items.map((x) => x.getBoundingClientRect());
+    const from = items.indexOf(el);
+    drag = { el, id: press.id, x0: press.x, y0: press.y, from, idx: from, slots, dx: 0, dy: 0, wob: el.classList.contains("wob") };
+    press = null;
+    try {
+      el.setPointerCapture(drag.id);
+    } catch {}
+    el.classList.remove("wob"); // su temblor usa transform y no dejaría moverla
+    el.style.zIndex = "5";
+    el.style.transition = `transform .25s ${SPRING}, box-shadow .25s`;
+    el.style.transform = "scale(1.05)";
+    el.style.boxShadow = LIFT;
+  }
+
+  function move(e) {
+    const d = drag;
+    d.dx = e.clientX - d.x0;
+    d.dy = e.clientY - d.y0;
+    const home = d.slots[d.from];
+    const cx = home.left + home.width / 2 + d.dx;
+    const cy = home.top + home.height / 2 + d.dy;
+    let best = d.idx;
+    let bestDist = Infinity;
+    d.slots.forEach((r, i) => {
+      const dist = Math.hypot(r.left + r.width / 2 - cx, r.top + r.height / 2 - cy);
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = i;
+      }
+    });
+    if (best !== d.idx) {
+      flip(() => {
+        items.splice(items.indexOf(d.el), 1);
+        items.splice(best, 0, d.el);
+        place();
+      }, d.el);
+      d.idx = best;
+    }
+    // La pieza sigue al dedo aunque su hueco en la cuadrícula haya cambiado.
+    const slot = d.slots[d.idx];
+    d.el.style.transition = "box-shadow .25s";
+    d.el.style.transform = `translate(${home.left - slot.left + d.dx}px,${home.top - slot.top + d.dy}px) scale(1.05)`;
+  }
+
+  function end() {
+    const d = drag;
+    drag = null;
+    suppressUntil = Date.now() + 500;
+    d.el.style.transition = `transform .45s ${SPRING}, box-shadow .3s`;
+    d.el.style.transform = "";
+    d.el.style.boxShadow = "";
+    setTimeout(() => {
+      d.el.style.zIndex = "";
+      d.el.style.transition = "";
+      if (d.wob) d.el.classList.add("wob");
+    }, 460);
+    if (d.idx !== d.from) onOrder(items.slice());
+  }
+
+  grid.addEventListener("pointerdown", (e) => {
+    const el = e.target.closest("[data-id]");
+    if (!el || drag || !grid.contains(el)) return;
+    press = { el, id: e.pointerId, x: e.clientX, y: e.clientY, timer: setTimeout(start, hold) };
+  });
+  grid.addEventListener("pointermove", (e) => {
+    if (press && Math.hypot(e.clientX - press.x, e.clientY - press.y) > 8) {
+      clearTimeout(press.timer);
+      press = null;
+    }
+    if (drag && e.pointerId === drag.id) move(e);
+  });
+  const up = () => {
+    if (press) {
+      clearTimeout(press.timer);
+      press = null;
+    }
+    if (drag) end();
+  };
+  grid.addEventListener("pointerup", up);
+  grid.addEventListener("pointercancel", up);
+  // Mientras se arrastra no hay scroll ni menú de enlace; tras arrastrar, soltar no abre la pieza.
+  grid.addEventListener("touchmove", (e) => drag && e.preventDefault(), { passive: false });
+  grid.addEventListener("contextmenu", (e) => e.preventDefault());
+  grid.addEventListener(
+    "click",
+    (e) => {
+      if (Date.now() > suppressUntil && !drag) return;
+      e.preventDefault();
+      e.stopPropagation();
+    },
+    true
+  );
+  return grid;
+}

@@ -243,6 +243,19 @@ describe("categorías, pagos a mano y presupuesto", () => {
     expect((await a.call(`/month?categoria=${a.cat("Ropa")}`)).data.chargesTotalCents).toBe(500);
   });
 
+  it("el orden de las categorías se guarda y se usa en toda la app", async () => {
+    const a = await cuenta();
+    const ids = (await a.call("/categories")).data.categories.map((c) => c.id);
+    const nuevo = [ids[3], ids[0], ids[5], ids[1], ids[4], ids[2]];
+    expect((await a.call("/categories/order", { ids: nuevo })).status).toBe(200);
+    expect((await a.call("/categories")).data.categories.map((c) => c.id)).toEqual(nuevo);
+    expect((await a.call("/month")).data.categories.map((c) => c.id)).toEqual(nuevo);
+    // Incompleto, repetido o con ids ajenos: no se acepta.
+    expect((await a.call("/categories/order", { ids: nuevo.slice(1) })).status).toBe(400);
+    expect((await a.call("/categories/order", { ids: [nuevo[0], ...nuevo.slice(0, 5)] })).status).toBe(400);
+    expect((await a.call("/categories/order", { ids: [9999, ...nuevo.slice(1)] })).status).toBe(400);
+  });
+
   it("el presupuesto no admite importes negativos", async () => {
     const a = await cuenta();
     expect((await a.call("/budget", { monthlyBudgetCents: -1, categories: [] })).status).toBe(400);

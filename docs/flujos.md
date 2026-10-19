@@ -118,6 +118,7 @@ iOS pasa los datos de la transacción a la acción solo o hay que asignarlos con
 | Tarjeta | Nombre (máx. 22), 4 dígitos obligatorios, nombre en Wallet opcional, uno de los 6 colores. Solo se guardan los 4 últimos dígitos. |
 | Borrar tarjeta | Sus pagos se conservan sin tarjeta. |
 | Categoría | Nombre (máx. 24), uno de los 6 iconos y de los 6 colores; nuevas al final. |
+| Orden de las categorías | Se cambia arrastrando en el Inicio y se guarda entero (`POST /api/categories/order` con todos los ids; incompleto, repetido o con ids ajenos se rechaza). Es el orden del Inicio, Ajustes › Categorías, Por revisar, Pago, Presupuesto y Nuevo gasto. |
 | Borrar categoría | Sus pagos vuelven a Por revisar y se olvidan las reglas de comercio que apuntaban a ella. |
 
 ## Mes y presupuesto
