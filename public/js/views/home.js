@@ -4,12 +4,6 @@ import { go, session } from "../app.js";
 import { busy, html, ICON } from "../dom.js";
 import { enableFaceId, faceIdEnabledHere, faceIdError, passkeySupported } from "../passkey.js";
 
-const I = {
-  cats: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B1B1F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>',
-  lock: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B1B1F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="3"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
-  face: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B1B1F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 9.5v1M15 9.5v1M12 9.5v3.5h-1M9.5 15.5c1.4 1 3.6 1 5 0"/></svg>',
-};
-
 function row(icon, color, title, sub) {
   const r = html(`
     <a data-press class="card-box" style="padding:10px 12px;display:flex;align-items:center;gap:12px">
@@ -60,18 +54,18 @@ export function renderHome() {
   const error = el.querySelector(".error");
   const rows = el.querySelector("[data-rows]");
 
-  const cats = row(I.cats, "#CDF56B", "Categorías", "Crear, editar y borrar");
+  const cats = row(ICON.categories, "#CDF56B", "Categorías", "Crear, editar y borrar");
   cats.href = "#/categorias";
   const pay = row(ICON.applePay, "#FFC93C", "Conectar Apple Pay", "Tu enlace y los pasos del atajo");
   pay.href = "#/conectar-apple-pay";
-  const pass = row(I.lock, "#CDB6FF", "Cambiar contraseña", "Con Face ID no hace falta la actual");
+  const pass = row(ICON.lock, "#CDB6FF", "Cambiar contraseña", "Con Face ID no hace falta la actual");
   pass.href = "#/cambiar-contrasena";
   const cardsRow = row(ICON.card, "#A9D8FF", "Tarjetas", "Añadir, editar y borrar");
   cardsRow.href = "#/tarjetas";
   rows.append(cardsRow, cats, pay, pass);
 
   if (passkeySupported()) {
-    const face = row(I.face, "#98EBC6", "Face ID", "");
+    const face = row(ICON.faceId, "#98EBC6", "Face ID", "");
     face.setAttribute("role", "button");
     const draw = () => {
       const on = faceIdEnabledHere();

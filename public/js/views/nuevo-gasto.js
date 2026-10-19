@@ -1,19 +1,11 @@
 // Pantalla "Nuevo gasto" (NuevoGasto.dc.html). Sube desde abajo; se cierra con la ✕.
 import { api } from "../api.js";
 import { back } from "../nav.js";
-import { busy, html, ICON } from "../dom.js";
+import { busy, html, ICON, iconSize } from "../dom.js";
 import { dayLabel } from "../format.js";
 import { categoryIcon } from "../icons.js";
 import { cardChips } from "../components.js";
 
-const DEL =
-  '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11v12H9l-5-6z"/><path d="M13 10l4 4M17 10l-4 4"/></svg>';
-const CAL =
-  '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>';
-const STORE =
-  '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5A5470" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9l1.5-4h13L20 9"/><path d="M5 9v10h14V9"/><path d="M9 19v-5h6v5"/></svg>';
-const CHECK =
-  '<svg class="plop" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#1B1B1F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position:absolute;left:68px;top:68px;animation-delay:.35s"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 const LABEL = "font-size:13px;font-weight:700;color:#5A5470;margin-bottom:6px";
 
 export function renderNuevoGasto() {
@@ -37,7 +29,7 @@ export function renderNuevoGasto() {
       </div>
 
       <label class="field" style="flex:none;height:50px">
-        ${STORE}
+        <span style="display:flex;color:var(--muted)">${ICON.store}</span>
         <input name="merchant" type="text" maxlength="80" aria-label="Comercio o nota" placeholder="¿Dónde? Mercadona, gasolina…">
       </label>
 
@@ -137,7 +129,7 @@ export function renderNuevoGasto() {
       box.append(b);
     }
     // "Otra fecha": no es un botón, sino una etiqueta con el selector de fecha nativo encima (invisible).
-    const otra = html(`<label style="${PILL}">${CAL}<span data-otra-txt>Otra fecha</span></label>`);
+    const otra = html(`<label style="${PILL}">${ICON.calendar}<span data-otra-txt>Otra fecha</span></label>`);
     const input = document.createElement("input");
     input.type = "date";
     input.setAttribute("aria-label", "Otra fecha");
@@ -174,7 +166,7 @@ export function renderNuevoGasto() {
         b.setAttribute("aria-label", k === "del" ? "Borrar" : k === "," ? "Coma decimal" : k);
         b.style.cssText = "min-height:0;border:1.5px solid rgba(27,27,31,.22);border-radius:16px;background:#fff;color:#1B1B1F;font-size:22px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer";
         b.setAttribute("data-press", "");
-        if (k === "del") b.innerHTML = DEL;
+        if (k === "del") b.innerHTML = ICON.keyDelete;
         else b.textContent = k;
         b.addEventListener("click", () => press(k));
         return b;
@@ -201,7 +193,7 @@ export function renderNuevoGasto() {
           <div class="plop" style="position:absolute;inset:0;box-sizing:border-box;border-radius:56px;border:1.5px solid rgba(27,27,31,.22);background:#fff;overflow:hidden">
             <div data-fill style="position:absolute;left:0;right:0;bottom:0;height:62%"></div>
           </div>
-          ${CHECK}
+          <span class="plop" style="position:absolute;left:68px;top:68px;display:flex;color:var(--ink)">${iconSize(ICON.check, 64)}</span>
         </div>
         <div data-title style="font-size:30px;font-weight:800;letter-spacing:-.8px"></div>
         <div data-sub style="font-size:16px;font-weight:600;color:#5A5470"></div>

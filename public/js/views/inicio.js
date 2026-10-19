@@ -10,25 +10,19 @@ import { enableFaceId, faceIdEnabledHere, faceIdError, passkeySupported } from "
 export const view = { month: null };
 
 const ASK_KEY = "dipper_faceid_ask";
-const CHEVRON = (d) =>
-  `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
-const GEAR =
-  '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>';
-const SLIDERS =
-  '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>';
 
 export function renderInicio() {
   const el = html(`
     <div class="screen">
       <div class="topbar">
         <div style="display:flex;align-items:center;gap:2px">
-          <button type="button" data-prev class="icon-btn" aria-label="Mes anterior">${CHEVRON("M15 5l-7 7 7 7")}</button>
+          <button type="button" data-prev class="icon-btn" aria-label="Mes anterior">${ICON.back}</button>
           <span data-month style="font-size:20px;font-weight:800;letter-spacing:-.3px"></span>
-          <button type="button" data-next class="icon-btn" style="margin-left:0" aria-label="Mes siguiente">${CHEVRON("M9 5l7 7-7 7")}</button>
+          <button type="button" data-next class="icon-btn" style="margin-left:0" aria-label="Mes siguiente">${ICON.forward}</button>
         </div>
         <div style="display:flex;gap:8px">
-          <a href="#/presupuesto" data-press aria-label="Presupuesto" class="round-btn">${SLIDERS}</a>
-          <a href="#/ajustes" data-press aria-label="Ajustes" class="round-btn dash">${GEAR}</a>
+          <a href="#/presupuesto" data-press aria-label="Presupuesto" class="round-btn">${ICON.sliders}</a>
+          <a href="#/ajustes" data-press aria-label="Ajustes" class="round-btn dash">${ICON.gear}</a>
         </div>
       </div>
 

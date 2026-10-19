@@ -4,7 +4,6 @@ import { go } from "../app.js";
 import { html, ICON } from "../dom.js";
 
 const KEY = "dipper_ap_steps";
-const CHECK = '<svg class="pop" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 
 const STEPS = [
   { id: 1, title: "Copia tu enlace personal", body: "Une tus pagos con tu cuenta. No lo compartas.", btn: "Copiar enlace", btnDone: "Copiado", color: "#FFC93C", token: true },
@@ -89,7 +88,7 @@ export function renderApplePay() {
         const badge = card.querySelector("[data-badge]");
         badge.style.background = isDone ? "#1B1B1F" : s.color;
         badge.style.color = isDone ? "#fff" : "#1B1B1F";
-        if (isDone) badge.innerHTML = CHECK;
+        if (isDone) badge.innerHTML = `<span class="pop" style="display:flex">${ICON.check}</span>`;
         else badge.textContent = String(s.id);
         card.querySelector("[data-title]").textContent = s.title;
         card.querySelector("[data-body]").textContent = s.body;

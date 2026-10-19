@@ -23,9 +23,10 @@ por tarjeta y por categoría y "lo que toca al día", y filtra por tarjeta o cat
 **Por qué importa:** cada cálculo que se queda en la pantalla habría que reescribirlo en Swift y
 mantener los dos iguales. En el servidor se escribe una vez.
 
-## 2. Iconos fuera del juego único
+## 2. Iconos fuera del juego único ✅ 19-10-2026
 
-Iconos dibujados dentro de su pantalla en vez de en `ICON` (`public/js/dom.js`):
+Hecho: los 24 iconos de la app están en `ICON` (`public/js/dom.js`) con trazo `currentColor`, y la
+tabla de [`DISENO.md`](../DISENO.md#iconos) es la lista completa para Swift. Los que estaban sueltos eran:
 
 | Icono | Dónde |
 |---|---|

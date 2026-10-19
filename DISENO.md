@@ -62,17 +62,26 @@ Un solo juego, en `ICON` (`public/js/dom.js`): trazo `currentColor`, extremos re
 - 22–24 px con trazo 2,6 para navegación: volver, cerrar, +.
 - Un icono = un significado. Nunca dos dibujos para lo mismo ni el mismo dibujo para dos cosas.
 
+Todos los iconos de la app están en `ICON`; ninguna pantalla dibuja los suyos. Para otro tamaño se
+usa `iconSize(ICON.x, px)`, y el color lo pone el contenedor (`color:`), nunca el icono. Los iconos de
+categoría son aparte: son datos que elige el usuario (`categoryIcon` en `public/js/icons.js`).
+
 | Significado | Icono |
 |---|---|
 | Editar | lápiz con línea interior (`ICON.edit`) |
 | Borrar | papelera (`ICON.trash`) |
-| Añadir | + (`ICON.plus`) |
-| Volver / ir | flecha `ICON.back` / `ICON.chevron` |
+| Añadir / quitar | + y − (`ICON.plus`, `ICON.minus`) |
 | Hecho | check (`ICON.check`) |
-| Información | círculo con i (`ICON.info`) |
-| Contraseña | candado (`ICON.lock`) |
-| Tarjetas | tarjeta con banda (`ICON.card`) |
-| Apple Pay | móvil con onda (`ICON.applePay`) |
+| Información / aviso | círculo con i (`ICON.info`) / con ! (`ICON.alert`, pago sin categoría) |
+| Volver, mes anterior / mes siguiente | `ICON.back` / `ICON.forward` |
+| Ir a otra pantalla (final de fila) | `ICON.chevron` |
+| Cerrar | `ICON.close` |
+| Ajustes / Presupuesto | engranaje (`ICON.gear`) / reguladores (`ICON.sliders`) |
+| Tarjetas / Categorías | tarjeta con banda (`ICON.card`) / cuatro cuadros (`ICON.categories`) |
+| Apple Pay / Face ID | móvil con onda (`ICON.applePay`) / marco de cara (`ICON.faceId`) |
+| Contraseña / correo / nombre | `ICON.lock` / `ICON.mail` / `ICON.user` |
+| Comercio / fecha / días que quedan | tienda (`ICON.store`) / calendario (`ICON.calendar`) / reloj (`ICON.clock`) |
+| Borrar una cifra (teclado) | `ICON.keyDelete` |
 
 ## Patrones
 

@@ -5,7 +5,6 @@ import { html, ICON, iconSize } from "../dom.js";
 import { euros, when } from "../format.js";
 import { cardChips, merchantEditor, penButton, rawLine } from "../components.js";
 
-const CHECK_WHITE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 
 export function renderPendientes() {
   // Estado de cada pago: { sel, rem, card, name, editing, draft, done, appliedIds, saving }
@@ -203,7 +202,7 @@ export function renderPendientes() {
     const cat = catById(st.sel);
     const card = html(`
       <div class="stick" style="margin-bottom:14px;box-sizing:border-box;border:1.5px solid rgba(27,27,31,.22);border-radius:24px;padding:12px 16px;display:flex;align-items:center;gap:12px">
-        <span style="flex:none;width:34px;height:34px;border-radius:50%;background:#1B1B1F;display:flex;align-items:center;justify-content:center">${CHECK_WHITE}</span>
+        <span style="flex:none;width:34px;height:34px;border-radius:50%;background:#1B1B1F;display:flex;align-items:center;justify-content:center"><span style="display:flex;color:#fff">${iconSize(ICON.check, 18)}</span></span>
         <span data-txt style="flex:1;min-width:0;font-size:16px;font-weight:700"></span>
         <button type="button" data-undo style="border:0;background:transparent;font-size:14px;font-weight:700;text-decoration:underline;color:#1B1B1F;cursor:pointer;padding:8px 0">Deshacer</button>
       </div>

@@ -1,15 +1,11 @@
 // Pantalla "Presupuesto" (Presupuesto.dc.html).
 import { api } from "../api.js";
 import { back } from "../nav.js";
-import { busy, html, ICON } from "../dom.js";
+import { busy, html, ICON, iconSize } from "../dom.js";
 import { eurosInt, monthLabel } from "../format.js";
 import { categoryIcon } from "../icons.js";
 import { view } from "./inicio.js";
 
-const MINUS = (s) =>
-  `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>`;
-const PLUS = (s) =>
-  `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>`;
 const ROUND = "flex:none;border-radius:50%;border:1.5px solid rgba(27,27,31,.22);background:#F1EDF9;color:#1B1B1F;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0";
 
 export function renderPresupuesto() {
@@ -27,12 +23,12 @@ export function renderPresupuesto() {
         <div style="padding:12px 16px">
           <div style="font-size:14px;font-weight:600;color:#5A5470;text-align:center">Total del mes</div>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px">
-            <button type="button" data-mdown class="round-btn" aria-label="Bajar 50 euros" style="${ROUND};width:48px;height:48px">${MINUS(22)}</button>
+            <button type="button" data-mdown class="round-btn" aria-label="Bajar 50 euros" style="${ROUND};width:48px;height:48px">${iconSize(ICON.minus, 22)}</button>
             <div style="display:flex;align-items:baseline;gap:6px">
               <span data-monthly style="font-size:56px;font-weight:800;line-height:1;letter-spacing:-2.2px"></span>
               <span style="font-size:26px;font-weight:700">€</span>
             </div>
-            <button type="button" data-mup class="round-btn" aria-label="Subir 50 euros" style="${ROUND};width:48px;height:48px">${PLUS(22)}</button>
+            <button type="button" data-mup class="round-btn" aria-label="Subir 50 euros" style="${ROUND};width:48px;height:48px">${iconSize(ICON.plus, 22)}</button>
           </div>
           <div data-segs style="display:flex;gap:3px;height:14px;margin-top:12px"></div>
           <div style="display:flex;justify-content:center;margin-top:10px">
@@ -82,9 +78,9 @@ export function renderPresupuesto() {
           <span data-name style="display:block;font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>
           <span data-spent style="display:block;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>
         </span>
-        <button type="button" data-down class="round-btn" style="${ROUND};width:38px;height:38px">${MINUS(18)}</button>
+        <button type="button" data-down class="round-btn" style="${ROUND};width:38px;height:38px">${iconSize(ICON.minus, 18)}</button>
         <span data-amount style="flex:none;width:58px;text-align:center;font-size:18px;font-weight:800"></span>
-        <button type="button" data-up class="round-btn" style="${ROUND};width:38px;height:38px">${PLUS(18)}</button>
+        <button type="button" data-up class="round-btn" style="${ROUND};width:38px;height:38px">${iconSize(ICON.plus, 18)}</button>
       </div>
     `);
     const ic = r.querySelector("[data-ic]");

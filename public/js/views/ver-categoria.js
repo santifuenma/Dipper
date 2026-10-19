@@ -6,8 +6,6 @@ import { euros, eurosInt, monthLabel } from "../format.js";
 import { categoryIcon } from "../icons.js";
 import { view } from "./inicio.js";
 
-const CLOCK =
-  '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1B1B1F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
 
 export function renderVerCategoria(params) {
   const id = Number(params.get("id"));
@@ -57,7 +55,7 @@ export function renderVerCategoria(params) {
             </div>
           </div>
           <div data-hint hidden style="margin-top:10px;display:flex;gap:10px;align-items:flex-start;padding:11px 14px;border:1.5px dashed rgba(27,27,31,.4);border-radius:20px">
-            ${CLOCK}
+            <span style="flex:none;display:flex;margin-top:1px">${ICON.clock}</span>
             <span data-hint-txt style="font-size:16px;font-weight:600;line-height:1.35"></span>
           </div>
           <div data-bycard-wrap>

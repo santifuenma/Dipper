@@ -1,7 +1,7 @@
 // Pantalla "Tap en tarjeta" (Tarjeta.dc.html).
 import { api } from "../api.js";
 import { emptyNote, fitMovements, movementGroups, seeAllLink } from "../components.js";
-import { html, ICON } from "../dom.js";
+import { html, ICON, iconSize } from "../dom.js";
 import { eurosInt, monthLabel } from "../format.js";
 import { cardBorder, cardFg } from "../icons.js";
 import { view } from "./inicio.js";
@@ -49,7 +49,7 @@ export function renderVerTarjeta(params) {
                 <span data-last style="font-size:24px;font-weight:700;letter-spacing:3px"></span>
               </span>
               <span data-ap hidden style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;padding:6px 11px;border-radius:99px;background:#fff;color:#1B1B1F">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1B1B1F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+                ${iconSize(ICON.check, 14)}
                 Apple Pay activo
               </span>
             </span>
