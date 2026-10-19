@@ -73,7 +73,7 @@ export function renderCategoriaForm(params) {
         const on = ic === st.icon;
         b.setAttribute("aria-pressed", on ? "true" : "false");
         b.setAttribute("aria-label", "Icono " + ic);
-        b.style.cssText = `width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(27,27,31,.22);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .3s cubic-bezier(.3,1.6,.5,1),box-shadow .2s;background:${on ? st.color : "#fff"};transform:${on ? "scale(1.1)" : "none"};box-shadow:${ring(on)}`;
+        b.style.cssText = `width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(27,27,31,.22);color:#1B1B1F;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .3s cubic-bezier(.3,1.6,.5,1),box-shadow .2s;background:${on ? st.color : "#fff"};transform:${on ? "scale(1.1)" : "none"};box-shadow:${ring(on)}`;
         b.innerHTML = categoryIcon(ic, 20);
         b.addEventListener("click", () => {
           st.icon = ic;

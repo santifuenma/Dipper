@@ -11,8 +11,9 @@ const PATHS = {
 export const CATEGORY_ICONS = Object.keys(PATHS);
 export const CATEGORY_COLORS = ["#CDF56B", "#FFC2A1", "#A9D8FF", "#FFA8D2", "#CDB6FF", "#98EBC6"];
 
+// El color lo pone el contenedor (currentColor), como los iconos de ICON.
 export function categoryIcon(icon, size = 20, stroke = 2.2) {
-  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="#1B1B1F" stroke-width="${stroke}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PATHS[icon] || PATHS.sup}</svg>`;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${stroke}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PATHS[icon] || PATHS.sup}</svg>`;
 }
 
 // Colores de tarjeta del diseño: fondo y color del texto encima.

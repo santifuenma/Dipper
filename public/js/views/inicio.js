@@ -185,16 +185,16 @@ export function renderInicio() {
             <div data-fill class="fill"></div>
             <div style="position:relative;z-index:2;height:100%;box-sizing:border-box;padding:10px 12px;display:flex;flex-direction:column;justify-content:space-between">
               <div style="display:flex;justify-content:space-between;align-items:flex-start">
-                <span data-ic></span>
+                <span data-ic style="display:flex;color:var(--muted)"></span>
                 <span data-over hidden style="font-size:12px;font-weight:800;padding:3px 8px;border-radius:99px;background:#1B1B1F;color:#FFC2A1"></span>
               </div>
               <div>
                 <div data-name style="font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
                 <div style="display:flex;align-items:baseline;gap:5px">
                   <span data-amount style="font-size:25px;font-weight:800;letter-spacing:-.6px;line-height:1.1"></span>
-                  <span data-of style="font-size:13px;font-weight:600;opacity:.75"></span>
+                  <span data-of style="font-size:13px;font-weight:600;color:var(--muted)"></span>
                 </div>
-                <div data-left hidden style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+                <div data-left hidden style="font-size:13px;font-weight:700;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
               </div>
             </div>
           </a>
