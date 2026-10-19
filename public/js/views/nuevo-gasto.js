@@ -4,7 +4,7 @@ import { back } from "../nav.js";
 import { busy, html, ICON, iconSize } from "../dom.js";
 import { dayLabel } from "../format.js";
 import { categoryIcon } from "../icons.js";
-import { cardChips } from "../components.js";
+import { bigAmount, cardChips, keypad } from "../components.js";
 
 
 export function renderNuevoGasto() {
@@ -18,14 +18,7 @@ export function renderNuevoGasto() {
         <span style="width:44px"></span>
       </div>
 
-      <div style="flex:none">
-        <div style="font-size:14px;font-weight:600;color:#5A5470">importe</div>
-        <div style="display:flex;align-items:baseline;gap:6px">
-          <span data-amount style="font-size:min(72px,8.6dvh);font-weight:800;line-height:1;letter-spacing:-3px"></span>
-          <span class="caret" aria-hidden="true"></span>
-          <span style="font-size:34px;font-weight:700">€</span>
-        </div>
-      </div>
+      <div data-amount-box></div>
 
       <label class="field" style="flex:none;height:50px">
         <span style="display:flex;color:var(--muted)">${ICON.store}</span>
@@ -47,7 +40,7 @@ export function renderNuevoGasto() {
         <div data-dates style="display:flex;gap:8px"></div>
       </div>
 
-      <div data-keys style="flex:1;min-height:150px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr));gap:8px"></div>
+      <div data-keys-box></div>
 
       <div class="error" role="alert"></div>
       <button type="button" data-save class="btn btn-lima" style="flex:none" disabled>Guardar gasto</button>
@@ -58,25 +51,20 @@ export function renderNuevoGasto() {
   const value = () => parseFloat(st.amount.replace(",", ".")) || 0;
   const canSave = () => value() > 0 && st.cat !== null && !st.saving;
 
-  function press(k) {
-    let a = st.amount;
-    if (k === "del") a = a.slice(0, -1);
-    else if (k === ",") {
-      if (!a.includes(",")) a = (a === "" ? "0" : a) + ",";
-    } else {
-      const i = a.indexOf(",");
-      if (i >= 0 && a.length - i > 2) return;
-      if (a === "0") a = k;
-      else if (a.length < 7) a += k;
-    }
-    st.amount = a;
-    draw();
-  }
+  // Importe y teclado: los mismos componentes que la hoja de Presupuesto.
+  const amountEl = bigAmount();
+  q("[data-amount-box]").replaceWith(amountEl);
+  const keys = keypad({
+    style: "flex:1;min-height:150px;",
+    onChange: (v) => {
+      st.amount = v;
+      draw();
+    },
+  });
+  q("[data-keys-box]").replaceWith(keys);
 
   function drawAmount() {
-    const a = q("[data-amount]");
-    a.textContent = st.amount === "" ? "0" : st.amount;
-    a.style.color = st.amount === "" ? "rgba(27,27,31,.28)" : "#1B1B1F";
+    amountEl.show(st.amount);
     q("[data-save]").disabled = !canSave();
   }
 
@@ -157,22 +145,6 @@ export function renderNuevoGasto() {
     datePills.otra.querySelector("[data-otra-txt]").textContent = st.date === "otra" && st.other ? dayLabel(st.other) : "Otra fecha";
   }
 
-  function drawKeys() {
-    q("[data-keys]").replaceChildren(
-      ...["1", "2", "3", "4", "5", "6", "7", "8", "9", ",", "0", "del"].map((k) => {
-        const b = document.createElement("button");
-        b.type = "button";
-        b.setAttribute("aria-label", k === "del" ? "Borrar" : k === "," ? "Coma decimal" : k);
-        b.style.cssText = "min-height:0;border:1.5px solid rgba(27,27,31,.22);border-radius:16px;background:#fff;color:#1B1B1F;font-size:22px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer";
-        b.setAttribute("data-press", "");
-        if (k === "del") b.innerHTML = ICON.keyDelete;
-        else b.textContent = k;
-        b.addEventListener("click", () => press(k));
-        return b;
-      })
-    );
-  }
-
   function draw() {
     drawAmount();
   }
@@ -204,7 +176,7 @@ export function renderNuevoGasto() {
     done.querySelector("[data-title]").textContent = "Pegado en " + (cat ? cat.name : "");
     done.querySelector("[data-sub]").textContent = `${st.amount} € · ${card ? card.name : "Efectivo"} · ${dayLabel(when())}`;
     done.querySelector("[data-again]").addEventListener("click", () => {
-      st.amount = "";
+      keys.setValue("");
       st.cat = null;
       q("[name=merchant]").value = "";
       done.remove();
@@ -238,7 +210,6 @@ export function renderNuevoGasto() {
     }
   });
 
-  drawKeys();
   buildDates();
   updateDates();
   draw();

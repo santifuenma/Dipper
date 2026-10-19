@@ -397,3 +397,67 @@ export function dots(size, { ring = "#fff", outline = false, colors = ["#FFC93C"
     )
     .join("");
 }
+
+// Importe grande con cursor (Nuevo gasto, hoja de Presupuesto). el.show("12,5") lo pinta; vacío, un 0 gris.
+export function bigAmount(label = "importe") {
+  const el = html(`
+    <div style="flex:none">
+      <div data-label style="font-size:14px;font-weight:600;color:#5A5470"></div>
+      <div style="display:flex;align-items:baseline;gap:6px">
+        <span data-amount style="font-size:min(72px,8.6dvh);font-weight:800;line-height:1;letter-spacing:-3px"></span>
+        <span class="caret" aria-hidden="true"></span>
+        <span style="font-size:34px;font-weight:700">€</span>
+      </div>
+    </div>
+  `);
+  el.querySelector("[data-label]").textContent = label;
+  const amount = el.querySelector("[data-amount]");
+  el.show = (value) => {
+    amount.textContent = value === "" ? "0" : value;
+    amount.style.color = value === "" ? "rgba(27,27,31,.28)" : "#1B1B1F";
+  };
+  el.show("");
+  return el;
+}
+
+// Teclado numérico de 3×4 (1–9, coma, 0, borrar). Sin decimales, el hueco de la coma queda vacío.
+// Guarda el texto escrito ("12,5"); onChange lo recibe en cada tecla. maxLength cuenta también la coma.
+export function keypad({ decimals = true, maxLength = 7, style = "", onChange }) {
+  const grid = html(
+    `<div data-keys style="${style}display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr));gap:8px"></div>`
+  );
+  let value = "";
+  const set = (v) => {
+    value = v;
+    onChange(value);
+  };
+  function press(k) {
+    let a = value;
+    if (k === "del") a = a.slice(0, -1);
+    else if (k === ",") {
+      if (!a.includes(",")) a = (a === "" ? "0" : a) + ",";
+    } else {
+      const i = a.indexOf(",");
+      if (i >= 0 && a.length - i > 2) return;
+      if (a === "0") a = k;
+      else if (a.length < maxLength) a += k;
+    }
+    set(a);
+  }
+  grid.replaceChildren(
+    ...["1", "2", "3", "4", "5", "6", "7", "8", "9", decimals ? "," : null, "0", "del"].map((k) => {
+      if (k === null) return document.createElement("span");
+      const b = document.createElement("button");
+      b.type = "button";
+      b.setAttribute("aria-label", k === "del" ? "Borrar" : k === "," ? "Coma decimal" : k);
+      b.style.cssText = "min-height:0;border:1.5px solid rgba(27,27,31,.22);border-radius:16px;background:#fff;color:#1B1B1F;font-size:22px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer";
+      b.setAttribute("data-press", "");
+      if (k === "del") b.innerHTML = ICON.keyDelete;
+      else b.textContent = k;
+      b.addEventListener("click", () => press(k));
+      return b;
+    })
+  );
+  grid.setValue = set;
+  return grid;
+}

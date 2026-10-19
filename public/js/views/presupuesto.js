@@ -5,6 +5,7 @@ import { busy, html, ICON, iconSize } from "../dom.js";
 import { eurosInt, monthLabel } from "../format.js";
 import { categoryIcon } from "../icons.js";
 import { view } from "./inicio.js";
+import { bigAmount, keypad } from "../components.js";
 
 const ROUND = "flex:none;border-radius:50%;border:1.5px solid rgba(27,27,31,.22);background:#F1EDF9;color:#1B1B1F;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0";
 
@@ -25,7 +26,7 @@ export function renderPresupuesto() {
           <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px">
             <button type="button" data-mdown class="round-btn" aria-label="Bajar 50 euros" style="${ROUND};width:48px;height:48px">${iconSize(ICON.minus, 22)}</button>
             <div style="display:flex;align-items:baseline;gap:6px">
-              <span data-monthly style="font-size:56px;font-weight:800;line-height:1;letter-spacing:-2.2px"></span>
+              <span data-monthly data-press role="button" tabindex="0" aria-label="Escribir el total del mes" style="font-size:56px;font-weight:800;line-height:1;letter-spacing:-2.2px;cursor:pointer"></span>
               <span style="font-size:26px;font-weight:700">€</span>
             </div>
             <button type="button" data-mup class="round-btn" aria-label="Subir 50 euros" style="${ROUND};width:48px;height:48px">${iconSize(ICON.plus, 22)}</button>
@@ -79,7 +80,7 @@ export function renderPresupuesto() {
           <span data-spent style="display:block;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>
         </span>
         <button type="button" data-down class="round-btn" style="${ROUND};width:38px;height:38px">${iconSize(ICON.minus, 18)}</button>
-        <span data-amount style="flex:none;width:58px;text-align:center;font-size:18px;font-weight:800"></span>
+        <span data-amount data-press role="button" tabindex="0" style="flex:none;width:58px;text-align:center;font-size:18px;font-weight:800;cursor:pointer"></span>
         <button type="button" data-up class="round-btn" style="${ROUND};width:38px;height:38px">${iconSize(ICON.plus, 18)}</button>
       </div>
     `);
@@ -106,8 +107,68 @@ export function renderPresupuesto() {
     };
     r.querySelector("[data-down]").addEventListener("click", () => adj(-1000));
     r.querySelector("[data-up]").addEventListener("click", () => adj(1000));
+    const amount = r.querySelector("[data-amount]");
+    amount.setAttribute("aria-label", "Escribir el presupuesto de " + c.name);
+    amount.addEventListener("click", () =>
+      askAmount(c.name, c, (cents) => {
+        st.bud.set(c.id, cents);
+        draw();
+        drawTotal();
+      })
+    );
     draw();
     return r;
+  }
+
+  // Hoja con el teclado de Nuevo gasto (sin decimales) para escribir un importe en euros.
+  // Empieza vacía: lo que se escriba sustituye al importe; si no se escribe nada, no cambia.
+  function askAmount(title, cat, done) {
+    const bg = html(`
+      <div class="sheet-bg">
+        <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="amount-title">
+          <div style="display:flex;align-items:center;gap:12px">
+            ${cat ? `<span data-ic class="ic-circle"></span>` : ""}
+            <span id="amount-title" style="font-size:22px;font-weight:800;letter-spacing:-.4px"></span>
+          </div>
+          <div data-amount-box style="margin-top:14px"></div>
+          <div data-keys-box></div>
+          <button type="button" data-ok class="btn btn-lima" style="margin-top:16px">Listo</button>
+        </div>
+      </div>
+    `);
+    bg.querySelector("#amount-title").textContent = title;
+    if (cat) {
+      const ic = bg.querySelector("[data-ic]");
+      ic.style.background = cat.color;
+      ic.innerHTML = categoryIcon(cat.icon, 20);
+    }
+    const amountEl = bigAmount("al mes");
+    let typed = "";
+    bg.querySelector("[data-amount-box]").append(amountEl);
+    bg.querySelector("[data-keys-box]").replaceWith(
+      keypad({
+        decimals: false,
+        maxLength: 6,
+        style: "margin-top:14px;height:248px;",
+        onChange: (v) => {
+          typed = v;
+          amountEl.show(v);
+        },
+      })
+    );
+    const close = () => {
+      bg.style.transition = "opacity .25s";
+      bg.style.opacity = "0";
+      setTimeout(() => bg.remove(), 260);
+    };
+    bg.querySelector("[data-ok]").addEventListener("click", () => {
+      if (typed !== "") done(Number(typed) * 100);
+      close();
+    });
+    bg.addEventListener("click", (e) => {
+      if (e.target === bg) close();
+    });
+    document.getElementById("app").append(bg);
   }
 
   q("[data-mdown]").addEventListener("click", () => {
@@ -118,6 +179,12 @@ export function renderPresupuesto() {
     st.monthly += 5000;
     drawTotal();
   });
+  q("[data-monthly]").addEventListener("click", () =>
+    askAmount("Total del mes", null, (cents) => {
+      st.monthly = cents;
+      drawTotal();
+    })
+  );
 
   const save = q("[data-save]");
   save.addEventListener("click", async () => {
