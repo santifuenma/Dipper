@@ -103,7 +103,7 @@ El líquido sube al aparecer (900 ms).
 
 | Uso | Especificación | Código |
 |---|---|---|
-| **Categoría del Inicio** | Rejilla de 2 columnas, hueco 12, filas de mínimo 84 que reparten el alto libre. Radio 20, borde `--line-soft`. Icono de categoría 24 (trazo 2) en `--muted`, nombre 15/700, importe 25/800 y "de 380" 13/600 en `--muted`, y debajo "Quedan 22 €" (13/700, `--muted`) o "Sin margen" si se ha llegado o pasado (con menos de 0,50 € también); sin presupuesto, nada. Si se pasa: pastilla "+X €" y el recuadro tiembla cada 7 s. | `inicio.js` |
+| **Categoría del Inicio** | Rejilla de 2 columnas, hueco 12, filas de mínimo 84 que reparten el alto libre. Radio 20, borde `--line-soft`. Icono de categoría 24 (trazo 2) en `--muted`, nombre 15/700, importe 25/800 y "de 380" 13/600 en `--muted`, y debajo "Quedan 22 €" (13/600, `--muted`, igual que "de 380") o "Sin margen" si se ha llegado o pasado (con menos de 0,50 € también); sin presupuesto, nada. Si se pasa: pastilla "+X €" y el recuadro tiembla cada 7 s. | `inicio.js` |
 | **Cabecera de categoría** | Ancho completo, alto 164, radio 28. Icono 34, importe 64/800 + "€" 30/700, "de 380 € este mes" 16/700, pastilla "quedan X €". | `ver-categoria.js` |
 | **Vista previa de categoría** | Como la cabecera, alto `min(164, 16 %)`, líquido al 62 % fijo; nombre 30/800 (o "Nombre" al 45 % si está vacío). | `categoria-form.js` |
 | **Su parte de cada categoría** | 112×96, radio 20, en fila deslizable. Nombre 13/700 e importe 22/800. Líquido = gasto con esa tarjeta frente al presupuesto. | `ver-tarjeta.js` |
