@@ -185,8 +185,8 @@ export function renderInicio() {
             <div data-fill class="fill"></div>
             <div style="position:relative;z-index:2;height:100%;box-sizing:border-box;padding:10px 12px;display:flex;flex-direction:column;justify-content:space-between">
               <div style="display:flex;justify-content:space-between;align-items:flex-start">
-                <span data-ic style="display:flex;color:var(--muted)"></span>
                 <span data-over hidden style="font-size:12px;font-weight:800;padding:3px 8px;border-radius:99px;background:#1B1B1F;color:#FFC2A1"></span>
+                <span data-ic style="display:flex;margin-left:auto;color:var(--muted)"></span>
               </div>
               <div>
                 <div data-name style="font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
