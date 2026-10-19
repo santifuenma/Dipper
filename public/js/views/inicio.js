@@ -189,7 +189,7 @@ export function renderInicio() {
                 <span data-over hidden style="flex:none;font-size:12px;font-weight:800;padding:3px 8px;border-radius:99px;background:#1B1B1F;color:#FFC2A1"></span>
                 <span data-ic class="ic-circle" style="width:32px;height:32px"></span>
               </div>
-              <div>
+              <div data-bottom>
                 <div style="display:flex;align-items:baseline;gap:5px">
                   <span data-amount style="font-size:25px;font-weight:800;letter-spacing:-.6px;line-height:1.1"></span>
                   <span data-of style="font-size:13px;font-weight:600;color:var(--muted)"></span>
@@ -204,7 +204,8 @@ export function renderInicio() {
         if (over) a.classList.add("wob");
         const fill = a.querySelector("[data-fill]");
         fill.style.color = t.color;
-        fill.style.height = (t.budgetCents > 0 ? Math.min(100, (spent / t.budgetCents) * 100) : 0) + "%";
+        a.dataset.pct = String(t.budgetCents > 0 ? Math.min(100, (spent / t.budgetCents) * 100) : 0);
+        fill.style.height = a.dataset.pct + "%";
         // El icono va en un círculo de su color: así la categoría tiene color aunque esté vacía.
         const ic = a.querySelector("[data-ic]");
         ic.style.background = t.color;
@@ -228,6 +229,33 @@ export function renderInicio() {
       })
     );
     tiles.resetOrder();
+    keepWavesOffText(tiles);
+  }
+
+  // El borde del líquido (con su ola) nunca cae sobre el importe ni sobre "Quedan…": si caería en ese
+  // bloque, sube justo por encima o se esconde por debajo, lo que quede más cerca. Las cifras exactas
+  // ya las dice el texto. Hace falta el tamaño real del recuadro, así que espera a que esté en pantalla.
+  function keepWavesOffText(tiles, tries = 0) {
+    const first = tiles.firstElementChild;
+    if (!first || !first.isConnected || !first.clientHeight) {
+      if (tries < 40) setTimeout(() => keepWavesOffText(tiles, tries + 1), 25);
+      return;
+    }
+    for (const a of tiles.children) {
+      const fill = a.querySelector("[data-fill]");
+      const pct = Number(a.dataset.pct);
+      const h = a.clientHeight;
+      const textTop = a.querySelector("[data-bottom]").getBoundingClientRect().top - a.getBoundingClientRect().top;
+      const zone = h - textTop + 3; // alto del bloque de texto de abajo, con 3 px de aire
+      const edge = (pct / 100) * h;
+      fill.style.bottom = "";
+      if (pct >= 100 || edge >= zone) fill.style.height = pct + "%";
+      else if (edge >= zone / 2) fill.style.height = zone + "px";
+      else {
+        fill.style.height = "0px";
+        fill.style.bottom = "-10px"; // la ola queda escondida bajo el borde
+      }
+    }
   }
 
   // Mantener pulsada una categoría y arrastrarla cambia el orden en toda la app.
