@@ -65,7 +65,7 @@ Un solo juego, en `ICON` (`public/js/dom.js`): trazo `currentColor`, extremos re
 Todos los iconos de la app están en `ICON`; ninguna pantalla dibuja los suyos. Para otro tamaño se
 usa `iconSize(ICON.x, px)`, y el color lo pone el contenedor (`color:`), nunca el icono. Los iconos de
 categoría son aparte, porque son datos que elige el usuario (`categoryIcon` en `public/js/icons.js`),
-pero siguen la misma regla: color del contenedor (tinta por defecto, `--muted` en los recuadros del Inicio).
+pero siguen la misma regla: color del contenedor (tinta por defecto, también dentro de su círculo de color).
 
 | Significado | Icono |
 |---|---|

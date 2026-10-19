@@ -187,7 +187,7 @@ export function renderInicio() {
               <div style="display:flex;align-items:flex-start;gap:6px">
                 <div data-name style="flex:1;min-width:0;font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
                 <span data-over hidden style="flex:none;font-size:12px;font-weight:800;padding:3px 8px;border-radius:99px;background:#1B1B1F;color:#FFC2A1"></span>
-                <span data-ic style="flex:none;display:flex;color:var(--muted)"></span>
+                <span data-ic class="ic-circle" style="width:32px;height:32px"></span>
               </div>
               <div>
                 <div style="display:flex;align-items:baseline;gap:5px">
@@ -205,7 +205,10 @@ export function renderInicio() {
         const fill = a.querySelector("[data-fill]");
         fill.style.color = t.color;
         fill.style.height = (t.budgetCents > 0 ? Math.min(100, (spent / t.budgetCents) * 100) : 0) + "%";
-        a.querySelector("[data-ic]").innerHTML = categoryIcon(t.icon, 24, 2);
+        // El icono va en un círculo de su color: así la categoría tiene color aunque esté vacía.
+        const ic = a.querySelector("[data-ic]");
+        ic.style.background = t.color;
+        ic.innerHTML = categoryIcon(t.icon, 18);
         a.querySelector("[data-name]").textContent = t.name;
         a.querySelector("[data-amount]").textContent = eurosInt(spent) + " €";
         a.querySelector("[data-of]").textContent = t.budgetCents > 0 ? "de " + eurosInt(t.budgetCents) : "";
