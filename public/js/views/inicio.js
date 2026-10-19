@@ -184,12 +184,12 @@ export function renderInicio() {
           <a data-press style="display:block;position:relative;overflow:hidden;min-height:0;box-sizing:border-box;border:1.5px solid rgba(27,27,31,.1);border-radius:20px;background:#fff">
             <div data-fill class="fill"></div>
             <div style="position:relative;z-index:2;height:100%;box-sizing:border-box;padding:10px 12px;display:flex;flex-direction:column;justify-content:space-between">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start">
-                <span data-over hidden style="font-size:12px;font-weight:800;padding:3px 8px;border-radius:99px;background:#1B1B1F;color:#FFC2A1"></span>
-                <span data-ic style="display:flex;margin-left:auto;color:var(--muted)"></span>
+              <div style="display:flex;align-items:flex-start;gap:6px">
+                <div data-name style="flex:1;min-width:0;font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+                <span data-over hidden style="flex:none;font-size:12px;font-weight:800;padding:3px 8px;border-radius:99px;background:#1B1B1F;color:#FFC2A1"></span>
+                <span data-ic style="flex:none;display:flex;color:var(--muted)"></span>
               </div>
               <div>
-                <div data-name style="font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
                 <div style="display:flex;align-items:baseline;gap:5px">
                   <span data-amount style="font-size:25px;font-weight:800;letter-spacing:-.6px;line-height:1.1"></span>
                   <span data-of style="font-size:13px;font-weight:600;color:var(--muted)"></span>
