@@ -194,7 +194,6 @@ export function renderInicio() {
                   <span data-amount style="font-size:25px;font-weight:800;letter-spacing:-.6px;line-height:1.1"></span>
                   <span data-of style="font-size:13px;font-weight:600;color:var(--muted)"></span>
                 </div>
-                <div data-left hidden style="font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
               </div>
             </div>
           </a>
@@ -213,13 +212,6 @@ export function renderInicio() {
         a.querySelector("[data-name]").textContent = t.name;
         a.querySelector("[data-amount]").textContent = eurosInt(spent) + " €";
         a.querySelector("[data-of]").textContent = t.budgetCents > 0 ? "de " + eurosInt(t.budgetCents) : "";
-        // Lo que queda (calculado en el servidor): "Quedan 22 €" o, si se ha llegado o pasado, "Sin margen".
-        // Con menos de 0,50 € el redondeo daría "Quedan 0 €": también es "Sin margen".
-        if (t.budgetCents > 0) {
-          const left = a.querySelector("[data-left]");
-          left.hidden = false;
-          left.textContent = t.leftCents >= 50 ? `Quedan ${eurosInt(t.leftCents)} €` : "Sin margen";
-        }
         if (over) {
           const pill = a.querySelector("[data-over]");
           pill.hidden = false;
@@ -232,8 +224,8 @@ export function renderInicio() {
     placeEmptyWave(tiles);
   }
 
-  // El líquido marca exactamente lo gastado. Sin gasto, la ola queda en la franja de debajo de
-  // "Quedan…" para que se vea.
+  // El líquido marca exactamente lo gastado. Sin gasto, la ola queda en la franja de debajo del
+  // importe para que se vea.
   // Hace falta el tamaño real del recuadro, así que espera a que esté en pantalla.
   function placeEmptyWave(tiles, tries = 0) {
     const first = tiles.firstElementChild;
@@ -246,7 +238,7 @@ export function renderInicio() {
       const fill = a.querySelector("[data-fill]");
       const box = a.getBoundingClientRect();
       const text = a.querySelector("[data-bottom]").getBoundingClientRect();
-      const under = box.bottom - text.bottom - 10; // la ola (10 px) cabe bajo "Quedan…"
+      const under = box.bottom - text.bottom - 10; // la ola (10 px) cabe bajo el importe
       fill.style.height = Math.max(0, under) + "px";
       fill.style.bottom = Math.min(0, under) + "px";
     }

@@ -88,8 +88,7 @@ Movimientos y Presupuesto.
      "quedan 1.353 € de aire" o "te pasaste 120 €" (17/700).
   2. Barra de 20 segmentos (gastado ÷ presupuesto del mes).
   3. Abanico de tarjetas (ver *Tarjeta de pago*).
-  4. Rejilla de categorías con líquido, que ocupa el alto que queda; cada una dice cuánto le queda
-     ("Quedan 22 €") o "Sin margen".
+  4. Rejilla de categorías con líquido, que ocupa el alto que queda.
   5. Abajo: recuadro punteado **"3 por revisar · Pagos nuevos sin categoría"** (o "Nada por
      revisar") con bolitas, y el botón + lima.
 - **Acciones**: cambiar de mes; tocar tarjeta (despliega / abre Ver tarjeta); tocar categoría →
