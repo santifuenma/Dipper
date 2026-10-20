@@ -184,12 +184,12 @@ export function renderInicio() {
           <a data-press style="display:block;position:relative;overflow:hidden;min-height:0;box-sizing:border-box;border:1.5px solid rgba(27,27,31,.1);border-radius:20px;background:#fff">
             <div data-fill class="fill"></div>
             <div style="position:relative;z-index:2;height:100%;box-sizing:border-box;padding:8px 10px;display:flex;flex-direction:column;justify-content:space-between">
-              <div data-top style="display:flex;align-items:flex-start;gap:6px">
-                <div data-name class="halo" style="flex:1;min-width:0;font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
-                <span data-over hidden style="flex:none;font-size:12px;font-weight:800;padding:3px 8px;border-radius:99px;background:#1B1B1F;color:#FFC2A1"></span>
+              <div data-top style="display:flex;justify-content:space-between;align-items:flex-start">
                 <span data-ic class="ic-circle" style="width:32px;height:32px"></span>
+                <span data-over hidden style="flex:none;font-size:12px;font-weight:800;padding:3px 8px;border-radius:99px;background:#1B1B1F;color:#FFC2A1"></span>
               </div>
-              <div data-bottom class="halo">
+              <div data-bottom>
+                <div data-name style="font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
                 <div style="display:flex;align-items:baseline;gap:5px">
                   <span data-amount style="font-size:25px;font-weight:800;letter-spacing:-.6px;line-height:1.1"></span>
                   <span data-of style="font-size:13px;font-weight:600;color:var(--muted)"></span>
@@ -232,8 +232,8 @@ export function renderInicio() {
     placeEmptyWave(tiles);
   }
 
-  // El líquido marca exactamente lo gastado; el texto lleva un halo (.halo) para leerse aunque la ola
-  // pase por detrás. Sin gasto, la ola queda en la franja de debajo de "Quedan…" para que se vea.
+  // El líquido marca exactamente lo gastado. Sin gasto, la ola queda en la franja de debajo de
+  // "Quedan…" para que se vea.
   // Hace falta el tamaño real del recuadro, así que espera a que esté en pantalla.
   function placeEmptyWave(tiles, tries = 0) {
     const first = tiles.firstElementChild;
