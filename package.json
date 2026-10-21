@@ -12,7 +12,8 @@
     "db:remote": "wrangler d1 migrations apply dipper --remote",
     "db:pruebas": "wrangler d1 migrations apply dipper-pruebas --remote --env pruebas",
     "icons": "node scripts/make-icons.mjs",
-    "reset-password": "node scripts/reset-password.mjs"
+    "reset-password": "node scripts/reset-password.mjs",
+    "demo": "node scripts/datos-demo.mjs"
   },
   "dependencies": {
     "@simplewebauthn/server": "^13.1.1"

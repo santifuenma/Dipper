@@ -275,6 +275,7 @@ Los registros de cada petición (incluido un `ingest` por envío del atajo) se v
 | `npm run deploy:pruebas` | Publica en el entorno de pruebas |
 | `npm test` | Ejecuta las pruebas del servidor |
 | `npm run reset-password` | Pone una contraseña nueva a la cuenta real desde el ordenador ⚠️ cierra todas las sesiones |
+| `npm run demo` | Con `npm run dev` en marcha, crea en la base local una cuenta de demostración (`demo@dipper.test`) con tarjetas, presupuesto, pagos del mes y 3 por revisar. Para empezar de cero, borrar `.wrangler/state` y volver a aplicar `npm run db:local` |
 | `npm run icons` | Regenera los iconos PNG de la app |
 
 ## Pruebas
