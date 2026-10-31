@@ -15,6 +15,7 @@ import { renderVerTarjeta } from "./views/ver-tarjeta.js";
 import { renderVerCategoria } from "./views/ver-categoria.js";
 import { renderMovimientos } from "./views/movimientos.js";
 import { renderPago } from "./views/pago.js";
+import { renderHistorial } from "./views/historial.js";
 import { renderPresupuesto } from "./views/presupuesto.js";
 import { renderNuevoGasto } from "./views/nuevo-gasto.js";
 import { renderCambiarContrasena } from "./views/cambiar-contrasena.js";
@@ -33,6 +34,7 @@ const ROUTES = {
   "/ver-categoria": { view: renderVerCategoria, auth: true },
   "/movimientos": { view: renderMovimientos, auth: true },
   "/pago": { view: renderPago, auth: true },
+  "/historial": { view: renderHistorial, auth: true },
   "/conectar-apple-pay": { view: renderApplePay, auth: true },
   "/por-revisar": { view: renderPorRevisar, auth: true },
   "/tarjeta": { view: renderTarjetaForm, auth: true },

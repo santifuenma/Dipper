@@ -120,7 +120,6 @@ export function renderNuevoGasto() {
     const input = document.createElement("input");
     input.type = "date";
     input.setAttribute("aria-label", "Otra fecha");
-    input.max = new Date().toISOString().slice(0, 10);
     input.style.cssText = "position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;-webkit-appearance:none;appearance:none;font-size:16px";
     input.addEventListener("change", () => {
       if (!input.value) return;

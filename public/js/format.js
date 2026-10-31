@@ -27,6 +27,13 @@ export function dayLabel(ts) {
   return shortDay.format(ts).replace(/\./g, "").replace(",", "");
 }
 
+// "hoy", "ayer" o "12 nov 2026" (siempre con día y año si no es hoy/ayer)
+const fullDay = new Intl.DateTimeFormat("es-ES", { timeZone: TZ, day: "numeric", month: "short", year: "numeric" });
+export function dayFull(ts) {
+  const l = dayLabel(ts);
+  return l === "hoy" || l === "ayer" ? l[0].toUpperCase() + l.slice(1) : fullDay.format(ts).replace(/\./g, "");
+}
+
 // "Hoy" / "Ayer" / "Lun 12 oct" para cabeceras de grupo
 export const dayTitle = (ts) => {
   const l = dayLabel(ts);

@@ -2,12 +2,12 @@
 import { api } from "../api.js";
 import { back } from "../nav.js";
 import { busy, html, ICON } from "../dom.js";
-import { euros, when } from "../format.js";
+import { dayFull, dayKey, euros, when } from "../format.js";
 import { cardChips, merchantEditor, penButton, rawLine } from "../components.js";
 
 export function renderPago(params) {
   const id = Number(params.get("id"));
-  const st = { sel: null, original: null, card: null, originalCard: null, categories: [], cards: [], charge: null, confirmDelete: false, name: "", originalName: "", editing: false, merchants: [] };
+  const st = { date: 0, originalDate: 0, sel: null, original: null, card: null, originalCard: null, categories: [], cards: [], charge: null, confirmDelete: false, name: "", originalName: "", editing: false, merchants: [] };
 
   const el = html(`
     <div class="screen">
@@ -31,6 +31,10 @@ export function renderPago(params) {
           <div class="label">Tarjeta</div>
           <div data-cards class="noscroll" style="display:flex;gap:8px;overflow-x:auto;margin:2px -20px 0;padding:8px 20px"></div>
         </div>
+        <div data-date-wrap hidden style="margin-top:14px">
+          <div class="label">Fecha</div>
+          <label data-date-pill style="position:relative;margin-top:8px;height:40px;box-sizing:border-box;padding:0 14px;border-radius:99px;display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;overflow:hidden;background:#fff;border:1.5px solid rgba(27,27,31,.22)">${ICON.calendar}<span data-date-txt></span></label>
+        </div>
         <div class="error" role="alert" style="margin-top:8px"></div>
       </div>
       <button type="button" data-save class="btn btn-lima" style="flex:none;margin-top:10px" disabled>Guardar</button>
@@ -42,7 +46,7 @@ export function renderPago(params) {
   const del = q("[data-delete]");
   const error = q(".error");
 
-  const changed = () => (st.sel !== st.original && st.sel !== null) || st.card !== st.originalCard || nameNow() !== st.originalName;
+  const changed = () => (st.sel !== st.original && st.sel !== null) || st.card !== st.originalCard || nameNow() !== st.originalName || st.date !== st.originalDate;
   // Si guarda sin tocar "Listo", vale lo que haya escrito.
   const nameNow = () => (st.editing && st.draft ? st.draft : st.name);
 
@@ -101,7 +105,27 @@ export function renderPago(params) {
       : st.card === null && st.card !== st.originalCard
         ? "Efectivo u otros"
         : c.walletCard || (c.source === "manual" ? "Efectivo u otros" : "Tarjeta desconocida");
-    q("[data-sub]").textContent = `${when(c.occurredAt)} · ${cardTxt}`;
+    q("[data-sub]").textContent = `${when(st.date)} · ${cardTxt}`;
+    q("[data-date-txt]").textContent = dayFull(st.date);
+  }
+
+  // Selector de fecha nativo (invisible) sobre la pastilla; se conserva la hora del pago. Vale cualquier día,
+  // también de meses que aún no han llegado.
+  function buildDate() {
+    const input = document.createElement("input");
+    input.type = "date";
+    input.setAttribute("aria-label", "Fecha del pago");
+    input.style.cssText = "position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;-webkit-appearance:none;appearance:none;font-size:16px";
+    input.addEventListener("change", () => {
+      if (!input.value) return;
+      const [y, m, d] = input.value.split("-").map(Number);
+      const t = new Date(st.originalDate);
+      st.date = new Date(y, m - 1, d, t.getHours(), t.getMinutes()).getTime();
+      drawSub();
+      save.disabled = !changed();
+    });
+    q("[data-date-pill]").append(input);
+    input.value = dayKey(st.date);
   }
 
   function draw() {
@@ -144,6 +168,7 @@ export function renderPago(params) {
     if (st.sel !== st.original && st.sel !== null) body.categoryId = st.sel;
     if (st.card !== st.originalCard) body.cardId = st.card;
     if (nameNow() !== st.originalName) body.merchant = nameNow();
+    if (st.date !== st.originalDate) body.date = st.date;
     busy(save, true);
     try {
       await api(`/charges/${id}`, body);
@@ -172,8 +197,10 @@ export function renderPago(params) {
 
   api(`/charges/${id}`)
     .then(({ charge, cards, categories, merchants }) => {
-      Object.assign(st, { charge, cards, categories, merchants: merchants || [], sel: charge.categoryId, original: charge.categoryId, card: charge.cardId, originalCard: charge.cardId, name: charge.merchant, originalName: charge.merchant });
+      Object.assign(st, { charge, cards, categories, merchants: merchants || [], sel: charge.categoryId, original: charge.categoryId, card: charge.cardId, originalCard: charge.cardId, name: charge.merchant, originalName: charge.merchant, date: charge.occurredAt, originalDate: charge.occurredAt });
       q("[data-card]").hidden = false;
+      q("[data-date-wrap]").hidden = false;
+      buildDate();
       q("[data-cats-wrap]").hidden = false;
       q("[data-cards-wrap]").hidden = false;
       del.hidden = false;

@@ -224,6 +224,25 @@ describe("categorías, pagos a mano y presupuesto", () => {
     expect(mes.data.charges[0]).toMatchObject({ amountCents: 1250, merchant: "Ocio", status: "done", source: "manual" });
   });
 
+  it("un pago se puede pasar a un mes futuro y el historial lo lleva por orden de registro", async () => {
+    const a = await cuenta();
+    const ocio = a.cat("Ocio");
+    const { data: p1 } = await a.call("/charges", { amountCents: 1000, merchant: "Uno", categoryId: ocio, cardId: null, date: Date.now() });
+    const { data: p2 } = await a.call("/charges", { amountCents: 2000, merchant: "Dos", categoryId: ocio, cardId: null, date: Date.now() });
+    const proximo = Date.now() + 40 * 86400000;
+    expect((await a.call(`/charges/${p1.id}`, { date: proximo })).status).toBe(200);
+    expect((await a.call(`/charges/${p1.id}`, { date: Date.now() + 5 * 366 * 86400000 })).status).toBe(400);
+    expect((await a.call(`/charges/${p1.id}`, { date: "x" })).status).toBe(400);
+    const pago = (await a.call(`/charges/${p1.id}`)).data.charge;
+    expect(pago.occurredAt).toBe(proximo);
+    const mes = (await a.call("/month")).data;
+    expect(mes.charges.map((c) => c.id)).toEqual([p2.id]);
+    expect(mes.latest > mes.current).toBe(true);
+    const h = (await a.call("/history")).data;
+    expect(h.charges.map((c) => c.id)).toEqual([p2.id, p1.id]);
+    expect(h.charges[1].createdAt).toBeLessThanOrEqual(h.charges[0].createdAt);
+  });
+
   it("el mes trae los totales calculados y se puede filtrar por tarjeta o categoría", async () => {
     const a = await cuenta();
     const { card } = (await a.call("/cards", { name: "Visa", last4: "1111", walletName: "Mi Visa", color: "#1B1B1F" })).data;

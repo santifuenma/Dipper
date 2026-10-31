@@ -193,7 +193,8 @@ exigen sesión.
 | `GET` | `/api/pending` · `/api/pending/count` | Pagos por revisar (con sugerencias y "Tus comercios") y su número |
 | `POST` | `/api/pending/:id/confirm` · `/undo` | Confirmar categoría, nombre y tarjeta, o deshacerlo |
 | `GET` | `/api/month?month=AAAA-MM` | Datos de un mes ya calculados: pagos, total, lo que queda, gasto por tarjeta y por categoría y lo que toca al día. `&tarjeta=` o `&categoria=` filtran la lista de pagos |
-| `GET` · `POST` | `/api/charges/:id` | Ver un pago o cambiar su categoría, tarjeta o nombre de comercio |
+| `GET` · `POST` | `/api/charges/:id` | Ver un pago o cambiar su categoría, tarjeta, fecha (hasta un año por delante) o nombre de comercio |
+| `GET` | `/api/history` | Los últimos 150 pagos por orden de registro (`createdAt`), con tarjetas y categorías |
 | `POST` | `/api/charges` · `/api/charges/:id/delete` | Añadir un gasto a mano o borrar un pago |
 | `GET` · `POST` | `/api/cards` · `/api/cards/:id` · `/delete` | Listar, crear, editar y borrar tarjetas |
 | `GET` · `POST` | `/api/categories` · `/api/categories/:id` · `/delete` | Listar, crear, editar y borrar categorías |

@@ -22,6 +22,7 @@ export function renderInicio() {
           <button type="button" data-next class="icon-btn" style="margin-left:0" aria-label="Mes siguiente">${ICON.forward}</button>
         </div>
         <div style="display:flex;gap:8px">
+          <a href="#/historial" data-press aria-label="Historial" class="round-btn">${ICON.clock}</a>
           <a href="#/presupuesto" data-press aria-label="Presupuesto" class="round-btn">${ICON.sliders}</a>
           <a href="#/ajustes" data-press aria-label="Ajustes" class="round-btn dash">${ICON.gear}</a>
         </div>
@@ -259,7 +260,8 @@ export function renderInicio() {
     if (!m) return;
     q("[data-month]").textContent = monthLabel(m);
     q("[data-spent-label]").textContent = "gastado en " + monthLabel(m);
-    next.disabled = !data || m >= data.current;
+    // Se puede avanzar hasta el último mes con pagos (los hay de meses futuros).
+    next.disabled = !data || m >= data.latest;
     next.style.opacity = next.disabled ? ".25" : "1";
     if (!data) return;
 

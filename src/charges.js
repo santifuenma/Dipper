@@ -60,7 +60,12 @@ export function monthSummary({ month, current, charges, cards, categories, month
 
 const CHARGE_COLS = `ch.id, ch.amount_cents AS amountCents, ch.merchant_name AS merchant, ch.merchant_raw AS merchantRaw,
   ch.card_id AS cardId, ch.wallet_card AS walletCard, ch.category_id AS categoryId, ch.status, ch.source,
-  ch.occurred_at AS occurredAt`;
+  ch.occurred_at AS occurredAt, ch.created_at AS createdAt`;
+
+// Fechas que vale un pago: hasta ~13 meses atrás y hasta un año por delante (pagos de meses futuros).
+const MAX_PAST = 400 * 86400000;
+const MAX_AHEAD = 366 * 86400000;
+const validDate = (ts, now = Date.now()) => Number.isFinite(ts) && ts >= now - MAX_PAST && ts <= now + MAX_AHEAD;
 
 async function month(env, url, user) {
   const m = /^\d{4}-\d{2}$/.test(url.searchParams.get("month") || "") ? url.searchParams.get("month") : monthKey(Date.now());
@@ -87,6 +92,9 @@ async function month(env, url, user) {
     .first();
 
   const current = monthKey(Date.now());
+  // Último mes con pagos (puede ser futuro): hasta ahí se puede avanzar en el Inicio.
+  const last = await env.DB.prepare("SELECT MAX(occurred_at) AS t FROM charges WHERE user_id = ?").bind(user.id).first();
+  const latest = last && last.t ? monthKey(last.t) : current;
   const summary = monthSummary({ month: m, current, charges: all, cards, categories, monthlyBudgetCents: u.b });
 
   // ?tarjeta= o ?categoria= dejan solo esos pagos en la lista (los totales siguen siendo del mes).
@@ -97,6 +105,7 @@ async function month(env, url, user) {
   return json({
     month: m,
     current,
+    latest: latest > current ? latest : current,
     charges,
     chargesTotalCents: charges.reduce((a, c) => a + c.amountCents, 0),
     monthlyBudgetCents: u.b,
@@ -115,7 +124,22 @@ async function getOne(env, user, id) {
   return json({ charge, card, cards, categories: await listCategories(env, user.id), merchants: await listMerchants(env, user.id) });
 }
 
-// Cambia la categoría, la tarjeta y/o el nombre del comercio de un pago. cardId: null = efectivo u otros.
+// Historial: los últimos pagos registrados, del que entró más recientemente al más antiguo (da igual su fecha).
+async function history(env, user) {
+  const { results: charges } = await env.DB.prepare(
+    `SELECT ${CHARGE_COLS} FROM charges ch WHERE ch.user_id = ? ORDER BY ch.created_at DESC, ch.id DESC LIMIT 150`
+  )
+    .bind(user.id)
+    .all();
+  const { results: cards } = await env.DB.prepare(
+    "SELECT id, name, last4, wallet_name AS walletName, color FROM cards WHERE user_id = ? ORDER BY id"
+  )
+    .bind(user.id)
+    .all();
+  return json({ charges, cards, categories: await listCategories(env, user.id) });
+}
+
+// Cambia la categoría, la tarjeta, la fecha y/o el nombre del comercio de un pago. cardId: null = efectivo u otros.
 // El nombre se cambia en todos los pagos de ese comercio y se recuerda para los que lleguen.
 async function update(request, env, user, id) {
   const body = await readJson(request);
@@ -146,6 +170,11 @@ async function update(request, env, user, id) {
     }
     stmts.push(env.DB.prepare("UPDATE charges SET card_id = ? WHERE id = ?").bind(cardId, id));
   }
+  if ("date" in body) {
+    const when = Number(body.date);
+    if (!validDate(when)) return json({ error: "Esa fecha no vale." }, 400);
+    stmts.push(env.DB.prepare("UPDATE charges SET occurred_at = ? WHERE id = ?").bind(when, id));
+  }
   if (!stmts.length) return json({ error: "No hay nada que cambiar." }, 400);
   await env.DB.batch(stmts);
   return json({ ok: true });
@@ -165,7 +194,7 @@ async function createManual(request, env, user) {
   }
   const now = Date.now();
   let when = Number(date) || now;
-  if (when > now + 86400000 || when < now - 400 * 86400000) when = now;
+  if (!validDate(when, now)) when = now;
 
   const name = String(merchant || "").trim().slice(0, 80) || cat.name;
   const res = await env.DB.prepare(
@@ -188,6 +217,7 @@ export async function handleCharges(request, env, url, user) {
   const p = url.pathname;
   const m = request.method;
   if (p === "/api/month" && m === "GET") return month(env, url, user);
+  if (p === "/api/history" && m === "GET") return history(env, user);
   if (p === "/api/charges" && m === "POST") return createManual(request, env, user);
   const match = p.match(/^\/api\/charges\/(\d+)(\/delete)?$/);
   if (!match) return null;

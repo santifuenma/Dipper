@@ -1,6 +1,6 @@
 # Pantallas
 
-Las 17 pantallas de Dipper. Cada una sigue la misma plantilla: para qué sirve, qué muestra, qué se
+Las 18 pantallas de Dipper. Cada una sigue la misma plantilla: para qué sirve, qué muestra, qué se
 puede hacer, de dónde saca los datos y qué reglas tiene. Las piezas citadas están en
 [`componentes.md`](componentes.md) y las reglas largas en [`flujos.md`](flujos.md).
 
@@ -39,6 +39,7 @@ flowchart LR
 | [Ver categoría](#ver-categoría) | `#/ver-categoria?id=` | Sí | Normal |
 | [Movimientos](#movimientos) | `#/movimientos?tarjeta=&categoria=` | Sí | Normal, con scroll |
 | [Pago](#pago) | `#/pago?id=` | Sí | Normal |
+| [Historial](#historial) | `#/historial` | Sí | Normal, con scroll |
 | [Por revisar](#por-revisar) | `#/por-revisar` | Sí | Normal, con scroll |
 | [Nuevo gasto](#nuevo-gasto) | `#/nuevo-gasto` | Sí | Sube desde abajo |
 | [Presupuesto](#presupuesto) | `#/presupuesto` | Sí | Normal |
@@ -82,7 +83,7 @@ Movimientos y Presupuesto.
 
 - **Para qué**: ver el mes de un vistazo.
 - **Barra**: ‹ mes › (el siguiente se desactiva al llegar al actual; "octubre" o "octubre 2025" si
-  es de otro año) y a la derecha Presupuesto (`ICON` de reguladores) y Ajustes (engranaje, punteado).
+  es de otro año) y a la derecha Historial (reloj), Presupuesto (`ICON` de reguladores) y Ajustes (engranaje, punteado).
 - **Muestra, de arriba abajo**:
   1. "gastado en octubre" 15/600 `--muted`, total `min(92, 10,8 %)`/800 + "€", y
      "quedan 1.353 € de aire" o "te pasaste 120 €" (17/700).
@@ -93,7 +94,7 @@ Movimientos y Presupuesto.
      revisar") con bolitas, y el botón + lima.
 - **Acciones**: cambiar de mes; tocar tarjeta (despliega / abre Ver tarjeta); tocar categoría →
   Ver categoría; **mantener pulsada una categoría y arrastrarla** la cambia de sitio (cuadrícula
-  ordenable) y ese orden se usa en toda la app; Por revisar; + → Nuevo gasto; Presupuesto; Ajustes.
+  ordenable) y ese orden se usa en toda la app; Por revisar; + → Nuevo gasto; Historial; Presupuesto; Ajustes. El mes se puede avanzar hasta el último que tenga pagos (`latest`, puede ser futuro).
 - **Una sola vez tras entrar con contraseña**: hoja "¿Entrar con Face ID la próxima vez?" con
   **Activar** y **Ahora no** (no se vuelve a preguntar).
 - **API**: `GET /api/month?month=AAAA-MM`.
@@ -132,13 +133,23 @@ Movimientos y Presupuesto.
 - **Barra**: volver, "Pago", papelera con confirmación (aviso "Toca otra vez la papelera para borrar
   este pago.").
 - **Muestra**: caja con importe 52/800, nombre del comercio 22/800 con el lápiz, línea de Apple Pay
-  y "hoy · 18:42 · Visa ···· 1234"; "Categoría" en rejilla de fichas; "Tarjeta" en fichas de
+  y "hoy · 18:42 · Visa ···· 1234"; "Fecha" (pastilla con calendario nativo, vale cualquier día, también de meses futuros; se conserva la hora); "Categoría" en rejilla de fichas; "Tarjeta" en fichas de
   tarjeta (la usada primero, más Efectivo); botón **Guardar** (activo solo si algo cambió).
 - **Editar el nombre**: el editor de comercio sustituye al nombre, con la nota "Se cambia en todos
   los pagos de este comercio."; elegir un comercio propone su categoría; Guardar vale aunque no se
   pulse "Listo".
-- **API**: `GET /api/charges/:id`, `POST /api/charges/:id` (`categoryId`, `cardId`, `merchant`),
+- **API**: `GET /api/charges/:id`, `POST /api/charges/:id` (`categoryId`, `cardId`, `merchant`, `date`),
   `POST /api/charges/:id/delete`.
+
+## Historial
+
+- **Barra**: volver, "Historial".
+- **Muestra**: los últimos 150 pagos en el orden en que se registraron (no el de su fecha), agrupados por
+  el día de registro. Fila en modo *historial* (círculo de categoría, comercio, importe y
+  "Categoría · tarjeta · hora de registro"); si el pago es de otro día, una segunda línea "Pago del 3 nov 2026".
+  Tocar una fila abre su Pago.
+- **Vacía**: "Aún no hay pagos registrados."
+- **API**: `GET /api/history`.
 
 ## Por revisar
 

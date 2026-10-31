@@ -1,16 +1,16 @@
 // Piezas compartidas entre Inicio, Tarjeta, Categoría y Movimientos.
 import { html, ICON } from "./dom.js";
-import { dayKey, dayTitle, euros, timeOf } from "./format.js";
+import { dayFull, dayKey, dayTitle, euros, timeOf } from "./format.js";
 import { cardBorder, cardFg, categoryIcon } from "./icons.js";
 
 // Agrupa pagos (ya ordenados del más reciente al más antiguo) por día.
-export function groupByDay(charges) {
+export function groupByDay(charges, field = "occurredAt") {
   const groups = [];
   for (const c of charges) {
-    const k = dayKey(c.occurredAt);
+    const k = dayKey(c[field]);
     let g = groups[groups.length - 1];
     if (!g || g.key !== k) {
-      g = { key: k, label: dayTitle(c.occurredAt), rows: [] };
+      g = { key: k, label: dayTitle(c[field]), rows: [] };
       groups.push(g);
     }
     g.rows.push(c);
@@ -20,9 +20,12 @@ export function groupByDay(charges) {
 
 // Lista de movimientos agrupada por día (estilo Tarjeta.dc.html / Categoria.dc.html).
 // mode "category": icono de categoría + "Categoría · hora". mode "card": punto de tarjeta + "hora · ···· 1234".
+// mode "history": como "category" pero agrupado por el día en que se registró el pago, con "Categoría · tarjeta · hora de
+// registro" y, si el pago es de otro día, una segunda línea con su fecha.
 export function movementGroups(charges, { cats, cards, mode = "category" }) {
   const wrap = document.createElement("div");
-  for (const g of groupByDay(charges)) {
+  const history = mode === "history";
+  for (const g of groupByDay(charges, history ? "createdAt" : "occurredAt")) {
     const group = html(`
       <div style="margin-top:10px">
         <div data-label class="label" style="margin:0 0 6px 4px"></div>
@@ -48,7 +51,7 @@ export function movementGroups(charges, { cats, cards, mode = "category" }) {
       if (i < g.rows.length - 1) row.style.borderBottom = "1px solid rgba(27,27,31,.08)";
       const lead = row.querySelector("[data-lead]");
       const sub = row.querySelector("[data-sub]");
-      if (mode === "category") {
+      if (mode === "category" || history) {
         lead.className = "ic-circle";
         lead.style.boxSizing = "border-box";
         if (cat) {
@@ -58,7 +61,19 @@ export function movementGroups(charges, { cats, cards, mode = "category" }) {
           lead.style.border = "1.5px dashed rgba(27,27,31,.5)";
           lead.innerHTML = ICON.alert;
         }
-        sub.textContent = (cat ? cat.name : "Por revisar") + " · " + timeOf(c.occurredAt);
+        if (history) {
+          const where = card ? card.name + " ···· " + card.last4 : c.walletCard || "Efectivo";
+          sub.style.cssText = "display:block;font-size:13px;font-weight:500;color:#5A5470;white-space:nowrap;overflow:hidden;text-overflow:ellipsis";
+          sub.textContent = `${cat ? cat.name : "Por revisar"} · ${where} · ${timeOf(c.createdAt)}`;
+          if (dayKey(c.occurredAt) !== dayKey(c.createdAt)) {
+            const when = document.createElement("span");
+            when.style.cssText = "display:block;font-size:12px;font-weight:700;color:var(--ink)";
+            when.textContent = "Pago del " + dayFull(c.occurredAt);
+            sub.after(when);
+          }
+        } else {
+          sub.textContent = (cat ? cat.name : "Por revisar") + " · " + timeOf(c.occurredAt);
+        }
       } else {
         lead.remove();
         const dot = document.createElement("span");
