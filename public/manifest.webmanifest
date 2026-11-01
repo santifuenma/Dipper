@@ -3,6 +3,7 @@
   "short_name": "Dipper",
   "start_url": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#F1EDF9",
   "theme_color": "#F1EDF9",
   "lang": "es",

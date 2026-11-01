@@ -23,6 +23,11 @@
 </head>
 <body>
   <div id="app"></div>
+  <!-- iOS no deja bloquear la orientación: en horizontal (en un móvil) se tapa la app con este aviso -->
+  <div id="rotate" role="alert">
+    <span aria-hidden="true">↻</span>
+    <span>Gira el móvil.<br>Dipper se usa en vertical.</span>
+  </div>
   <script type="module" src="/js/app.js"></script>
 </body>
 </html>
