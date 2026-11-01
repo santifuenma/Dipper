@@ -170,6 +170,11 @@ async function update(request, env, user, id) {
     }
     stmts.push(env.DB.prepare("UPDATE charges SET card_id = ? WHERE id = ?").bind(cardId, id));
   }
+  if ("amountCents" in body) {
+    const amount = Math.round(Number(body.amountCents));
+    if (!Number.isFinite(amount) || amount === 0 || Math.abs(amount) > 100000000) return json({ error: "Escribe un importe." }, 400);
+    stmts.push(env.DB.prepare("UPDATE charges SET amount_cents = ? WHERE id = ?").bind(amount, id));
+  }
   if ("date" in body) {
     const when = Number(body.date);
     if (!validDate(when)) return json({ error: "Esa fecha no vale." }, 400);

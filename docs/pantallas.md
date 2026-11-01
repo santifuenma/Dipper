@@ -132,13 +132,13 @@ Movimientos y Presupuesto.
 
 - **Barra**: volver, "Pago", papelera con confirmación (aviso "Toca otra vez la papelera para borrar
   este pago.").
-- **Muestra**: caja con importe 52/800, nombre del comercio 22/800 con el lápiz, línea de Apple Pay
+- **Muestra**: caja con importe 52/800 con su lápiz (al tocarlo, campo numérico con "Listo"), nombre del comercio 22/800 con el lápiz, línea de Apple Pay
   y "hoy · 18:42 · Visa ···· 1234"; "Fecha" (pastilla con calendario nativo, vale cualquier día, también de meses futuros; se conserva la hora); "Categoría" en rejilla de fichas; "Tarjeta" en fichas de
   tarjeta (la usada primero, más Efectivo); botón **Guardar** (activo solo si algo cambió).
 - **Editar el nombre**: el editor de comercio sustituye al nombre, con la nota "Se cambia en todos
   los pagos de este comercio."; elegir un comercio propone su categoría; Guardar vale aunque no se
   pulse "Listo".
-- **API**: `GET /api/charges/:id`, `POST /api/charges/:id` (`categoryId`, `cardId`, `merchant`, `date`),
+- **API**: `GET /api/charges/:id`, `POST /api/charges/:id` (`categoryId`, `cardId`, `merchant`, `date`, `amountCents`),
   `POST /api/charges/:id/delete`.
 
 ## Historial

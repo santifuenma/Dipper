@@ -7,7 +7,7 @@ import { cardChips, merchantEditor, penButton, rawLine } from "../components.js"
 
 export function renderPago(params) {
   const id = Number(params.get("id"));
-  const st = { date: 0, originalDate: 0, sel: null, original: null, card: null, originalCard: null, categories: [], cards: [], charge: null, confirmDelete: false, name: "", originalName: "", editing: false, merchants: [] };
+  const st = { amount: 0, originalAmount: 0, editingAmount: false, date: 0, originalDate: 0, sel: null, original: null, card: null, originalCard: null, categories: [], cards: [], charge: null, confirmDelete: false, name: "", originalName: "", editing: false, merchants: [] };
 
   const el = html(`
     <div class="screen">
@@ -19,7 +19,7 @@ export function renderPago(params) {
       <div style="flex:1;min-height:0;padding:8px 0 12px">
         <div data-del-hint class="hint-danger" style="margin-bottom:10px"></div>
         <div data-card class="card-box" style="border-radius:28px;padding:16px 18px" hidden>
-          <div data-amount style="font-size:52px;font-weight:800;line-height:1;letter-spacing:-2px"></div>
+          <div data-amount-box></div>
           <div data-merchant style="margin-top:10px"></div>
           <div data-sub style="margin-top:8px;font-size:14px;font-weight:600;color:#5A5470"></div>
         </div>
@@ -46,9 +46,58 @@ export function renderPago(params) {
   const del = q("[data-delete]");
   const error = q(".error");
 
-  const changed = () => (st.sel !== st.original && st.sel !== null) || st.card !== st.originalCard || nameNow() !== st.originalName || st.date !== st.originalDate;
+  const changed = () => (st.sel !== st.original && st.sel !== null) || st.card !== st.originalCard || nameNow() !== st.originalName || st.date !== st.originalDate || st.amount !== st.originalAmount;
   // Si guarda sin tocar "Listo", vale lo que haya escrito.
   const nameNow = () => (st.editing && st.draft ? st.draft : st.name);
+
+  // Importe con lápiz; al tocarlo, un campo numérico con "Listo". Vale la coma o el punto como decimal.
+  function drawAmount() {
+    const box = q("[data-amount-box]");
+    if (st.editingAmount) {
+      const form = html(`
+        <form class="field has-btn" style="height:56px">
+          <input data-input type="text" inputmode="decimal" autocomplete="off" enterkeyhint="done" aria-label="Importe en euros" style="font-size:28px;font-weight:800">
+          <span style="font-size:22px;font-weight:700;color:var(--ink)">€</span>
+          <button type="submit" class="toggle" style="text-decoration:underline">Listo</button>
+        </form>
+      `);
+      const input = form.querySelector("[data-input]");
+      input.value = (st.amount / 100).toFixed(2).replace(".", ",");
+      const read = () => {
+        const v = Math.round(parseFloat(input.value.replace(",", ".").replace(/[^\d.-]/g, "")) * 100);
+        return Number.isFinite(v) && v !== 0 ? v : null;
+      };
+      input.addEventListener("input", () => {
+        const v = read();
+        if (v !== null) st.amount = v;
+        save.disabled = !changed();
+      });
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const v = read();
+        if (v === null) return;
+        st.amount = v;
+        st.editingAmount = false;
+        drawAmount();
+        draw();
+      });
+      box.replaceChildren(form);
+      requestAnimationFrame(() => {
+        input.focus();
+        input.select();
+      });
+      return;
+    }
+    const row = html(`<div style="display:flex;align-items:center;gap:10px"><span data-a style="font-size:52px;font-weight:800;line-height:1;letter-spacing:-2px"></span></div>`);
+    row.querySelector("[data-a]").textContent = euros(st.amount);
+    const pen = penButton(() => {
+      st.editingAmount = true;
+      drawAmount();
+    });
+    pen.setAttribute("aria-label", "Cambiar el importe");
+    row.append(pen);
+    box.replaceChildren(row);
+  }
 
   // Nombre del comercio con lápiz; al tocarlo, el campo y las fichas de tus comercios.
   function drawMerchant() {
@@ -169,6 +218,7 @@ export function renderPago(params) {
     if (st.card !== st.originalCard) body.cardId = st.card;
     if (nameNow() !== st.originalName) body.merchant = nameNow();
     if (st.date !== st.originalDate) body.date = st.date;
+    if (st.amount !== st.originalAmount) body.amountCents = st.amount;
     busy(save, true);
     try {
       await api(`/charges/${id}`, body);
@@ -204,7 +254,8 @@ export function renderPago(params) {
       q("[data-cats-wrap]").hidden = false;
       q("[data-cards-wrap]").hidden = false;
       del.hidden = false;
-      q("[data-amount]").textContent = euros(charge.amountCents);
+      st.amount = st.originalAmount = charge.amountCents;
+      drawAmount();
       drawMerchant();
       draw();
     })

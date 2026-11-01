@@ -243,6 +243,16 @@ describe("categorías, pagos a mano y presupuesto", () => {
     expect(h.charges[1].createdAt).toBeLessThanOrEqual(h.charges[0].createdAt);
   });
 
+  it("se puede corregir el importe de un pago", async () => {
+    const a = await cuenta();
+    const { data: p } = await a.call("/charges", { amountCents: 1000, merchant: "Uno", categoryId: a.cat("Ocio"), cardId: null, date: Date.now() });
+    expect((await a.call(`/charges/${p.id}`, { amountCents: 2575 })).status).toBe(200);
+    expect((await a.call(`/charges/${p.id}`)).data.charge.amountCents).toBe(2575);
+    expect((await a.call(`/charges/${p.id}`, { amountCents: 0 })).status).toBe(400);
+    expect((await a.call(`/charges/${p.id}`, { amountCents: "x" })).status).toBe(400);
+    expect((await a.call("/month")).data.totalCents).toBe(2575);
+  });
+
   it("el mes trae los totales calculados y se puede filtrar por tarjeta o categoría", async () => {
     const a = await cuenta();
     const { card } = (await a.call("/cards", { name: "Visa", last4: "1111", walletName: "Mi Visa", color: "#1B1B1F" })).data;
