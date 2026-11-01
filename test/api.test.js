@@ -253,6 +253,17 @@ describe("categorías, pagos a mano y presupuesto", () => {
     expect((await a.call("/month")).data.totalCents).toBe(2575);
   });
 
+  it("cada pago puede llevar un concepto distinto del comercio", async () => {
+    const a = await cuenta();
+    const { data: p } = await a.call("/charges", { amountCents: 1000, merchant: "Zara", concept: "  regalo   de Marta ", categoryId: a.cat("Ropa"), cardId: null, date: Date.now() });
+    expect((await a.call(`/charges/${p.id}`)).data.charge).toMatchObject({ merchant: "Zara", concept: "regalo de Marta" });
+    expect((await a.call(`/charges/${p.id}`, { concept: "cumpleaños" })).status).toBe(200);
+    expect((await a.call("/month")).data.charges[0].concept).toBe("cumpleaños");
+    expect((await a.call(`/charges/${p.id}`, { concept: "x".repeat(81) })).status).toBe(400);
+    expect((await a.call(`/charges/${p.id}`, { concept: "" })).status).toBe(200);
+    expect((await a.call(`/charges/${p.id}`)).data.charge.concept).toBeNull();
+  });
+
   it("el mes trae los totales calculados y se puede filtrar por tarjeta o categoría", async () => {
     const a = await cuenta();
     const { card } = (await a.call("/cards", { name: "Visa", last4: "1111", walletName: "Mi Visa", color: "#1B1B1F" })).data;

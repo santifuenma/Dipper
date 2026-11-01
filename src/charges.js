@@ -60,7 +60,10 @@ export function monthSummary({ month, current, charges, cards, categories, month
 
 const CHARGE_COLS = `ch.id, ch.amount_cents AS amountCents, ch.merchant_name AS merchant, ch.merchant_raw AS merchantRaw,
   ch.card_id AS cardId, ch.wallet_card AS walletCard, ch.category_id AS categoryId, ch.status, ch.source,
-  ch.occurred_at AS occurredAt, ch.created_at AS createdAt`;
+  ch.occurred_at AS occurredAt, ch.created_at AS createdAt, ch.concept AS concept`;
+
+// Concepto: nota propia del pago; vacío = sin concepto, y más de 80 caracteres no vale.
+const cleanConcept = (s) => (typeof s === "string" ? s.trim().replace(/\s+/g, " ") : "");
 
 // Fechas que vale un pago: hasta ~13 meses atrás y hasta un año por delante (pagos de meses futuros).
 const MAX_PAST = 400 * 86400000;
@@ -170,6 +173,11 @@ async function update(request, env, user, id) {
     }
     stmts.push(env.DB.prepare("UPDATE charges SET card_id = ? WHERE id = ?").bind(cardId, id));
   }
+  if ("concept" in body) {
+    const concept = cleanConcept(body.concept);
+    if (concept.length > 80) return json({ error: "El concepto es demasiado largo." }, 400);
+    stmts.push(env.DB.prepare("UPDATE charges SET concept = ? WHERE id = ?").bind(concept || null, id));
+  }
   if ("amountCents" in body) {
     const amount = Math.round(Number(body.amountCents));
     if (!Number.isFinite(amount) || amount === 0 || Math.abs(amount) > 100000000) return json({ error: "Escribe un importe." }, 400);
@@ -187,7 +195,8 @@ async function update(request, env, user, id) {
 
 // Gasto añadido a mano (efectivo, Bizum, recibos…): entra ya con su categoría.
 async function createManual(request, env, user) {
-  const { amountCents, merchant, categoryId, cardId, date } = await readJson(request);
+  const { amountCents, merchant, categoryId, cardId, date, concept: rawConcept } = await readJson(request);
+  const concept = cleanConcept(rawConcept).slice(0, 80);
   const amount = Math.round(Number(amountCents));
   if (!Number.isFinite(amount) || amount <= 0 || amount > 100000000) return json({ error: "Escribe un importe." }, 400);
   const cat = await env.DB.prepare("SELECT id, name FROM categories WHERE id = ? AND user_id = ?").bind(Number.isInteger(categoryId) ? categoryId : -1, user.id).first();
@@ -204,10 +213,10 @@ async function createManual(request, env, user) {
   const name = String(merchant || "").trim().slice(0, 80) || cat.name;
   const res = await env.DB.prepare(
     `INSERT INTO charges (user_id, amount_cents, merchant_raw, merchant_key, merchant_name, card_id, wallet_card,
-       category_id, status, source, occurred_at, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, NULL, ?, 'done', 'manual', ?, ?)`
+       category_id, status, source, occurred_at, created_at, concept)
+     VALUES (?, ?, ?, ?, ?, ?, NULL, ?, 'done', 'manual', ?, ?, ?)`
   )
-    .bind(user.id, amount, name, normalize(name) || "MANUAL", name, card ? card.id : null, cat.id, when, now)
+    .bind(user.id, amount, name, normalize(name) || "MANUAL", name, card ? card.id : null, cat.id, when, now, concept || null)
     .run();
   return json({ id: res.meta.last_row_id }, 201);
 }

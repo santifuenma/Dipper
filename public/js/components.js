@@ -85,6 +85,12 @@ export function movementGroups(charges, { cats, cards, mode = "category" }) {
         sub.append(dot, txt);
       }
       row.querySelector("[data-merchant]").textContent = c.merchant;
+      if (c.concept) {
+        const note = document.createElement("span");
+        note.style.cssText = "display:block;font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis";
+        note.textContent = c.concept;
+        row.querySelector("[data-merchant]").after(note);
+      }
       row.querySelector("[data-amount]").textContent = euros(c.amountCents);
       rowsEl.append(row);
     });

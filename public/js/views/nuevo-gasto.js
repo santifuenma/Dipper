@@ -11,7 +11,7 @@ export function renderNuevoGasto() {
   const st = { amount: "", cat: null, card: null, date: "hoy", other: null, cats: [], cards: [], saving: false };
 
   const el = html(`
-    <div class="screen" style="gap:10px">
+    <div class="screen" style="gap:8px">
       <div class="topbar">
         <a href="#/" data-back class="icon-btn" aria-label="Cerrar">${ICON.close}</a>
         <span class="title">Nuevo gasto</span>
@@ -20,9 +20,14 @@ export function renderNuevoGasto() {
 
       <div data-amount-box></div>
 
-      <label class="field" style="flex:none;height:50px">
+      <label class="field" style="flex:none;height:42px">
         <span style="display:flex;color:var(--muted)">${ICON.store}</span>
         <input name="merchant" type="text" maxlength="80" aria-label="Comercio o nota" placeholder="¿Dónde? Mercadona, gasolina…">
+      </label>
+
+      <label class="field" style="flex:none;height:42px">
+        <span style="display:flex;color:var(--muted)">${ICON.edit}</span>
+        <input name="concept" type="text" maxlength="80" autocomplete="off" aria-label="Concepto" placeholder="Concepto (opcional): regalo de Marta…">
       </label>
 
       <div style="flex:none">
@@ -55,7 +60,7 @@ export function renderNuevoGasto() {
   const amountEl = bigAmount();
   q("[data-amount-box]").replaceWith(amountEl);
   const keys = keypad({
-    style: "flex:1;min-height:150px;",
+    style: "flex:1;min-height:96px;",
     onChange: (v) => {
       st.amount = v;
       draw();
@@ -178,6 +183,7 @@ export function renderNuevoGasto() {
       keys.setValue("");
       st.cat = null;
       q("[name=merchant]").value = "";
+      q("[name=concept]").value = "";
       done.remove();
       drawCats();
       draw();
@@ -195,6 +201,7 @@ export function renderNuevoGasto() {
       await api("/charges", {
         amountCents: Math.round(value() * 100),
         merchant: q("[name=merchant]").value.trim(),
+        concept: q("[name=concept]").value.trim(),
         categoryId: st.cat,
         cardId: st.card,
         date: when(),

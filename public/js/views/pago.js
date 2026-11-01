@@ -31,9 +31,15 @@ export function renderPago(params) {
           <div class="label">Tarjeta</div>
           <div data-cards class="noscroll" style="display:flex;gap:8px;overflow-x:auto;margin:2px -20px 0;padding:8px 20px"></div>
         </div>
-        <div data-date-wrap hidden style="margin-top:14px">
+        <div data-concept-wrap hidden style="margin-top:10px">
+          <div class="label">Concepto</div>
+          <label class="field" style="margin-top:6px;height:44px">
+            <input data-concept type="text" maxlength="80" autocomplete="off" enterkeyhint="done" aria-label="Concepto" placeholder="Ej. regalo de Marta">
+          </label>
+        </div>
+        <div data-date-wrap hidden style="margin-top:10px;display:flex;align-items:center;justify-content:space-between;gap:12px">
           <div class="label">Fecha</div>
-          <label data-date-pill style="position:relative;margin-top:8px;height:40px;box-sizing:border-box;padding:0 14px;border-radius:99px;display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;overflow:hidden;background:#fff;border:1.5px solid rgba(27,27,31,.22)">${ICON.calendar}<span data-date-txt></span></label>
+          <label data-date-pill style="position:relative;height:38px;box-sizing:border-box;padding:0 14px;border-radius:99px;display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;overflow:hidden;background:#fff;border:1.5px solid rgba(27,27,31,.22)">${ICON.calendar}<span data-date-txt></span></label>
         </div>
         <div class="error" role="alert" style="margin-top:8px"></div>
       </div>
@@ -46,7 +52,8 @@ export function renderPago(params) {
   const del = q("[data-delete]");
   const error = q(".error");
 
-  const changed = () => (st.sel !== st.original && st.sel !== null) || st.card !== st.originalCard || nameNow() !== st.originalName || st.date !== st.originalDate || st.amount !== st.originalAmount;
+  const changed = () => (st.sel !== st.original && st.sel !== null) || st.card !== st.originalCard || nameNow() !== st.originalName || st.date !== st.originalDate || st.amount !== st.originalAmount || conceptNow() !== st.originalConcept;
+  const conceptNow = () => q("[data-concept]").value.trim().replace(/\s+/g, " ");
   // Si guarda sin tocar "Listo", vale lo que haya escrito.
   const nameNow = () => (st.editing && st.draft ? st.draft : st.name);
 
@@ -211,6 +218,10 @@ export function renderPago(params) {
     q("[data-del-hint]").textContent = st.confirmDelete ? "Toca otra vez la papelera para borrar este pago." : "";
   }
 
+  q("[data-concept]").addEventListener("input", () => {
+    save.disabled = !changed();
+  });
+
   save.addEventListener("click", async () => {
     if (save.disabled) return;
     const body = {};
@@ -219,6 +230,7 @@ export function renderPago(params) {
     if (nameNow() !== st.originalName) body.merchant = nameNow();
     if (st.date !== st.originalDate) body.date = st.date;
     if (st.amount !== st.originalAmount) body.amountCents = st.amount;
+    if (conceptNow() !== st.originalConcept) body.concept = conceptNow();
     busy(save, true);
     try {
       await api(`/charges/${id}`, body);
@@ -255,6 +267,9 @@ export function renderPago(params) {
       q("[data-cards-wrap]").hidden = false;
       del.hidden = false;
       st.amount = st.originalAmount = charge.amountCents;
+      st.originalConcept = charge.concept || "";
+      q("[data-concept]").value = st.originalConcept;
+      q("[data-concept-wrap]").hidden = false;
       drawAmount();
       drawMerchant();
       draw();

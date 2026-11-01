@@ -133,12 +133,12 @@ Movimientos y Presupuesto.
 - **Barra**: volver, "Pago", papelera con confirmación (aviso "Toca otra vez la papelera para borrar
   este pago.").
 - **Muestra**: caja con importe 52/800 con su lápiz (al tocarlo, campo numérico con "Listo"), nombre del comercio 22/800 con el lápiz, línea de Apple Pay
-  y "hoy · 18:42 · Visa ···· 1234"; "Fecha" (pastilla con calendario nativo, vale cualquier día, también de meses futuros; se conserva la hora); "Categoría" en rejilla de fichas; "Tarjeta" en fichas de
+  y "hoy · 18:42 · Visa ···· 1234"; "Concepto" (nota propia, opcional, hasta 80 caracteres; distinta del comercio); "Fecha" (pastilla con calendario nativo, vale cualquier día, también de meses futuros; se conserva la hora); "Categoría" en rejilla de fichas; "Tarjeta" en fichas de
   tarjeta (la usada primero, más Efectivo); botón **Guardar** (activo solo si algo cambió).
 - **Editar el nombre**: el editor de comercio sustituye al nombre, con la nota "Se cambia en todos
   los pagos de este comercio."; elegir un comercio propone su categoría; Guardar vale aunque no se
   pulse "Listo".
-- **API**: `GET /api/charges/:id`, `POST /api/charges/:id` (`categoryId`, `cardId`, `merchant`, `date`, `amountCents`),
+- **API**: `GET /api/charges/:id`, `POST /api/charges/:id` (`categoryId`, `cardId`, `merchant`, `date`, `amountCents`, `concept`),
   `POST /api/charges/:id/delete`.
 
 ## Historial
@@ -173,7 +173,7 @@ Movimientos y Presupuesto.
 ## Nuevo gasto
 
 - **Sube desde abajo**; se cierra con ✕.
-- **Muestra**: importe grande; campo "¿Dónde? Mercadona, gasolina…" con icono de tienda;
+- **Muestra**: importe grande; campo "¿Dónde? Mercadona, gasolina…" con icono de tienda; campo opcional "Concepto" con lápiz;
   "Categoría" (fichas con icono, en fila deslizable); "Tarjeta" (fichas de tarjeta, la primera
   elegida, más Efectivo); "Fecha" (Hoy, Ayer, Otra fecha); teclado numérico; botón **Guardar gasto**
   (activo con importe > 0 y categoría).
