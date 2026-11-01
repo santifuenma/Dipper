@@ -4,8 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "predev": "node scripts/build.mjs",
     "dev": "wrangler dev",
+    "build": "node scripts/build.mjs",
+    "predeploy": "node scripts/build.mjs",
     "deploy": "wrangler deploy",
+    "predeploy:pruebas": "node scripts/build.mjs",
     "deploy:pruebas": "wrangler deploy --env pruebas",
     "test": "vitest run",
     "db:local": "wrangler d1 migrations apply dipper --local",

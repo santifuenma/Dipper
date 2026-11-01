@@ -3,6 +3,10 @@ main = "src/worker.js"
 compatibility_date = "2025-09-01"
 compatibility_flags = ["nodejs_compat"]
 
+# El Worker se ejecuta cerca de la base D1: cada pantalla hace varias consultas y así cada viaje es más corto.
+[placement]
+mode = "smart"
+
 # Registro de peticiones (Workers Logs) para poder revisar después qué llegó del atajo.
 [observability]
 enabled = true
@@ -32,6 +36,8 @@ enabled = true
 
 [env.pruebas.vars]
 REGISTRO_ABIERTO = "si"
+# Solo aquí se ve "Enviar aviso de prueba" en Ajustes.
+AVISO_PRUEBA = "si"
 
 [env.pruebas.assets]
 directory = "./public"

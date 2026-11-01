@@ -1,5 +1,5 @@
 // Pantalla "Movimientos" (nueva, acordada): todos los pagos del mes, opcionalmente de una tarjeta o categoría.
-import { api } from "../api.js";
+import { swr } from "../api.js";
 import { emptyNote, movementGroups } from "../components.js";
 import { html, ICON } from "../dom.js";
 import { euros, monthLabel } from "../format.js";
@@ -28,8 +28,7 @@ export function renderMovimientos(params) {
   `);
 
   const filtro = cardId ? `&tarjeta=${cardId}` : catId ? `&categoria=${catId}` : "";
-  api(`/month?month=${view.month || ""}${filtro}`)
-    .then((data) => {
+  swr(`/month?month=${view.month || ""}${filtro}`, (data) => {
       el.querySelector("[data-month]").textContent = monthLabel(data.month);
       const list = data.charges; // ya filtrados por el servidor
       let title = "Todos";

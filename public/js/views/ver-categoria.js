@@ -1,5 +1,5 @@
 // Pantalla "Tap en categoría" (Categoria.dc.html). El botón de arriba abre "Editar categoría".
-import { api } from "../api.js";
+import { swr } from "../api.js";
 import { emptyNote, fitMovements, movementGroups, seeAllLink } from "../components.js";
 import { html, ICON } from "../dom.js";
 import { euros, eurosInt, monthLabel } from "../format.js";
@@ -22,8 +22,7 @@ export function renderVerCategoria(params) {
   `);
   const body = el.querySelector("[data-body]");
 
-  api(`/month?month=${view.month || ""}&categoria=${id}`)
-    .then((data) => {
+  swr(`/month?month=${view.month || ""}&categoria=${id}`, (data) => {
       const cat = data.categories.find((c) => c.id === id);
       if (!cat) {
         el.querySelector(".error").textContent = "Esa categoría ya no existe.";

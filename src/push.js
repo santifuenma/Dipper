@@ -57,7 +57,10 @@ export async function handlePush(request, env, url, user) {
   const m = request.method;
   if (!p.startsWith("/api/push/")) return null;
   if (m === "GET" && p === "/api/push/key") {
-    return pushConfigured(env) ? json({ key: env.VAPID_PUBLIC }) : json({ error: "Los avisos no están configurados en este servidor." }, 503);
+    // test: solo el entorno de pruebas enseña el botón "Enviar aviso de prueba".
+    return pushConfigured(env)
+      ? json({ key: env.VAPID_PUBLIC, test: env.AVISO_PRUEBA === "si" })
+      : json({ error: "Los avisos no están configurados en este servidor." }, 503);
   }
   if (m !== "POST") return null;
 
@@ -86,6 +89,7 @@ export async function handlePush(request, env, url, user) {
     return json({ ok: true });
   }
   if (p === "/api/push/test") {
+    if (env.AVISO_PRUEBA !== "si") return json({ error: "No encontrado." }, 404);
     if (!pushConfigured(env)) return json({ error: "Los avisos no están configurados en este servidor." }, 503);
     return json({ ok: true, sent: await notifyUser(env, user.id, url.origin) });
   }

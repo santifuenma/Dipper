@@ -194,7 +194,7 @@ exigen sesión.
 | `POST` | `/api/pending/:id/confirm` · `/undo` | Confirmar categoría, nombre y tarjeta, o deshacerlo |
 | `GET` | `/api/month?month=AAAA-MM` | Datos de un mes ya calculados: pagos, total, lo que queda, gasto por tarjeta y por categoría y lo que toca al día. `&tarjeta=` o `&categoria=` filtran la lista de pagos |
 | `GET` · `POST` | `/api/charges/:id` | Ver un pago o cambiar su categoría, tarjeta, importe, concepto (nota propia), fecha (hasta un año por delante) o nombre de comercio |
-| `GET` · `POST` | `/api/push/key` · `/subscribe` · `/unsubscribe` · `/test` | Avisos push: clave pública, alta y baja de un dispositivo y aviso de prueba |
+| `GET` · `POST` | `/api/push/key` · `/subscribe` · `/unsubscribe` · `/test` | Avisos push: clave pública, alta y baja de un dispositivo y aviso de prueba (`/test` solo existe si `AVISO_PRUEBA = "si"`, es decir, en pruebas) |
 | `GET` | `/api/history` | Los últimos 150 pagos por orden de registro (`createdAt`), con tarjetas y categorías |
 | `POST` | `/api/charges` · `/api/charges/:id/delete` | Añadir un gasto a mano o borrar un pago |
 | `GET` · `POST` | `/api/cards` · `/api/cards/:id` · `/delete` | Listar, crear, editar y borrar tarjetas |
@@ -322,7 +322,7 @@ public/
   js/dom.js        # Utilidades de DOM y juego único de iconos (ICON)
   js/views/        # Una vista por pantalla
 migrations/        # Esquema de D1, una migración por cambio
-scripts/           # Iconos, cambio de contraseña y claves de los avisos (npm run vapid)
+scripts/           # Iconos, contraseña, claves de los avisos (npm run vapid) y build.mjs, que genera public/sw.js (npm run build)
 wrangler.toml      # Worker, bases D1 y entorno de pruebas
 test/              # Pruebas del servidor (npm test)
 vitest.config.mjs  # Configuración de las pruebas

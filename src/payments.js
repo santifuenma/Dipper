@@ -1,5 +1,5 @@
 // Pagos de Apple Pay: enlace personal, recepción desde Atajos y pantalla "Por revisar".
-import { listCategories } from "./categories.js";
+import { categoriesStmt } from "./categories.js";
 import { merchantInfo } from "./merchants.js";
 import { notifyUser } from "./push.js";
 import { json, randomToken, readJson, sha256 } from "./util.js";
@@ -200,15 +200,12 @@ export function cleanMerchantName(name) {
 }
 
 // Fichas "Tus comercios": los nombres que ya usa, con la categoría de su último pago.
-export async function listMerchants(env, userId) {
-  const { results } = await env.DB.prepare(
+export const merchantsStmt = (env, userId) =>
+  env.DB.prepare(
     `SELECT merchant_name AS name, category_id AS categoryId, MAX(occurred_at) AS last, COUNT(*) AS n
      FROM charges WHERE user_id = ? AND status = 'done' GROUP BY merchant_name ORDER BY n DESC, last DESC LIMIT 60`
-  )
-    .bind(userId)
-    .all();
-  return results.map((r) => ({ name: r.name, categoryId: r.categoryId }));
-}
+  ).bind(userId);
+export const toMerchants = (results) => results.map((r) => ({ name: r.name, categoryId: r.categoryId }));
 
 // Recuerda el nombre del comercio y se lo pone a todos sus pagos (los de antes y los que lleguen).
 export function renameMerchantStmts(env, userId, merchantKey, name) {
@@ -234,22 +231,24 @@ async function applePayLink(env, url, user) {
 }
 
 async function pending(env, user) {
-  const categories = await listCategories(env, user.id);
-  const { results } = await env.DB.prepare(
-    `SELECT ch.id, ch.amount_cents, ch.merchant_raw, ch.merchant_key, ch.merchant_name, ch.wallet_card, ch.occurred_at,
-            ch.card_id, ch.card_check, ca.name AS card_name, ca.last4 AS card_last4, ca.color AS card_color
-     FROM charges ch LEFT JOIN cards ca ON ca.id = ch.card_id
-     WHERE ch.user_id = ? AND ch.status = 'pending'
-     ORDER BY ch.occurred_at DESC`
-  )
-    .bind(user.id)
-    .all();
-  const { results: cards } = await env.DB.prepare("SELECT id, name, last4, color, wallet_name FROM cards WHERE user_id = ? ORDER BY id")
-    .bind(user.id)
-    .all();
-  const { results: rules } = await env.DB.prepare("SELECT merchant_key, category_id FROM merchant_rules WHERE user_id = ?")
-    .bind(user.id)
-    .all();
+  // Cinco consultas en un solo viaje a la base.
+  const [catsRes, pendingRes, cardsRes, rulesRes, merchantsRes] = await env.DB.batch([
+    categoriesStmt(env, user.id),
+    env.DB.prepare(
+      `SELECT ch.id, ch.amount_cents, ch.merchant_raw, ch.merchant_key, ch.merchant_name, ch.wallet_card, ch.occurred_at,
+              ch.card_id, ch.card_check, ca.name AS card_name, ca.last4 AS card_last4, ca.color AS card_color
+       FROM charges ch LEFT JOIN cards ca ON ca.id = ch.card_id
+       WHERE ch.user_id = ? AND ch.status = 'pending'
+       ORDER BY ch.occurred_at DESC`
+    ).bind(user.id),
+    env.DB.prepare("SELECT id, name, last4, color, wallet_name FROM cards WHERE user_id = ? ORDER BY id").bind(user.id),
+    env.DB.prepare("SELECT merchant_key, category_id FROM merchant_rules WHERE user_id = ?").bind(user.id),
+    merchantsStmt(env, user.id),
+  ]);
+  const categories = catsRes.results;
+  const results = pendingRes.results;
+  const cards = cardsRes.results;
+  const rules = rulesRes.results;
 
   const items = results.map((r) => {
     // Comercio recordado (pago retenido solo por la tarjeta): su categoría; si no, la sugerida por el nombre.
@@ -274,7 +273,7 @@ async function pending(env, user) {
         : [],
     };
   });
-  return json({ items, categories, merchants: await listMerchants(env, user.id) });
+  return json({ items, categories, merchants: toMerchants(merchantsRes.results) });
 }
 
 async function confirm(request, env, user, id) {

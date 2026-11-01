@@ -1,5 +1,5 @@
 // Dipper: arranque, rutas y bloqueo de zoom.
-import { api } from "./api.js";
+import { api, forgetData } from "./api.js";
 import { go } from "./nav.js";
 import { startNav } from "./nav.js";
 import { startServiceWorker } from "./push.js";
@@ -24,7 +24,23 @@ import { renderCambiarContrasena } from "./views/cambiar-contrasena.js";
 
 export { go } from "./nav.js";
 
-export const session = { user: null };
+// El usuario se recuerda en el dispositivo para abrir directamente el Inicio (con lo último que se vio) mientras el
+// servidor confirma la sesión. Al salir de la cuenta se borra todo.
+const USER_KEY = "dipper_user";
+let user = null;
+export const session = {
+  get user() {
+    return user;
+  },
+  set user(u) {
+    user = u;
+    try {
+      if (u) localStorage.setItem(USER_KEY, JSON.stringify(u));
+      else localStorage.removeItem(USER_KEY);
+    } catch {}
+    if (!u) forgetData();
+  },
+};
 
 // auth: si la pantalla exige sesión. root: no se puede volver atrás desde ella.
 // sheet: pantalla con ✕ que sube desde abajo (p. ej. Nuevo gasto).
@@ -61,14 +77,38 @@ function blockZoom() {
 
 async function boot() {
   blockZoom();
+  let remembered = null;
   try {
-    const me = await api("/auth/me");
-    session.user = me.user;
-    session.authMethod = me.authMethod;
-  } catch {
-    session.user = null;
+    remembered = JSON.parse(localStorage.getItem(USER_KEY) || "null");
+  } catch {}
+  const check = api("/auth/me");
+
+  if (remembered && remembered.id) {
+    // Ya entró antes en este dispositivo: se abre al momento y se confirma la sesión por detrás.
+    user = remembered;
+    startNav(document.getElementById("app"), ROUTES, () => !!user);
+    check
+      .then((me) => {
+        session.user = me.user;
+        session.authMethod = me.authMethod;
+      })
+      .catch((err) => {
+        // Sin conexión se queda como está; solo si el servidor dice que la sesión ya no vale se vuelve a Entrar.
+        if (err.status === 401) {
+          session.user = null;
+          go("/entrar");
+        }
+      });
+  } else {
+    try {
+      const me = await check;
+      session.user = me.user;
+      session.authMethod = me.authMethod;
+    } catch {
+      session.user = null;
+    }
+    startNav(document.getElementById("app"), ROUTES, () => !!user);
   }
-  startNav(document.getElementById("app"), ROUTES, () => !!session.user);
   startServiceWorker(go);
 }
 

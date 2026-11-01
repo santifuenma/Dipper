@@ -11,6 +11,7 @@ pantalla, se indica con 📱 (ver [`auditoria.md`](auditoria.md)).
 - [Comercios: nombre, clave y sugerencia](#comercios-nombre-clave-y-sugerencia)
 - [Reconocer la tarjeta](#reconocer-la-tarjeta)
 - [Por revisar](#por-revisar)
+- [Rendimiento y caché](#rendimiento-y-caché)
 - [Avisos push](#avisos-push)
 - [Editar un pago](#editar-un-pago)
 - [Gasto a mano](#gasto-a-mano)
@@ -98,6 +99,18 @@ iOS pasa los datos de la transacción a la acción solo o hay que asignarlos con
 | Deshacer | Devuelve a pendientes el pago y los que se colocaron con él; si se había recordado, se olvida la regla. El nombre propio no se deshace. |
 | Tarjeta nueva | Si llega un nombre de Wallet que no tiene ninguna tarjeta, se ofrece guardarla con ese nombre y, si aparecen al final, los 4 dígitos. |
 | Contador | El número de pendientes se ve en la barra y en el Inicio. |
+
+## Rendimiento y caché
+
+| Regla | Detalle |
+|---|---|
+| Archivos de la app | El service worker (`public/sw.js`, generado por `npm run build` desde `scripts/sw.template.js`) guarda HTML, JS, CSS e iconos y los sirve desde el dispositivo. Cada versión (hash de todos los archivos) se descarga entera antes de usarse y borra la anterior: nunca se mezclan. `npm run dev`, `deploy` y `deploy:pruebas` lo generan solos. La API nunca se guarda. |
+| Fuentes | La fuente de Google no bloquea el pintado (se cambia al llegar) y queda guardada en el dispositivo. |
+| Arranque | Si ya entraste en este dispositivo, la app abre el Inicio al momento con lo último que se vio (`dipper_user` y `dipper_cold` en el almacenamiento local) y confirma la sesión por detrás; solo un 401 te lleva a Entrar. Salir de la cuenta lo borra todo. |
+| Datos de pantalla | `swr()` enseña lo último que se sabe y lo actualiza al llegar (sin repintar si no cambió). Las consultas iguales que van en camino se comparten. Tocar una tarjeta, categoría o pago precarga su pantalla. |
+| Tras un cambio | Cualquier cambio (POST) vacía lo guardado y vuelve a pedir el Inicio: nunca se enseña algo anterior a tu propio cambio. |
+| Servidor | Cada pantalla hace **una sola ida a la base** (`DB.batch`), no una por consulta; hay índices por categoría y tarjeta (migración 0010) y Smart Placement acerca el Worker a la base. |
+| Para Swift | La idea se traslada: caché local de la última respuesta, mostrar al abrir y actualizar por detrás. |
 
 ## Avisos push
 

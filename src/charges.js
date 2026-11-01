@@ -1,7 +1,7 @@
 // Movimientos: datos de un mes (Inicio, tarjeta, categoría, lista) y cambiar o borrar un pago.
-import { listCategories } from "./categories.js";
+import { categoriesStmt } from "./categories.js";
 import { normalize } from "./merchants.js";
-import { cleanMerchantName, listMerchants, renameMerchantStmts } from "./payments.js";
+import { cleanMerchantName, merchantsStmt, renameMerchantStmts, toMerchants } from "./payments.js";
 import { json, readJson } from "./util.js";
 
 const monthKeyFmt = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Madrid", year: "numeric", month: "2-digit" });
@@ -76,27 +76,26 @@ async function month(env, url, user) {
   // Margen de un día a cada lado; luego se filtra por el mes en hora de Madrid.
   const from = Date.UTC(y, mo - 1, 1) - 86400000;
   const to = Date.UTC(y, mo, 1) + 86400000;
-  const { results } = await env.DB.prepare(
-    `SELECT ${CHARGE_COLS} FROM charges ch WHERE ch.user_id = ? AND ch.occurred_at >= ? AND ch.occurred_at < ? ORDER BY ch.occurred_at DESC`
-  )
-    .bind(user.id, from, to)
-    .all();
-  const all = results.filter((c) => monthKey(c.occurredAt) === m);
-
-  const { results: cards } = await env.DB.prepare(
-    "SELECT id, name, last4, wallet_name AS walletName, color FROM cards WHERE user_id = ? ORDER BY id"
-  )
-    .bind(user.id)
-    .all();
-  const categories = await listCategories(env, user.id);
-  const u = await env.DB.prepare("SELECT monthly_budget_cents AS b FROM users WHERE id = ?").bind(user.id).first();
-  const { c: pendingCount } = await env.DB.prepare("SELECT COUNT(*) AS c FROM charges WHERE user_id = ? AND status = 'pending'")
-    .bind(user.id)
-    .first();
+  // Todo lo que necesita la pantalla en un solo viaje a la base (cada consulta suelta cuesta una ida y vuelta).
+  const [monthRes, cardsRes, catsRes, userRes, pendingRes, lastRes] = await env.DB.batch([
+    env.DB.prepare(
+      `SELECT ${CHARGE_COLS} FROM charges ch WHERE ch.user_id = ? AND ch.occurred_at >= ? AND ch.occurred_at < ? ORDER BY ch.occurred_at DESC`
+    ).bind(user.id, from, to),
+    env.DB.prepare("SELECT id, name, last4, wallet_name AS walletName, color FROM cards WHERE user_id = ? ORDER BY id").bind(user.id),
+    categoriesStmt(env, user.id),
+    env.DB.prepare("SELECT monthly_budget_cents AS b FROM users WHERE id = ?").bind(user.id),
+    env.DB.prepare("SELECT COUNT(*) AS c FROM charges WHERE user_id = ? AND status = 'pending'").bind(user.id),
+    // Último mes con pagos (puede ser futuro): hasta ahí se puede avanzar en el Inicio.
+    env.DB.prepare("SELECT MAX(occurred_at) AS t FROM charges WHERE user_id = ?").bind(user.id),
+  ]);
+  const all = monthRes.results.filter((c) => monthKey(c.occurredAt) === m);
+  const cards = cardsRes.results;
+  const categories = catsRes.results;
+  const u = userRes.results[0];
+  const pendingCount = pendingRes.results[0].c;
+  const last = lastRes.results[0];
 
   const current = monthKey(Date.now());
-  // Último mes con pagos (puede ser futuro): hasta ahí se puede avanzar en el Inicio.
-  const last = await env.DB.prepare("SELECT MAX(occurred_at) AS t FROM charges WHERE user_id = ?").bind(user.id).first();
   const latest = last && last.t ? monthKey(last.t) : current;
   const summary = monthSummary({ month: m, current, charges: all, cards, categories, monthlyBudgetCents: u.b });
 
@@ -118,28 +117,27 @@ async function month(env, url, user) {
 }
 
 async function getOne(env, user, id) {
-  const charge = await env.DB.prepare(`SELECT ${CHARGE_COLS} FROM charges ch WHERE ch.id = ? AND ch.user_id = ?`).bind(id, user.id).first();
+  const [chargeRes, cardsRes, catsRes, merchantsRes] = await env.DB.batch([
+    env.DB.prepare(`SELECT ${CHARGE_COLS} FROM charges ch WHERE ch.id = ? AND ch.user_id = ?`).bind(id, user.id),
+    env.DB.prepare("SELECT id, name, last4, color FROM cards WHERE user_id = ? ORDER BY id").bind(user.id),
+    categoriesStmt(env, user.id),
+    merchantsStmt(env, user.id),
+  ]);
+  const charge = chargeRes.results[0];
   if (!charge) return json({ error: "Ese pago ya no existe." }, 404);
-  const { results: cards } = await env.DB.prepare("SELECT id, name, last4, color FROM cards WHERE user_id = ? ORDER BY id")
-    .bind(user.id)
-    .all();
+  const cards = cardsRes.results;
   const card = cards.find((k) => k.id === charge.cardId) || null;
-  return json({ charge, card, cards, categories: await listCategories(env, user.id), merchants: await listMerchants(env, user.id) });
+  return json({ charge, card, cards, categories: catsRes.results, merchants: toMerchants(merchantsRes.results) });
 }
 
 // Historial: los últimos pagos registrados, del que entró más recientemente al más antiguo (da igual su fecha).
 async function history(env, user) {
-  const { results: charges } = await env.DB.prepare(
-    `SELECT ${CHARGE_COLS} FROM charges ch WHERE ch.user_id = ? ORDER BY ch.created_at DESC, ch.id DESC LIMIT 150`
-  )
-    .bind(user.id)
-    .all();
-  const { results: cards } = await env.DB.prepare(
-    "SELECT id, name, last4, wallet_name AS walletName, color FROM cards WHERE user_id = ? ORDER BY id"
-  )
-    .bind(user.id)
-    .all();
-  return json({ charges, cards, categories: await listCategories(env, user.id) });
+  const [chargesRes, cardsRes, catsRes] = await env.DB.batch([
+    env.DB.prepare(`SELECT ${CHARGE_COLS} FROM charges ch WHERE ch.user_id = ? ORDER BY ch.created_at DESC, ch.id DESC LIMIT 150`).bind(user.id),
+    env.DB.prepare("SELECT id, name, last4, wallet_name AS walletName, color FROM cards WHERE user_id = ? ORDER BY id").bind(user.id),
+    categoriesStmt(env, user.id),
+  ]);
+  return json({ charges: chargesRes.results, cards: cardsRes.results, categories: catsRes.results });
 }
 
 // Cambia la categoría, la tarjeta, la fecha y/o el nombre del comercio de un pago. cardId: null = efectivo u otros.

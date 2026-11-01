@@ -1,4 +1,5 @@
 // Piezas compartidas entre Inicio, Tarjeta, Categoría y Movimientos.
+import { prefetch } from "./api.js";
 import { html, ICON } from "./dom.js";
 import { dayFull, dayKey, dayTitle, euros, timeOf } from "./format.js";
 import { cardBorder, cardFg, categoryIcon } from "./icons.js";
@@ -48,6 +49,7 @@ export function movementGroups(charges, { cats, cards, mode = "category" }) {
         </a>
       `);
       row.href = "#/pago?id=" + c.id;
+      row.addEventListener("pointerdown", () => prefetch("/charges/" + c.id), { passive: true }); // la pantalla Pago ya tiene sus datos al entrar
       if (i < g.rows.length - 1) row.style.borderBottom = "1px solid rgba(27,27,31,.08)";
       const lead = row.querySelector("[data-lead]");
       const sub = row.querySelector("[data-sub]");

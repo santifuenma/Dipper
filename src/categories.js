@@ -21,14 +21,16 @@ export function seedCategories(env, userId) {
   return env.DB.batch(DEFAULT_CATEGORIES.map((c, i) => stmt.bind(userId, c.icon, c.name, c.color, c.budget_cents, i, now)));
 }
 
-export async function listCategories(env, userId) {
-  const { results } = await env.DB.prepare(
+// La consulta suelta, para poder juntarla con otras en un solo viaje a la base (env.DB.batch).
+export const categoriesStmt = (env, userId) =>
+  env.DB.prepare(
     `SELECT c.id, c.icon, c.name, c.color, c.budget_cents AS budgetCents,
             (SELECT COUNT(*) FROM charges ch WHERE ch.category_id = c.id) AS charges
      FROM categories c WHERE c.user_id = ? ORDER BY c.position, c.id`
-  )
-    .bind(userId)
-    .all();
+  ).bind(userId);
+
+export async function listCategories(env, userId) {
+  const { results } = await categoriesStmt(env, userId).all();
   return results;
 }
 

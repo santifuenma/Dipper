@@ -274,7 +274,7 @@ describe("categorías, pagos a mano y presupuesto", () => {
     expect((await a.call("/push/subscribe", sub)).status).toBe(201); // repetida: no se duplica
     const { env } = await import("cloudflare:test");
     expect((await env.DB.prepare("SELECT COUNT(*) AS c FROM push_subscriptions").first()).c).toBe(1);
-    expect((await a.call("/push/test", {})).status).toBe(503);
+    expect((await a.call("/push/test", {})).status).toBe(404); // solo existe en el entorno de pruebas
     expect((await a.call("/push/unsubscribe", { endpoint: sub.endpoint })).status).toBe(200);
     expect((await env.DB.prepare("SELECT COUNT(*) AS c FROM push_subscriptions").first()).c).toBe(0);
   });

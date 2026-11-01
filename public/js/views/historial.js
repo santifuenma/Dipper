@@ -1,5 +1,5 @@
 // Pantalla "Historial": los pagos en el orden en que se registraron, con dónde quedaron. Tocar uno abre su Pago.
-import { api } from "../api.js";
+import { swr } from "../api.js";
 import { emptyNote, movementGroups } from "../components.js";
 import { html, ICON } from "../dom.js";
 
@@ -19,8 +19,7 @@ export function renderHistorial() {
     </div>
   `);
 
-  api("/history")
-    .then((data) => {
+  swr("/history", (data) => {
       el.querySelector("[data-list]").replaceChildren(
         data.charges.length
           ? movementGroups(data.charges, { cats: data.categories, cards: data.cards, mode: "history" })

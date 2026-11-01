@@ -1,6 +1,6 @@
 // Pantalla "Inicio" (Inicio.dc.html).
 import { dots, makeReorderable } from "../components.js";
-import { api } from "../api.js";
+import { api, keepWarm, prefetch, swr } from "../api.js";
 import { session } from "../app.js";
 import { busy, html, ICON, iconSize } from "../dom.js";
 import { eurosInt, monthLabel, shiftMonth } from "../format.js";
@@ -9,7 +9,7 @@ import { setBadge } from "../push.js";
 import { enableFaceId, faceIdEnabledHere, faceIdError, passkeySupported } from "../passkey.js";
 
 // Mes que se está viendo; se conserva al ir y volver de otras pantallas.
-export const view = { month: null };
+export const view = { month: null, current: null };
 
 const ASK_KEY = "dipper_faceid_ask";
 
@@ -138,6 +138,7 @@ export function renderInicio() {
         </a>
       `);
       a.href = `#/ver-tarjeta?id=${c.id}`;
+      a.addEventListener("pointerdown", () => prefetch(`/month?month=${view.month || ""}&tarjeta=${c.id}`), { passive: true });
       a.style.zIndex = String(sorted.length - i);
       a.style.background = c.color;
       a.style.color = cardFg(c.color);
@@ -201,6 +202,7 @@ export function renderInicio() {
           </a>
         `);
         a.href = `#/ver-categoria?id=${t.id}`;
+        a.addEventListener("pointerdown", () => prefetch(`/month?month=${view.month || ""}&categoria=${t.id}`), { passive: true });
         a.dataset.id = t.id;
         if (over) a.classList.add("wob");
         const fill = a.querySelector("[data-fill]");
@@ -276,14 +278,22 @@ export function renderInicio() {
     drawTiles();
   }
 
+  // El mes actual siempre se pide como "/month" (así coincide con lo guardado del arranque anterior).
+  const monthPath = () => (!view.month || view.month === view.current ? "/month" : "/month?month=" + view.month);
+
   async function load() {
     const id = ++loadId;
+    const path = monthPath();
+    keepWarm(path);
     try {
-      const res = await api("/month" + (view.month ? "?month=" + view.month : ""));
-      if (id !== loadId) return;
-      data = res;
-      if (!view.month) view.month = res.month;
-      draw();
+      // Primero lo último que se sabe y, al llegar, lo actualizado.
+      await swr(path, (res) => {
+        if (id !== loadId) return;
+        data = res;
+        view.current = res.current;
+        if (!view.month) view.month = res.month;
+        draw();
+      });
     } catch (err) {
       q(".error").textContent = err.message;
     }

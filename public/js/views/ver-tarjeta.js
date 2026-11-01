@@ -1,5 +1,5 @@
 // Pantalla "Tap en tarjeta" (Tarjeta.dc.html).
-import { api } from "../api.js";
+import { swr } from "../api.js";
 import { emptyNote, fitMovements, movementGroups, seeAllLink } from "../components.js";
 import { html, ICON, iconSize } from "../dom.js";
 import { eurosInt, monthLabel } from "../format.js";
@@ -22,8 +22,7 @@ export function renderVerTarjeta(params) {
   `);
   const body = el.querySelector("[data-body]");
 
-  api(`/month?month=${view.month || ""}&tarjeta=${id}`)
-    .then((data) => {
+  swr(`/month?month=${view.month || ""}&tarjeta=${id}`, (data) => {
       const card = data.cards.find((c) => c.id === id);
       if (!card) {
         el.querySelector(".error").textContent = "Esa tarjeta ya no existe.";

@@ -108,11 +108,18 @@ export function renderAjustes() {
     test.querySelector("[data-end]").innerHTML = "";
     test.hidden = true;
     let on = false;
+    let canTest = false; // solo el entorno de pruebas
     const draw = () => {
       avisos.querySelector("[data-sub]").textContent = on ? "Te avisamos de cada pago por revisar" : "Una notificación por cada pago nuevo";
       avisos.querySelector("[data-end]").innerHTML = pill(on);
-      test.hidden = !on;
+      test.hidden = !(on && canTest);
     };
+    api("/push/key")
+      .then((r) => {
+        canTest = !!r.test;
+        draw();
+      })
+      .catch(() => {});
     pushEnabledHere().then((v) => {
       on = v;
       draw();

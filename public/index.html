@@ -14,8 +14,11 @@
   <link rel="icon" type="image/png" href="/icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap" rel="stylesheet">
+  <!-- La fuente no bloquea el pintado: la app sale al momento con la fuente del sistema y se cambia al llegar (swap) -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap"></noscript>
   <link rel="stylesheet" href="/style.css">
+  <link rel="modulepreload" href="/js/app.js">
   <title>Dipper</title>
 </head>
 <body>

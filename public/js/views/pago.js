@@ -1,5 +1,5 @@
 // Pantalla "Pago" (nueva, acordada): cambiar la categoría, la tarjeta o el nombre del comercio de un pago, o borrarlo.
-import { api } from "../api.js";
+import { api, load } from "../api.js";
 import { back } from "../nav.js";
 import { busy, html, ICON } from "../dom.js";
 import { dayFull, dayKey, euros, when } from "../format.js";
@@ -257,7 +257,7 @@ export function renderPago(params) {
     }
   });
 
-  api(`/charges/${id}`)
+  load(`/charges/${id}`)
     .then(({ charge, cards, categories, merchants }) => {
       Object.assign(st, { charge, cards, categories, merchants: merchants || [], sel: charge.categoryId, original: charge.categoryId, card: charge.cardId, originalCard: charge.cardId, name: charge.merchant, originalName: charge.merchant, date: charge.occurredAt, originalDate: charge.occurredAt });
       q("[data-card]").hidden = false;
