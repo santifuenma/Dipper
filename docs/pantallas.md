@@ -198,9 +198,11 @@ Movimientos y Presupuesto.
 ## Ajustes
 
 - **Barra**: volver, "Ajustes".
+- **API de avisos**: `GET /api/push/key`, `POST /api/push/subscribe`, `/unsubscribe` y `/test`.
 - **Muestra**: caja de cuenta (bolitas, nombre y correo); filas **Tarjetas**, **Categorías**,
-  **Conectar Apple Pay**, **Cambiar contraseña** y, si el iPhone lo admite, **Face ID** con pastilla
-  Activar / Activado; abajo, botón blanco **Salir** con texto `--danger` y el enlace **Borrar cuenta**
+  **Conectar Apple Pay**, **Cambiar contraseña**, **Avisos de pagos** (pastilla Activar / Activado; con avisos activos aparece
+  **Enviar aviso de prueba**; sin la app instalada en la pantalla de inicio explica cómo) y, si el
+  iPhone lo admite, **Face ID** con pastilla Activar / Activado; abajo, botón blanco **Salir** con texto `--danger` y el enlace **Borrar cuenta**
   en `--danger`.
 - **Borrar cuenta**: hoja "¿Borrar tu cuenta?" que explica que se borra todo para siempre, pide la
   contraseña (no si se entró con Face ID) y ofrece **Borrar mi cuenta** (botón blanco con texto

@@ -5,6 +5,7 @@ import { session } from "../app.js";
 import { busy, html, ICON, iconSize } from "../dom.js";
 import { eurosInt, monthLabel, shiftMonth } from "../format.js";
 import { cardBorder, cardFg, categoryIcon } from "../icons.js";
+import { setBadge } from "../push.js";
 import { enableFaceId, faceIdEnabledHere, faceIdError, passkeySupported } from "../passkey.js";
 
 // Mes que se está viendo; se conserva al ir y volver de otras pantallas.
@@ -269,6 +270,7 @@ export function renderInicio() {
     q("[data-total]").textContent = eurosInt(data.totalCents);
     q("[data-sub]").textContent = data.leftCents >= 0 ? `quedan ${eurosInt(data.leftCents)} € de aire` : `te pasaste ${eurosInt(-data.leftCents)} €`;
     q("[data-segs]").replaceChildren(...segs(data.totalCents, data.monthlyBudgetCents));
+    if (!view.month || view.month === data.current) setBadge(data.pendingCount);
     q("[data-pending]").textContent = data.pendingCount ? `${data.pendingCount} por revisar` : "Nada por revisar";
     drawCards();
     drawTiles();

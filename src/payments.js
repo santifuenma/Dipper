@@ -1,6 +1,7 @@
 // Pagos de Apple Pay: enlace personal, recepción desde Atajos y pantalla "Por revisar".
 import { listCategories } from "./categories.js";
 import { merchantInfo } from "./merchants.js";
+import { notifyUser } from "./push.js";
 import { json, randomToken, readJson, sha256 } from "./util.js";
 
 // "12,50 €", "€12.50", "1.234,56", "1,234.56", "-3" -> número
@@ -106,26 +107,27 @@ async function guessCard(env, userId, merchantKey, candidates) {
 }
 
 // Entrada de pagos con el enlace personal (atajo de la PWA, sin sesión).
-export async function ingest(request, env, token) {
+export async function ingest(request, env, token, ctx) {
   if (request.method !== "POST") return json({ error: "Usa POST." }, 405);
   if (!token || !token.startsWith("dpr_")) return json({ error: "Enlace no válido." }, 401);
   const user = await env.DB.prepare("SELECT id FROM users WHERE ingest_token = ?").bind(token).first();
   if (!user) return json({ error: "Enlace no válido." }, 401);
-  return ingestFor(request, env, user, "enlace");
+  return ingestFor(request, env, user, "enlace", ctx, new URL(request.url).origin);
 }
 
 // Lo mismo con la sesión del usuario: lo usará la acción de Atajos de la app nativa (App Intent).
-async function ingestWithSession(request, env, user) {
-  return ingestFor(request, env, user, "sesion");
+async function ingestWithSession(request, env, user, ctx) {
+  return ingestFor(request, env, user, "sesion", ctx, new URL(request.url).origin);
 }
 
-async function ingestFor(request, env, user, via) {
+async function ingestFor(request, env, user, via, ctx, origin) {
   const all = await readPayments(request);
   const payments = all.slice(0, 200);
   console.log("ingest", { via, contentType: request.headers.get("content-type"), objetos: payments.length });
   const { results: cards } = await env.DB.prepare("SELECT id, wallet_name, last4 FROM cards WHERE user_id = ?").bind(user.id).all();
   let received = 0;
   let added = 0;
+  let newPending = 0;
 
   for (const body of payments) {
     const amountRaw = pick(body, "importe", "amount", "cantidad");
@@ -176,6 +178,13 @@ async function ingestFor(request, env, user, via) {
       )
       .run();
     added += res.meta.changes;
+    if (res.meta.changes && !autoCat) newPending++;
+  }
+
+  // Un pago nuevo por revisar avisa a los dispositivos con los avisos activados (sin retrasar la respuesta).
+  if (newPending) {
+    const job = notifyUser(env, user.id, origin).catch((err) => console.log("push", String(err)));
+    if (ctx) ctx.waitUntil(job);
   }
 
   // Una cola vacía (envío nocturno sin pagos pendientes) no es un error.
@@ -338,11 +347,11 @@ async function pendingCount(env, user) {
   return json({ count: c });
 }
 
-export async function handlePayments(request, env, url, user) {
+export async function handlePayments(request, env, url, user, ctx) {
   const p = url.pathname;
   const m = request.method;
   if (m === "GET" && p === "/api/applepay") return applePayLink(env, url, user);
-  if (m === "POST" && p === "/api/pagos") return ingestWithSession(request, env, user);
+  if (m === "POST" && p === "/api/pagos") return ingestWithSession(request, env, user, ctx);
   if (m === "GET" && p === "/api/pending") return pending(env, user);
   if (m === "GET" && p === "/api/pending/count") return pendingCount(env, user);
   const match = p.match(/^\/api\/pending\/(\d+)\/(confirm|undo)$/);

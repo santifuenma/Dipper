@@ -113,3 +113,25 @@ describe("resumen del mes", () => {
     expect(s.categories[0].perDayCents).toBeNull();
   });
 });
+
+describe("avisos push (VAPID)", () => {
+  it("la cabecera lleva un JWT ES256 que se verifica con la clave pública", async () => {
+    const { vapidHeader } = await import("../src/push.js");
+    const pair = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
+    const jwk = await crypto.subtle.exportKey("jwk", pair.privateKey);
+    const pub = Buffer.from(await crypto.subtle.exportKey("raw", pair.publicKey)).toString("base64url");
+    const env = { VAPID_PUBLIC: pub, VAPID_PRIVATE: JSON.stringify({ kty: jwk.kty, crv: jwk.crv, x: jwk.x, y: jwk.y, d: jwk.d }) };
+    const h = await vapidHeader(env, "https://web.push.apple.com/abc", "https://dipper.test", 1_700_000_000_000);
+    const [, jwt, k] = h.match(/^vapid t=(\S+), k=(\S+)$/);
+    expect(k).toBe(pub);
+    const [head, body, sig] = jwt.split(".");
+    expect(JSON.parse(atob(body))).toMatchObject({ aud: "https://web.push.apple.com", sub: "https://dipper.test", exp: 1_700_043_200 });
+    const ok = await crypto.subtle.verify(
+      { name: "ECDSA", hash: "SHA-256" },
+      pair.publicKey,
+      Buffer.from(sig, "base64url"),
+      new TextEncoder().encode(`${head}.${body}`)
+    );
+    expect(ok).toBe(true);
+  });
+});

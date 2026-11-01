@@ -264,6 +264,21 @@ describe("categorías, pagos a mano y presupuesto", () => {
     expect((await a.call(`/charges/${p.id}`)).data.charge.concept).toBeNull();
   });
 
+  it("los dispositivos se suscriben a los avisos y se dan de baja", async () => {
+    const a = await cuenta();
+    const sub = { endpoint: "https://web.push.apple.com/abc123", keys: { p256dh: "p", auth: "a" } };
+    expect((await a.call("/push/key")).status).toBe(503); // sin claves VAPID en las pruebas
+    expect((await a.call("/push/subscribe", { endpoint: "http://web.push.apple.com/x" })).status).toBe(400);
+    expect((await a.call("/push/subscribe", { endpoint: "https://evil.example.com/x" })).status).toBe(400);
+    expect((await a.call("/push/subscribe", sub)).status).toBe(201);
+    expect((await a.call("/push/subscribe", sub)).status).toBe(201); // repetida: no se duplica
+    const { env } = await import("cloudflare:test");
+    expect((await env.DB.prepare("SELECT COUNT(*) AS c FROM push_subscriptions").first()).c).toBe(1);
+    expect((await a.call("/push/test", {})).status).toBe(503);
+    expect((await a.call("/push/unsubscribe", { endpoint: sub.endpoint })).status).toBe(200);
+    expect((await env.DB.prepare("SELECT COUNT(*) AS c FROM push_subscriptions").first()).c).toBe(0);
+  });
+
   it("el mes trae los totales calculados y se puede filtrar por tarjeta o categoría", async () => {
     const a = await cuenta();
     const { card } = (await a.call("/cards", { name: "Visa", last4: "1111", walletName: "Mi Visa", color: "#1B1B1F" })).data;

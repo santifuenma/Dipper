@@ -3,6 +3,7 @@ import { dots } from "../components.js";
 import { api } from "../api.js";
 import { go, session } from "../app.js";
 import { busy, html, ICON, passwordToggle } from "../dom.js";
+import { disablePush, enablePush, pushEnabledHere, pushSupported, testPush } from "../push.js";
 import { enableFaceId, faceIdEnabledHere, faceIdError, passkeySupported } from "../passkey.js";
 
 function row(icon, color, title, sub) {
@@ -90,6 +91,62 @@ export function renderAjustes() {
       }
     });
     rows.append(face);
+  }
+
+  // Avisos: una notificación por cada pago nuevo por revisar. Solo con la app instalada en la pantalla de inicio.
+  const avisos = row(ICON.bell, "#FFC2A1", "Avisos de pagos", "");
+  avisos.setAttribute("role", "button");
+  const pill = (on) =>
+    `<span style="font-size:13px;font-weight:800;padding:5px 11px;border-radius:99px;background:${on ? "#CDF56B" : "#fff"};border:1.5px solid rgba(27,27,31,.22)">${on ? "Activado" : "Activar"}</span>`;
+  if (!pushSupported()) {
+    avisos.querySelector("[data-sub]").textContent = "Instala Dipper en la pantalla de inicio (iOS 16.4 o más)";
+    avisos.querySelector("[data-end]").innerHTML = "";
+    rows.append(avisos);
+  } else {
+    const test = row(ICON.bell, "#fff", "Enviar aviso de prueba", "Para comprobar que llegan");
+    test.setAttribute("role", "button");
+    test.querySelector("[data-end]").innerHTML = "";
+    test.hidden = true;
+    let on = false;
+    const draw = () => {
+      avisos.querySelector("[data-sub]").textContent = on ? "Te avisamos de cada pago por revisar" : "Una notificación por cada pago nuevo";
+      avisos.querySelector("[data-end]").innerHTML = pill(on);
+      test.hidden = !on;
+    };
+    pushEnabledHere().then((v) => {
+      on = v;
+      draw();
+    });
+    draw();
+    avisos.addEventListener("click", async (e) => {
+      e.preventDefault();
+      error.textContent = "";
+      busy(avisos, true);
+      try {
+        if (on) await disablePush();
+        else await enablePush();
+        on = await pushEnabledHere();
+        draw();
+      } catch (err) {
+        error.textContent = err.message;
+      } finally {
+        busy(avisos, false);
+      }
+    });
+    test.addEventListener("click", async (e) => {
+      e.preventDefault();
+      error.textContent = "";
+      busy(test, true);
+      try {
+        const { sent } = await testPush();
+        if (!sent) error.textContent = "No se ha podido enviar el aviso. Prueba a desactivarlos y activarlos otra vez.";
+      } catch (err) {
+        error.textContent = err.message;
+      } finally {
+        busy(test, false);
+      }
+    });
+    rows.append(avisos, test);
   }
 
   // Borrar la cuenta: hoja con la explicación y, si se entró con contraseña, la contraseña.

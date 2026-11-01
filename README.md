@@ -194,6 +194,7 @@ exigen sesión.
 | `POST` | `/api/pending/:id/confirm` · `/undo` | Confirmar categoría, nombre y tarjeta, o deshacerlo |
 | `GET` | `/api/month?month=AAAA-MM` | Datos de un mes ya calculados: pagos, total, lo que queda, gasto por tarjeta y por categoría y lo que toca al día. `&tarjeta=` o `&categoria=` filtran la lista de pagos |
 | `GET` · `POST` | `/api/charges/:id` | Ver un pago o cambiar su categoría, tarjeta, importe, concepto (nota propia), fecha (hasta un año por delante) o nombre de comercio |
+| `GET` · `POST` | `/api/push/key` · `/subscribe` · `/unsubscribe` · `/test` | Avisos push: clave pública, alta y baja de un dispositivo y aviso de prueba |
 | `GET` | `/api/history` | Los últimos 150 pagos por orden de registro (`createdAt`), con tarjetas y categorías |
 | `POST` | `/api/charges` · `/api/charges/:id/delete` | Añadir un gasto a mano o borrar un pago |
 | `GET` · `POST` | `/api/cards` · `/api/cards/:id` · `/delete` | Listar, crear, editar y borrar tarjetas |
@@ -309,16 +310,19 @@ src/
   cards.js         # Tarjetas y su reconocimiento por nombre de Wallet
   categories.js    # Categorías y las seis de partida
   budget.js        # Presupuesto total y por categoría
+  push.js          # Avisos push (VAPID): suscripciones y envío al llegar un pago por revisar
   util.js          # JSON, cookies, hashes y tokens
 public/
   index.html       # Página única de la PWA
   style.css        # Tokens y clases comunes (ver DISENO.md)
   js/app.js        # Rutas por hash y arranque
   js/components.js # Piezas compartidas: listas de movimientos, fichas, filas deslizables…
+  sw.js            # Service worker: recibe los avisos y los enseña como notificación
+  js/push.js       # Activar y quitar los avisos en este dispositivo
   js/dom.js        # Utilidades de DOM y juego único de iconos (ICON)
   js/views/        # Una vista por pantalla
 migrations/        # Esquema de D1, una migración por cambio
-scripts/           # Iconos y cambio de contraseña desde el ordenador
+scripts/           # Iconos, cambio de contraseña y claves de los avisos (npm run vapid)
 wrangler.toml      # Worker, bases D1 y entorno de pruebas
 test/              # Pruebas del servidor (npm test)
 vitest.config.mjs  # Configuración de las pruebas

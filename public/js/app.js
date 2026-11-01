@@ -1,6 +1,8 @@
 // Dipper: arranque, rutas y bloqueo de zoom.
 import { api } from "./api.js";
+import { go } from "./nav.js";
 import { startNav } from "./nav.js";
+import { startServiceWorker } from "./push.js";
 import { renderLogin } from "./views/login.js";
 import { renderRegistro } from "./views/registro.js";
 import { renderAjustes } from "./views/ajustes.js";
@@ -67,6 +69,7 @@ async function boot() {
     session.user = null;
   }
   startNav(document.getElementById("app"), ROUTES, () => !!session.user);
+  startServiceWorker(go);
 }
 
 boot();

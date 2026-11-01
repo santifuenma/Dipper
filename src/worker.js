@@ -5,17 +5,18 @@ import { handleCards } from "./cards.js";
 import { handleCategories } from "./categories.js";
 import { handleCharges } from "./charges.js";
 import { handleBudget } from "./budget.js";
+import { handlePush } from "./push.js";
 import { json } from "./util.js";
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (!url.pathname.startsWith("/api/")) return env.ASSETS.fetch(request);
 
     try {
       // El atajo de Apple Pay se identifica con el enlace personal, no con la sesión.
       if (url.pathname.startsWith("/api/ingest/")) {
-        return await ingest(request, env, url.pathname.slice("/api/ingest/".length));
+        return await ingest(request, env, url.pathname.slice("/api/ingest/".length), ctx);
       }
 
       if (request.method === "POST" && !(request.headers.get("content-type") || "").includes("application/json")) {
@@ -26,7 +27,8 @@ export default {
       const user = await currentUser(request, env);
       if (!user) return json({ error: "Tienes que entrar primero." }, 401);
       const res =
-        (await handlePayments(request, env, url, user)) ||
+        (await handlePayments(request, env, url, user, ctx)) ||
+        (await handlePush(request, env, url, user)) ||
         (await handleCards(request, env, url, user)) ||
         (await handleCategories(request, env, url, user)) ||
         (await handleCharges(request, env, url, user)) ||

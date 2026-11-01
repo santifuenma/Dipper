@@ -11,6 +11,7 @@ pantalla, se indica con 📱 (ver [`auditoria.md`](auditoria.md)).
 - [Comercios: nombre, clave y sugerencia](#comercios-nombre-clave-y-sugerencia)
 - [Reconocer la tarjeta](#reconocer-la-tarjeta)
 - [Por revisar](#por-revisar)
+- [Avisos push](#avisos-push)
 - [Editar un pago](#editar-un-pago)
 - [Gasto a mano](#gasto-a-mano)
 - [Tarjetas y categorías](#tarjetas-y-categorías)
@@ -97,6 +98,18 @@ iOS pasa los datos de la transacción a la acción solo o hay que asignarlos con
 | Deshacer | Devuelve a pendientes el pago y los que se colocaron con él; si se había recordado, se olvida la regla. El nombre propio no se deshace. |
 | Tarjeta nueva | Si llega un nombre de Wallet que no tiene ninguna tarjeta, se ofrece guardarla con ese nombre y, si aparecen al final, los 4 dígitos. |
 | Contador | El número de pendientes se ve en la barra y en el Inicio. |
+
+## Avisos push
+
+| Regla | Detalle |
+|---|---|
+| Activar | Ajustes → Avisos de pagos. Pide el permiso del sistema (solo tras un toque), crea la suscripción del dispositivo y la guarda en el servidor. Solo funciona con la PWA instalada en la pantalla de inicio (iOS 16.4+). Máximo 10 dispositivos por cuenta. |
+| Cuándo avisa | Al llegar un pago que queda **por revisar** (no los que se colocan solos). Un lote de pagos de la cola sin conexión manda un solo aviso. |
+| Contenido | El aviso va vacío; el service worker pide `GET /api/pending` y enseña "Comercio · importe — ¿En qué categoría lo ponemos?" o "N pagos por revisar". Tocarlo abre Por revisar. Los avisos se agrupan (misma `tag`). |
+| Número en el icono | El service worker y el Inicio ponen el número de pendientes (`setAppBadge`) si el sistema lo permite. |
+| Claves | VAPID (par ES256), una por entorno, como secretos `VAPID_PUBLIC` y `VAPID_PRIVATE` (`npm run vapid`). Sin ellas la función queda apagada. |
+| Limpieza | Las suscripciones que el servicio de push da por caducadas (404/410) se borran. Solo se envía a servicios de push de navegadores. |
+| A Swift | La tabla y el momento del aviso se conservan; la entrega pasa a APNs. |
 
 ## Editar un pago
 
