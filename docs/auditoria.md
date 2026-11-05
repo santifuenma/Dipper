@@ -86,7 +86,7 @@ Hecho: cada archivo de `public/js/views/` se llama como su pantalla, y la ruta d
 
 | Qué | Dónde | Cuándo |
 |---|---|---|
-| El paso 3 de Conectar Apple Pay explica "Obtener contenido de URL…", pero la configuración real usa la cola en iCloud y el atajo DIPPER SEND | `applepay.js` | **Decidir**: corregirlo ya o esperar a la app nativa, donde la pantalla cambia entera |
+| ~~El paso 3 de Conectar Apple Pay explicaba "Obtener contenido de URL…" pero la configuración real usa la cola en iCloud y el atajo DIPPER SEND~~ | `applepay.js` | **Hecho**: la guía de 8 pasos (`applePayGuide`) explica el montaje real, en Conectar Apple Pay y en la Bienvenida |
 | `npm run icons` genera el icono antiguo con el lila `#F0EAFF` | `scripts/make-icons.mjs` | Cuando se elija el icono nuevo (en pausa) |
 | "Acepto los términos y la privacidad" no enlaza a ningún texto | `registro.js` | Antes de publicar: hace falta la política de privacidad |
 

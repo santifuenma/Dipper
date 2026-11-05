@@ -155,7 +155,7 @@ Movimientos y Presupuesto.
   2. **Presupuesto** — "¿Cuánto quieres gastar al mes?": importe 64/800 con − y + (de 50 en 50 €) y hoja de teclado al tocarlo (`askAmount`). **Continuar** guarda.
   3. **Categorías** — "Reparte tu presupuesto": pastilla "X € sin asignar de Y €" / "Todo asignado" / "Te pasas…" y una fila por categoría (`budgetRow`, sin "gastado"). **Continuar** guarda total y categorías.
   4. **Tarjetas** — lista de las que ya hay (mini tarjeta de color, nombre, ···· 1234) y recuadro punteado **Añadir tarjeta** → Nueva tarjeta (al guardar vuelve aquí).
-  5. **Apple Pay** — los 3 pasos del atajo ahí mismo (`applePaySteps`: copiar el enlace personal, crear la automatización *Transacción* en Atajos, añadir la acción), cada uno con su botón y marca de hecho; en pantallas pequeñas la lista se desplaza. **Continuar** o **Lo haré luego** pasan al siguiente.
+  5. **Apple Pay** — la *guía del atajo* de 8 pasos ahí mismo (la misma de Conectar Apple Pay), un paso por pantalla: **Siguiente** avanza, ‹ retrocede dentro de la guía y, en el último, el botón pasa a **Continuar**. **Lo haré luego** salta el paso.
   6. **Avisos** — si el servidor no tiene claves VAPID, se salta. Sin la app instalada en la pantalla de inicio: 3 pasos para instalarla. Con ella: **Activar avisos** (pide el permiso) o **Ahora no**.
   7. **Face ID** — se salta si el iPhone no lo admite o ya está activado. **Activar Face ID** o **Ahora no**.
   8. **Todo listo** — 3 pasos numerados (revisar pagos, añadir a mano, historial). **Ir al inicio** marca la bienvenida como terminada.
@@ -281,10 +281,16 @@ Movimientos y Presupuesto.
 ## Conectar Apple Pay
 
 - **Barra**: indicador de pasos (dos segmentos llenos) y "Saltar".
-- **Muestra**: "Que tus pagos lleguen solos", "Se configura una sola vez."; tres pasos numerados
-  (copiar el enlace personal, crear la automatización en Atajos, añadir la acción); aviso "Solo
-  llegan los pagos con Apple Pay. El efectivo y Bizum, a mano."; botón "Probar con un pago" / "Listo,
-  ir al inicio".
-- **Reglas**: los pasos marcados se recuerdan en el iPhone; "Abrir Atajos" abre la app Atajos.
+- **Muestra**: "Que tus pagos lleguen solos", "Se configura una sola vez, en 8 pasos cortos."; la
+  *guía del atajo* (`applePayGuide`), un paso por pantalla; aviso "Solo llegan los pagos con Apple
+  Pay. El efectivo y Bizum, a mano."; botón **Siguiente** (en el último, "Listo, ir al inicio") y
+  "Paso anterior".
+- **Los 8 pasos** (el montaje real de Dipper: cola en iCloud + atajo aparte, ver [`flujos.md`](flujos.md#llegada-de-pagos-de-apple-pay)):
+  *Atajo DIPPER SEND* — 1 copiar el enlace personal (botón), 2 crear el atajo (botón **Abrir Atajos**),
+  3 acción *Obtener archivo* `dipper-cola.txt`, 4 acción *Obtener contenido de URL* (enlace, POST, JSON con
+  `cola`), 5 acción *Guardar archivo* vacío (vaciar la cola); *Automatización* — 6 crear la automatización
+  *Transacción* con *Ejecutar inmediatamente*, 7 acción *Añadir al archivo* con el JSON de cada pago (texto
+  con botón **Copiar texto**), 8 acción *Ejecutar atajo* DIPPER SEND.
+- **Reglas**: el paso en el que vas se recuerda en el iPhone (al abrir Atajos la app sale y puede recargarse).
 - **API**: `GET /api/applepay`.
 - **En la app nativa** esta pantalla cambia (ver [`flujos.md`](flujos.md#llegada-de-pagos-de-apple-pay)).

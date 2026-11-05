@@ -3,6 +3,7 @@ import { dots } from "../components.js";
 import { api } from "../api.js";
 import { go, session } from "../app.js";
 import { busy, html, ICON, passwordToggle } from "../dom.js";
+import { resetApplePayGuide } from "./applepay.js";
 import { appVersion, disablePush, enablePush, pushEnabledHere, pushSupported, testPush } from "../push.js";
 import { enableFaceId, faceIdEnabledHere, faceIdError, passkeySupported } from "../passkey.js";
 
@@ -80,6 +81,7 @@ export function renderAjustes() {
     e.preventDefault();
     busy(guide, true);
     try {
+      resetApplePayGuide();
       const ob = await api("/onboarding", { restart: true });
       session.user = { ...session.user, onboarding: { step: ob.step, tour: ob.tour, reminder: ob.reminder } };
       go("/bienvenida");

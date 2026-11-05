@@ -120,7 +120,7 @@ El líquido sube al aparecer (900 ms).
 | **Hoja de importe** | Hoja con título (y círculo de la categoría), *Importe grande* "al mes" vacío, *Teclado numérico* sin decimales (máx. 6 cifras) y **Listo**. Lo escrito sustituye al importe; sin escribir no cambia nada. | `askAmount()` |
 | **Fila de presupuesto** | La *Fila de categoría (Presupuesto)*; sin `spent` (bienvenida) no enseña "gastado". | `budgetRow()` |
 | **Guía de globos** | Capa que oscurece la pantalla salvo el elemento señalado (anillo blanco) y un globo (caja de radio 20) con título 19/800, texto 14/500, puntos de progreso, **Saltar** y pastilla lima **Siguiente / Entendido**. El globo va debajo del elemento si está en la mitad de arriba, si no encima. | `guidedTour()` |
-| **Pasos del atajo** | Los 3 *pasos numerados* de Conectar Apple Pay (copiar enlace con el enlace enmascarado `dpr_xxxx••••••xxx`, abrir Atajos, hecho); lo hecho se recuerda en el dispositivo. Lo usan la pantalla Conectar Apple Pay y la Bienvenida. | `applePaySteps()` |
+| **Guía del atajo** | Caja de radio 28 (padding 16 18): arriba pastilla de la parte ("1 · Atajo DIPPER SEND" en `#FFC93C`, "2 · Automatización" en `#98EBC6`) y 8 puntos de progreso; título 24/800, texto 15/500 `--muted`; según el paso, el enlace enmascarado con **Copiar enlace**, el texto JSON con **Copiar texto** o **Abrir Atajos** (pastilla de 38). La navegación (Siguiente, atrás) la ponen quienes la usan. El paso se recuerda en el dispositivo. | `applePayGuide()` |
 | **Paso numerado** | Caja: círculo de 34 con el número sobre un pastel (hecho: `--ink` con `ICON.check`), título 17/800, texto 14/500, y debajo un botón-pastilla de 38 (blanco; hecho: lima). Opcionalmente un recuadro punteado con el enlace enmascarado. | `applepay.js` |
 
 ## Listas
