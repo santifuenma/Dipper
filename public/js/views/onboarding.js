@@ -8,6 +8,7 @@ import { eurosInt } from "../format.js";
 import { cardBorder, cardFg } from "../icons.js";
 import { enableFaceId, faceIdEnabledHere, faceIdError, passkeySupported } from "../passkey.js";
 import { enablePush, pushSupported } from "../push.js";
+import { applePaySteps } from "./applepay.js";
 
 const STEPS = ["bienvenida", "presupuesto", "categorias", "tarjetas", "applepay", "avisos", "faceid", "listo"];
 const DONE = STEPS.length; // 8
@@ -286,12 +287,16 @@ export function renderOnboarding() {
 
   function applepay() {
     frame("Que los pagos lleguen solos", "Un atajo del iPhone manda a Dipper cada pago con Apple Pay. Se configura una sola vez, en 3 pasos.", {
-      mainLabel: "Configurar ahora",
-      onMain: () => go("/conectar-apple-pay"),
+      mainLabel: "Continuar",
+      onMain: next,
       altLabel: "Lo haré luego",
       onAlt: next,
     });
-    body.replaceChildren(note("Solo llegan los pagos con Apple Pay. El efectivo, Bizum y los recibos los añades tú con el + del Inicio."));
+    // Los mismos 3 pasos que Conectar Apple Pay, aquí mismo. Con pantallas pequeñas la lista se desplaza.
+    const steps = applePaySteps({ onError: (msg) => (error.textContent = msg) });
+    const scroll = html(`<div class="noscroll" style="flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;margin:0 -20px;padding:0 20px 4px"></div>`);
+    scroll.append(steps.el);
+    body.replaceChildren(scroll);
   }
 
   // Avisos: necesita que Dipper esté instalada en la pantalla de inicio. Si el servidor no los tiene configurados, se salta.

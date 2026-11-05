@@ -155,7 +155,7 @@ Movimientos y Presupuesto.
   2. **Presupuesto** — "¿Cuánto quieres gastar al mes?": importe 64/800 con − y + (de 50 en 50 €) y hoja de teclado al tocarlo (`askAmount`). **Continuar** guarda.
   3. **Categorías** — "Reparte tu presupuesto": pastilla "X € sin asignar de Y €" / "Todo asignado" / "Te pasas…" y una fila por categoría (`budgetRow`, sin "gastado"). **Continuar** guarda total y categorías.
   4. **Tarjetas** — lista de las que ya hay (mini tarjeta de color, nombre, ···· 1234) y recuadro punteado **Añadir tarjeta** → Nueva tarjeta (al guardar vuelve aquí).
-  5. **Apple Pay** — explica el atajo; **Configurar ahora** → Conectar Apple Pay (dentro de la bienvenida su barra cambia a atrás + "Lo haré luego" y su botón es **Continuar**, que da el paso por hecho y vuelve) o **Lo haré luego**.
+  5. **Apple Pay** — los 3 pasos del atajo ahí mismo (`applePaySteps`: copiar el enlace personal, crear la automatización *Transacción* en Atajos, añadir la acción), cada uno con su botón y marca de hecho; en pantallas pequeñas la lista se desplaza. **Continuar** o **Lo haré luego** pasan al siguiente.
   6. **Avisos** — si el servidor no tiene claves VAPID, se salta. Sin la app instalada en la pantalla de inicio: 3 pasos para instalarla. Con ella: **Activar avisos** (pide el permiso) o **Ahora no**.
   7. **Face ID** — se salta si el iPhone no lo admite o ya está activado. **Activar Face ID** o **Ahora no**.
   8. **Todo listo** — 3 pasos numerados (revisar pagos, añadir a mano, historial). **Ir al inicio** marca la bienvenida como terminada.

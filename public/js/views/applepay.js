@@ -1,6 +1,7 @@
 // Pantalla "Conectar Apple Pay" (ApplePay.dc.html). Mismo diseño; textos con los pasos reales (opción A).
+// Los 3 pasos del atajo son una pieza aparte (applePaySteps) que también usa la Bienvenida.
 import { api } from "../api.js";
-import { go, inOnboarding, session } from "../app.js";
+import { go } from "../app.js";
 import { html, ICON } from "../dom.js";
 
 const KEY = "dipper_ap_steps";
@@ -28,48 +29,13 @@ function mask(token) {
   return token.slice(0, 8) + "••••••" + token.slice(-3);
 }
 
-export function renderApplePay() {
+// Lista de los 3 pasos con su botón (copiar enlace, abrir Atajos, hecho). Lo hecho se recuerda en el dispositivo.
+// onChange: se llama tras cada cambio; onError(texto): avisa de un fallo (p. ej. no se pudo copiar).
+// Devuelve { el, allDone() }.
+export function applePaySteps({ onChange = () => {}, onError = () => {} } = {}) {
   const done = loadDone();
-  // Dentro de la bienvenida, esta pantalla es un paso más: se vuelve a ella en vez de ir al Inicio.
-  const onb = inOnboarding();
-  const exit = onb ? "/bienvenida" : "/";
   let link = null;
-
-  const el = html(`
-    <div class="screen">
-      <div class="topbar">
-        ${onb
-          ? `<a href="#/bienvenida" data-back class="icon-btn" aria-label="Volver">${ICON.back}</a>`
-          : `<div style="display:flex;gap:4px;width:96px" aria-label="Paso 2 de 2">
-          <span style="flex:1;height:8px;border-radius:4px;background:#1B1B1F"></span>
-          <span style="flex:1;height:8px;border-radius:4px;background:#1B1B1F"></span>
-        </div>`}
-        <a href="#${exit}" ${onb ? "data-back" : ""} style="font-size:15px;font-weight:700;padding:10px 0;text-decoration:underline">${onb ? "Lo haré luego" : "Saltar"}</a>
-      </div>
-
-      <div style="flex:none;margin-top:8px">
-        <h1 style="margin:0;font-size:32px;font-weight:800;letter-spacing:-1.2px;line-height:1.04">Que tus pagos lleguen solos</h1>
-        <div style="margin-top:6px;font-size:15px;font-weight:500;line-height:1.3;color:#5A5470">Se configura una sola vez.</div>
-      </div>
-
-      <div style="flex:1;min-height:0;margin:12px 0 0;padding:2px 0 0">
-        <div data-steps style="display:flex;flex-direction:column;gap:8px"></div>
-        <div style="margin-top:10px;display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1.5px dashed rgba(27,27,31,.4);border-radius:16px">
-          ${ICON.info}
-          <span style="font-size:14px;font-weight:600;line-height:1.35">Solo llegan los pagos con Apple Pay. El efectivo y Bizum, a mano.</span>
-        </div>
-        <div class="error" role="alert" style="margin-top:10px"></div>
-      </div>
-
-      <div style="flex:none;margin-top:12px">
-        <button type="button" data-main class="btn btn-lima"></button>
-      </div>
-    </div>
-  `);
-
-  const list = el.querySelector("[data-steps]");
-  const main = el.querySelector("[data-main]");
-  const error = el.querySelector(".error");
+  const list = html(`<div style="display:flex;flex-direction:column;gap:8px"></div>`);
 
   function draw() {
     list.replaceChildren(
@@ -105,18 +71,17 @@ export function renderApplePay() {
         return card;
       })
     );
-    const all = STEPS.every((s) => done[s.id]);
-    main.textContent = onb ? "Continuar" : all ? "Listo, ir al inicio" : "Probar con un pago";
+    onChange();
   }
 
   async function run(step) {
-    error.textContent = "";
+    onError("");
     if (step.id === 1) {
       if (!link) return;
       try {
         await navigator.clipboard.writeText(link.link);
       } catch {
-        error.textContent = "No se pudo copiar. Mantén pulsado el enlace para copiarlo.";
+        onError("No se pudo copiar. Mantén pulsado el enlace para copiarlo.");
         return;
       }
       done[1] = true;
@@ -133,22 +98,57 @@ export function renderApplePay() {
     draw();
   }
 
-  main.addEventListener("click", async () => {
-    if (onb) {
-      // Dentro de la bienvenida, "Continuar" da este paso por hecho: al volver, ya toca el siguiente.
-      session.user = { ...session.user, onboarding: { ...session.user.onboarding, step: 5 } };
-      await api("/onboarding", { step: 5 }).catch(() => {});
-    }
-    go(exit);
-  });
-
   draw();
   api("/applepay")
     .then((data) => {
       link = data;
       draw();
     })
-    .catch((err) => (error.textContent = err.message));
+    .catch((err) => onError(err.message));
+
+  return { el: list, allDone: () => STEPS.every((s) => done[s.id]) };
+}
+
+export function renderApplePay() {
+  const el = html(`
+    <div class="screen">
+      <div class="topbar">
+        <div style="display:flex;gap:4px;width:96px" aria-label="Paso 2 de 2">
+          <span style="flex:1;height:8px;border-radius:4px;background:#1B1B1F"></span>
+          <span style="flex:1;height:8px;border-radius:4px;background:#1B1B1F"></span>
+        </div>
+        <a href="#/" style="font-size:15px;font-weight:700;padding:10px 0;text-decoration:underline">Saltar</a>
+      </div>
+
+      <div style="flex:none;margin-top:8px">
+        <h1 style="margin:0;font-size:32px;font-weight:800;letter-spacing:-1.2px;line-height:1.04">Que tus pagos lleguen solos</h1>
+        <div style="margin-top:6px;font-size:15px;font-weight:500;line-height:1.3;color:#5A5470">Se configura una sola vez.</div>
+      </div>
+
+      <div style="flex:1;min-height:0;margin:12px 0 0;padding:2px 0 0">
+        <div data-steps></div>
+        <div style="margin-top:10px;display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1.5px dashed rgba(27,27,31,.4);border-radius:16px">
+          ${ICON.info}
+          <span style="font-size:14px;font-weight:600;line-height:1.35">Solo llegan los pagos con Apple Pay. El efectivo y Bizum, a mano.</span>
+        </div>
+        <div class="error" role="alert" style="margin-top:10px"></div>
+      </div>
+
+      <div style="flex:none;margin-top:12px">
+        <button type="button" data-main class="btn btn-lima"></button>
+      </div>
+    </div>
+  `);
+
+  const main = el.querySelector("[data-main]");
+  const error = el.querySelector(".error");
+  let steps = null; // onChange se llama ya en el primer dibujo, antes de que exista
+  const label = () => (main.textContent = steps && steps.allDone() ? "Listo, ir al inicio" : "Probar con un pago");
+  steps = applePaySteps({ onChange: label, onError: (msg) => (error.textContent = msg) });
+  el.querySelector("[data-steps]").replaceWith(steps.el);
+  label();
+
+  main.addEventListener("click", () => go("/"));
 
   return el;
 }
