@@ -4,9 +4,25 @@ import { api } from "./api.js";
 export const pushSupported = () => "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
 
 // Registra el service worker (solo hace falta una vez) y le deja mandar la app a una pantalla al tocar un aviso.
+// Actualizaciones: el service worker nuevo se instala solo y toma el control, pero esta página sigue con el código
+// viejo en memoria. Se recarga en el siguiente cambio de pantalla (nunca a mitad de escribir algo) y, para no esperar
+// a que el sistema se acuerde, se busca versión nueva cada vez que se vuelve a la app.
 export function startServiceWorker(go) {
   if (!("serviceWorker" in navigator)) return;
-  navigator.serviceWorker.register("/sw.js").catch(() => {});
+  const hadController = !!navigator.serviceWorker.controller; // la primera instalación no cuenta como actualización
+  let updated = false;
+  navigator.serviceWorker.register("/sw.js").then((reg) => {
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") reg.update().catch(() => {});
+    });
+    reg.update().catch(() => {});
+  }).catch(() => {});
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (hadController) updated = true;
+  });
+  window.addEventListener("hashchange", () => {
+    if (updated) location.reload();
+  });
   navigator.serviceWorker.addEventListener("message", (e) => {
     if (e.data && e.data.type === "go" && typeof e.data.path === "string") go(e.data.path);
   });

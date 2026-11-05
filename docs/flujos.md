@@ -119,6 +119,7 @@ iOS pasa los datos de la transacción a la acción solo o hay que asignarlos con
 | Regla | Detalle |
 |---|---|
 | Archivos de la app | El service worker (`public/sw.js`, generado por `npm run build` desde `scripts/sw.template.js`) guarda HTML, JS, CSS e iconos y los sirve desde el dispositivo. Cada versión (hash de todos los archivos) se descarga entera antes de usarse y borra la anterior: nunca se mezclan. `npm run dev`, `deploy` y `deploy:pruebas` lo generan solos. La API nunca se guarda. |
+| Actualizaciones | El service worker nuevo se instala solo y borra el viejo, pero la página abierta sigue con el código viejo: se recarga en el **siguiente cambio de pantalla** (nunca a mitad de escribir). Cada vez que se vuelve a la app se busca versión nueva (`visibilitychange`). Sin esto, una app instalada enseñaba la versión anterior hasta abrirla dos veces. |
 | Fuentes | La fuente de Google no bloquea el pintado (se cambia al llegar) y queda guardada en el dispositivo. |
 | Arranque | Si ya entraste en este dispositivo, la app abre el Inicio al momento con lo último que se vio (`dipper_user` y `dipper_cold` en el almacenamiento local) y confirma la sesión por detrás; solo un 401 te lleva a Entrar. Salir de la cuenta lo borra todo. |
 | Datos de pantalla | `swr()` enseña lo último que se sabe y lo actualiza al llegar (sin repintar si no cambió). Las consultas iguales que van en camino se comparten. Tocar una tarjeta, categoría o pago precarga su pantalla. |
