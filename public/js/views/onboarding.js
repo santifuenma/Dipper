@@ -93,6 +93,8 @@ export function renderOnboarding() {
     q("[data-sub]").textContent = sub;
     error.textContent = "";
     main.textContent = mainLabel;
+    // El botón es el mismo en todos los pasos: se libera aquí (un "ocupado" del paso anterior le quita los toques).
+    busy(main, false);
     main.disabled = false;
     main.onclick = onMain;
     alt.hidden = !altLabel;
