@@ -31,6 +31,11 @@ self.addEventListener("activate", (e) =>
   )
 );
 
+// La página puede preguntar qué versión es (se enseña en Ajustes, para saber de un vistazo cuál tiene el móvil).
+self.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "version" && e.source) e.source.postMessage({ type: "version", version: VERSION });
+});
+
 self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET") return;

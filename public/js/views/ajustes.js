@@ -3,7 +3,7 @@ import { dots } from "../components.js";
 import { api } from "../api.js";
 import { go, session } from "../app.js";
 import { busy, html, ICON, passwordToggle } from "../dom.js";
-import { disablePush, enablePush, pushEnabledHere, pushSupported, testPush } from "../push.js";
+import { appVersion, disablePush, enablePush, pushEnabledHere, pushSupported, testPush } from "../push.js";
 import { enableFaceId, faceIdEnabledHere, faceIdError, passkeySupported } from "../passkey.js";
 
 function row(icon, color, title, sub) {
@@ -46,9 +46,17 @@ export function renderAjustes() {
       </div>
 
       <button type="button" data-logout class="btn btn-white" style="flex:none;margin-top:10px;color:#B3261E">Salir</button>
+      <div data-version hidden style="flex:none;text-align:center;margin-top:4px;font-size:12px;font-weight:600;color:var(--faint)"></div>
       <button type="button" data-delete-account class="link-u" style="flex:none;align-self:center;margin-top:6px;font-size:14px;color:var(--danger)">Borrar cuenta</button>
     </div>
   `);
+
+  appVersion().then((v) => {
+    if (!v) return;
+    const d = el.querySelector("[data-version]");
+    d.textContent = "Versión " + v;
+    d.hidden = false;
+  });
 
   el.querySelector("[data-name]").textContent = session.user.name;
   el.querySelector("[data-email]").textContent = session.user.email;

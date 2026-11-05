@@ -28,6 +28,22 @@ export function startServiceWorker(go) {
   });
 }
 
+// Versión de la app que está sirviendo el service worker (null si aún no hay uno).
+export function appVersion() {
+  return new Promise((resolve) => {
+    const c = "serviceWorker" in navigator && navigator.serviceWorker.controller;
+    if (!c) return resolve(null);
+    const done = (v) => {
+      navigator.serviceWorker.removeEventListener("message", onMsg);
+      resolve(v);
+    };
+    const onMsg = (e) => e.data && e.data.type === "version" && done(e.data.version);
+    navigator.serviceWorker.addEventListener("message", onMsg);
+    c.postMessage({ type: "version" });
+    setTimeout(() => done(null), 1500);
+  });
+}
+
 const toBytes = (b64) => {
   const s = b64.replace(/-/g, "+").replace(/_/g, "/");
   return Uint8Array.from(atob(s + "===".slice((s.length + 3) % 4)), (c) => c.charCodeAt(0));
