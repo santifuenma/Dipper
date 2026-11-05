@@ -18,6 +18,7 @@ import { renderVerCategoria } from "./views/ver-categoria.js";
 import { renderMovimientos } from "./views/movimientos.js";
 import { renderPago } from "./views/pago.js";
 import { renderHistorial } from "./views/historial.js";
+import { renderOnboarding } from "./views/onboarding.js";
 import { renderPresupuesto } from "./views/presupuesto.js";
 import { renderNuevoGasto } from "./views/nuevo-gasto.js";
 import { renderCambiarContrasena } from "./views/cambiar-contrasena.js";
@@ -42,12 +43,16 @@ export const session = {
   },
 };
 
+// Bienvenida de las cuentas nuevas: mientras no termine (paso 8), el Inicio manda a ella.
+export const inOnboarding = () => !!(user && user.onboarding && user.onboarding.step < 8);
+
 // auth: si la pantalla exige sesión. root: no se puede volver atrás desde ella.
 // sheet: pantalla con ✕ que sube desde abajo (p. ej. Nuevo gasto).
 const ROUTES = {
   "/entrar": { view: renderLogin, auth: false, root: true },
   "/crear-cuenta": { view: renderRegistro, auth: false },
-  "/": { view: renderInicio, auth: true, root: true },
+  "/": { view: renderInicio, auth: true, root: true, redirect: () => (inOnboarding() ? "/bienvenida" : null) },
+  "/bienvenida": { view: renderOnboarding, auth: true, root: true },
   "/ver-tarjeta": { view: renderVerTarjeta, auth: true },
   "/ver-categoria": { view: renderVerCategoria, auth: true },
   "/movimientos": { view: renderMovimientos, auth: true },
@@ -91,6 +96,7 @@ async function boot() {
       .then((me) => {
         session.user = me.user;
         session.authMethod = me.authMethod;
+        if (inOnboarding() && (location.hash.slice(1) || "/") === "/") go("/bienvenida");
       })
       .catch((err) => {
         // Sin conexión se queda como está; solo si el servidor dice que la sesión ya no vale se vuelve a Entrar.

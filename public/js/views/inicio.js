@@ -1,7 +1,7 @@
 // Pantalla "Inicio" (Inicio.dc.html).
-import { dots, makeReorderable } from "../components.js";
+import { dots, guidedTour, makeReorderable } from "../components.js";
 import { api, keepWarm, prefetch, swr } from "../api.js";
-import { session } from "../app.js";
+import { inOnboarding, session } from "../app.js";
 import { busy, html, ICON, iconSize } from "../dom.js";
 import { eurosInt, monthLabel, shiftMonth } from "../format.js";
 import { cardBorder, cardFg, categoryIcon } from "../icons.js";
@@ -41,6 +41,14 @@ export function renderInicio() {
 
       <div data-cards class="noscroll" style="flex:none;margin:8px -20px 0;padding:10px 20px 6px;overflow-x:hidden;overscroll-behavior-x:contain;scroll-padding-left:20px">
         <div data-track style="position:relative;height:min(120px,14dvh)"></div>
+      </div>
+
+      <div data-reminder hidden style="flex:none;margin-top:6px;height:46px;box-sizing:border-box;border:1.5px dashed rgba(27,27,31,.4);border-radius:20px;display:flex;align-items:center">
+        <a data-reminder-link data-press style="flex:1;min-width:0;height:100%;display:flex;align-items:center;gap:10px;padding:0 6px 0 14px">
+          <span aria-hidden="true" style="display:flex;flex:none">${ICON.info}</span>
+          <span data-reminder-text style="flex:1;min-width:0;font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>
+        </a>
+        <button type="button" data-reminder-off class="round-btn sm" aria-label="Quitar este recordatorio" style="margin-right:6px">${ICON.close}</button>
       </div>
 
       <div data-tiles style="margin-top:12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;flex:1 1 0;min-height:0"></div>
@@ -309,8 +317,62 @@ export function renderInicio() {
     load();
   });
 
+  // Cuentas nuevas: la primera vez, guía de 3 globos; después, un recordatorio suave de lo que falta por configurar.
+  const REMINDERS = {
+    tarjeta: ["Falta añadir tu tarjeta", "#/tarjeta"],
+    applepay: ["Falta conectar Apple Pay", "#/conectar-apple-pay"],
+    avisos: ["Falta activar los avisos", "#/ajustes"],
+    faceid: ["Falta activar Face ID", "#/ajustes"],
+  };
+  const setOnboarding = (patch) => {
+    if (session.user) session.user = { ...session.user, onboarding: { ...session.user.onboarding, ...patch } };
+  };
+
+  async function reminder() {
+    try {
+      const { checklist } = await api("/onboarding");
+      const todo = checklist.find((c) => !c.done);
+      if (!todo) {
+        setOnboarding({ reminder: false });
+        return api("/onboarding", { reminderOff: true });
+      }
+      if (!el.isConnected) return;
+      const [text, href] = REMINDERS[todo.id];
+      q("[data-reminder-text]").textContent = text;
+      q("[data-reminder-link]").href = href;
+      q("[data-reminder]").hidden = false;
+    } catch {}
+  }
+  q("[data-reminder-off]").addEventListener("click", () => {
+    q("[data-reminder]").hidden = true;
+    setOnboarding({ reminder: false });
+    api("/onboarding", { reminderOff: true }).catch(() => {});
+  });
+
+  function guide() {
+    const ob = session.user && session.user.onboarding;
+    if (!ob || inOnboarding()) return;
+    if (!ob.tour) return ob.reminder ? reminder() : undefined;
+    // Hace falta el tamaño real de los recuadros: se espera a que el Inicio esté colocado.
+    setTimeout(() => {
+      if (!el.isConnected) return;
+      guidedTour(
+        [
+          { target: () => q("[data-tiles]"), title: "Tus categorías", text: "Cada recuadro se llena según lo que gastas. Tócalo para ver sus pagos; mantenlo pulsado y arrástralo para ordenarlas." },
+          { target: () => q("[href='#/por-revisar']"), title: "Pagos por revisar", text: "Aquí llegan los pagos de Apple Pay. Elige su categoría y Dipper la recordará para ese comercio." },
+          { target: () => q("[href='#/nuevo-gasto']"), title: "Añade a mano", text: "Efectivo, Bizum o recibos: toca el + y apúntalos, con concepto y fecha si quieres." },
+        ],
+        () => {
+          setOnboarding({ tour: false });
+          api("/onboarding", { tourSeen: true }).catch(() => {});
+          if (ob.reminder) reminder();
+        }
+      );
+    }, 900);
+  }
+
   draw();
-  load();
+  load().then(guide);
   maybeAskFaceId(el);
   return el;
 }

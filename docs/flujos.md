@@ -11,6 +11,7 @@ pantalla, se indica con 📱 (ver [`auditoria.md`](auditoria.md)).
 - [Comercios: nombre, clave y sugerencia](#comercios-nombre-clave-y-sugerencia)
 - [Reconocer la tarjeta](#reconocer-la-tarjeta)
 - [Por revisar](#por-revisar)
+- [Bienvenida de cuentas nuevas](#bienvenida-de-cuentas-nuevas)
 - [Rendimiento y caché](#rendimiento-y-caché)
 - [Avisos push](#avisos-push)
 - [Editar un pago](#editar-un-pago)
@@ -99,6 +100,19 @@ iOS pasa los datos de la transacción a la acción solo o hay que asignarlos con
 | Deshacer | Devuelve a pendientes el pago y los que se colocaron con él; si se había recordado, se olvida la regla. El nombre propio no se deshace. |
 | Tarjeta nueva | Si llega un nombre de Wallet que no tiene ninguna tarjeta, se ofrece guardarla con ese nombre y, si aparecen al final, los 4 dígitos. |
 | Contador | El número de pendientes se ve en la barra y en el Inicio. |
+
+## Bienvenida de cuentas nuevas
+
+| Regla | Detalle |
+|---|---|
+| Quién la ve | Las cuentas que se registran (paso 0). Las que ya existían quedan como terminadas (paso 8, migración 0011). Mientras el paso sea < 8, el Inicio manda a la Bienvenida. |
+| Progreso | `users.onboarding_step` (0-7; 8 = terminada) se guarda en el servidor en cada paso: se retoma al reabrir la app o en otro dispositivo. `user.onboarding` viaja en /auth/me, login y registro. |
+| Qué se define | Presupuesto total y por categoría (se guardan con `/api/budget`), tarjetas, atajo de Apple Pay, avisos y Face ID. Todo se puede saltar; el presupuesto conserva sus valores por defecto (1.500 € y el reparto de partida). |
+| Pasos que se saltan solos | Avisos si el servidor no tiene claves VAPID; Face ID si el dispositivo no lo admite o ya está activado. |
+| Guía del Inicio | La primera vez (`tour_seen = 0`), 3 globos; al acabar o saltar se marca vista. |
+| Recordatorio | Con la bienvenida terminada y `reminder_off = 0`, el Inicio enseña lo primero que falte según `checklist` del servidor: tarjeta (hay alguna), Apple Pay (ha llegado algún pago de Apple Pay), avisos (hay una suscripción), Face ID (hay una passkey). Con ✕ se quita (`reminder_off = 1`); si todo está hecho se quita solo. |
+| Repetir | `restart`: vuelve al paso 0 y reactiva guía y recordatorio. |
+| A Swift | Toda la lógica está en el servidor; la app nativa solo pinta los pasos. |
 
 ## Rendimiento y caché
 

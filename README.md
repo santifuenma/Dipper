@@ -195,6 +195,7 @@ exigen sesión.
 | `GET` | `/api/month?month=AAAA-MM` | Datos de un mes ya calculados: pagos, total, lo que queda, gasto por tarjeta y por categoría y lo que toca al día. `&tarjeta=` o `&categoria=` filtran la lista de pagos |
 | `GET` · `POST` | `/api/charges/:id` | Ver un pago o cambiar su categoría, tarjeta, importe, concepto (nota propia), fecha (hasta un año por delante) o nombre de comercio |
 | `GET` · `POST` | `/api/push/key` · `/subscribe` · `/unsubscribe` · `/test` | Avisos push: clave pública, alta y baja de un dispositivo y aviso de prueba (`/test` solo existe si `AVISO_PRUEBA = "si"`, es decir, en pruebas) |
+| `GET` · `POST` | `/api/onboarding` | Bienvenida de las cuentas nuevas: paso, guía y recordatorio, y lo que ya está configurado (`step`, `tourSeen`, `reminderOff`, `restart`) |
 | `GET` | `/api/history` | Los últimos 150 pagos por orden de registro (`createdAt`), con tarjetas y categorías |
 | `POST` | `/api/charges` · `/api/charges/:id/delete` | Añadir un gasto a mano o borrar un pago |
 | `GET` · `POST` | `/api/cards` · `/api/cards/:id` · `/delete` | Listar, crear, editar y borrar tarjetas |

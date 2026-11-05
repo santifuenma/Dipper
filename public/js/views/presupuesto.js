@@ -3,11 +3,8 @@ import { api } from "../api.js";
 import { back } from "../nav.js";
 import { busy, html, ICON, iconSize } from "../dom.js";
 import { eurosInt, monthLabel } from "../format.js";
-import { categoryIcon } from "../icons.js";
 import { view } from "./inicio.js";
-import { bigAmount, keypad } from "../components.js";
-
-const ROUND = "flex:none;border-radius:50%;border:1.5px solid rgba(27,27,31,.22);background:#F1EDF9;color:#1B1B1F;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0";
+import { askAmount, budgetRow, ROUND } from "../components.js";
 
 export function renderPresupuesto() {
   const st = { monthly: 0, bud: new Map(), cats: [], spent: new Map(), loaded: false };
@@ -71,105 +68,13 @@ export function renderPresupuesto() {
     freeEl.style.background = over ? "#FFC2A1" : free === 0 ? "#CDF56B" : "#fff";
   }
 
-  function rowFor(c) {
-    const r = html(`
-      <div class="card-box" style="padding:8px 10px 8px 12px;display:flex;align-items:center;gap:10px">
-        <span data-ic class="ic-circle" style="width:38px;height:38px"></span>
-        <span style="flex:1;min-width:0">
-          <span data-name style="display:block;font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>
-          <span data-spent style="display:block;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>
-        </span>
-        <button type="button" data-down class="round-btn" style="${ROUND};width:38px;height:38px">${iconSize(ICON.minus, 18)}</button>
-        <span data-amount data-press role="button" tabindex="0" style="flex:none;width:58px;text-align:center;font-size:18px;font-weight:800;cursor:pointer"></span>
-        <button type="button" data-up class="round-btn" style="${ROUND};width:38px;height:38px">${iconSize(ICON.plus, 18)}</button>
-      </div>
-    `);
-    const ic = r.querySelector("[data-ic]");
-    ic.style.background = c.color;
-    ic.innerHTML = categoryIcon(c.icon, 20);
-    r.querySelector("[data-name]").textContent = c.name;
-    r.querySelector("[data-down]").setAttribute("aria-label", "Bajar 10 euros en " + c.name);
-    r.querySelector("[data-up]").setAttribute("aria-label", "Subir 10 euros en " + c.name);
-    const draw = () => {
-      const b = st.bud.get(c.id);
-      const spent = st.spent.get(c.id) || 0;
-      const over = spent > b;
-      const s = r.querySelector("[data-spent]");
-      s.textContent = `gastado ${eurosInt(spent)} €` + (over ? " · te pasas" : "");
-      s.style.color = over ? "#B3261E" : "#5A5470";
-      s.style.fontWeight = over ? "700" : "500";
-      r.querySelector("[data-amount]").textContent = eurosInt(b) + " €";
-    };
-    const adj = (d) => {
-      st.bud.set(c.id, Math.max(0, st.bud.get(c.id) + d));
-      draw();
-      drawTotal();
-    };
-    r.querySelector("[data-down]").addEventListener("click", () => adj(-1000));
-    r.querySelector("[data-up]").addEventListener("click", () => adj(1000));
-    const amount = r.querySelector("[data-amount]");
-    amount.setAttribute("aria-label", "Escribir el presupuesto de " + c.name);
-    amount.addEventListener("click", () =>
-      askAmount(c.name, c, (cents) => {
-        st.bud.set(c.id, cents);
-        draw();
-        drawTotal();
-      })
-    );
-    draw();
-    return r;
-  }
-
-  // Hoja con el teclado de Nuevo gasto (sin decimales) para escribir un importe en euros.
-  // Empieza vacía: lo que se escriba sustituye al importe; si no se escribe nada, no cambia.
-  function askAmount(title, cat, done) {
-    const bg = html(`
-      <div class="sheet-bg">
-        <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="amount-title">
-          <div style="display:flex;align-items:center;gap:12px">
-            ${cat ? `<span data-ic class="ic-circle"></span>` : ""}
-            <span id="amount-title" style="font-size:22px;font-weight:800;letter-spacing:-.4px"></span>
-          </div>
-          <div data-amount-box style="margin-top:14px"></div>
-          <div data-keys-box></div>
-          <button type="button" data-ok class="btn btn-lima" style="margin-top:16px">Listo</button>
-        </div>
-      </div>
-    `);
-    bg.querySelector("#amount-title").textContent = title;
-    if (cat) {
-      const ic = bg.querySelector("[data-ic]");
-      ic.style.background = cat.color;
-      ic.innerHTML = categoryIcon(cat.icon, 20);
-    }
-    const amountEl = bigAmount("al mes");
-    let typed = "";
-    bg.querySelector("[data-amount-box]").append(amountEl);
-    bg.querySelector("[data-keys-box]").replaceWith(
-      keypad({
-        decimals: false,
-        maxLength: 6,
-        style: "margin-top:14px;height:248px;",
-        onChange: (v) => {
-          typed = v;
-          amountEl.show(v);
-        },
-      })
-    );
-    const close = () => {
-      bg.style.transition = "opacity .25s";
-      bg.style.opacity = "0";
-      setTimeout(() => bg.remove(), 260);
-    };
-    bg.querySelector("[data-ok]").addEventListener("click", () => {
-      if (typed !== "") done(Number(typed) * 100);
-      close();
+  const rowFor = (c) =>
+    budgetRow(c, {
+      get: () => st.bud.get(c.id),
+      set: (cents) => st.bud.set(c.id, cents),
+      spent: st.spent.get(c.id) || 0,
+      onChange: drawTotal,
     });
-    bg.addEventListener("click", (e) => {
-      if (e.target === bg) close();
-    });
-    document.getElementById("app").append(bg);
-  }
 
   q("[data-mdown]").addEventListener("click", () => {
     st.monthly = Math.max(0, st.monthly - 5000);

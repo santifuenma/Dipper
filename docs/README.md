@@ -10,7 +10,7 @@ Plano de la app por piezas, sacado del código actual (la PWA de `public/`). Sir
 |---|---|
 | [`../DISENO.md`](../DISENO.md) | Guía visual: colores, líneas, esquinas, botones, iconos, texto |
 | [`componentes.md`](componentes.md) | Cada pieza reutilizable con sus medidas, estados y dónde se usa |
-| [`pantallas.md`](pantallas.md) | Las 18 pantallas: contenido, estados, acciones y llamadas a la API |
+| [`pantallas.md`](pantallas.md) | Las 19 pantallas: contenido, estados, acciones y llamadas a la API |
 | [`flujos.md`](flujos.md) | Los recorridos completos y las reglas de negocio que los gobiernan |
 | [`auditoria.md`](auditoria.md) | Lo que hay que ordenar o decidir antes y durante la migración |
 | [`../README.md#api`](../README.md#api) | Rutas de la API del servidor |

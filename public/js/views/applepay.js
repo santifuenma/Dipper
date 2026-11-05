@@ -1,6 +1,6 @@
 // Pantalla "Conectar Apple Pay" (ApplePay.dc.html). Mismo diseño; textos con los pasos reales (opción A).
 import { api } from "../api.js";
-import { go } from "../app.js";
+import { go, inOnboarding, session } from "../app.js";
 import { html, ICON } from "../dom.js";
 
 const KEY = "dipper_ap_steps";
@@ -30,16 +30,21 @@ function mask(token) {
 
 export function renderApplePay() {
   const done = loadDone();
+  // Dentro de la bienvenida, esta pantalla es un paso más: se vuelve a ella en vez de ir al Inicio.
+  const onb = inOnboarding();
+  const exit = onb ? "/bienvenida" : "/";
   let link = null;
 
   const el = html(`
     <div class="screen">
       <div class="topbar">
-        <div style="display:flex;gap:4px;width:96px" aria-label="Paso 2 de 2">
+        ${onb
+          ? `<a href="#/bienvenida" data-back class="icon-btn" aria-label="Volver">${ICON.back}</a>`
+          : `<div style="display:flex;gap:4px;width:96px" aria-label="Paso 2 de 2">
           <span style="flex:1;height:8px;border-radius:4px;background:#1B1B1F"></span>
           <span style="flex:1;height:8px;border-radius:4px;background:#1B1B1F"></span>
-        </div>
-        <a href="#/" style="font-size:15px;font-weight:700;padding:10px 0;text-decoration:underline">Saltar</a>
+        </div>`}
+        <a href="#${exit}" ${onb ? "data-back" : ""} style="font-size:15px;font-weight:700;padding:10px 0;text-decoration:underline">${onb ? "Lo haré luego" : "Saltar"}</a>
       </div>
 
       <div style="flex:none;margin-top:8px">
@@ -101,7 +106,7 @@ export function renderApplePay() {
       })
     );
     const all = STEPS.every((s) => done[s.id]);
-    main.textContent = all ? "Listo, ir al inicio" : "Probar con un pago";
+    main.textContent = onb ? "Continuar" : all ? "Listo, ir al inicio" : "Probar con un pago";
   }
 
   async function run(step) {
@@ -128,7 +133,14 @@ export function renderApplePay() {
     draw();
   }
 
-  main.addEventListener("click", () => go("/"));
+  main.addEventListener("click", async () => {
+    if (onb) {
+      // Dentro de la bienvenida, "Continuar" da este paso por hecho: al volver, ya toca el siguiente.
+      session.user = { ...session.user, onboarding: { ...session.user.onboarding, step: 5 } };
+      await api("/onboarding", { step: 5 }).catch(() => {});
+    }
+    go(exit);
+  });
 
   draw();
   api("/applepay")

@@ -117,6 +117,9 @@ El líquido sube al aparecer (900 ms).
 | **Caja de cuenta** | Caja con radio 28: tres bolitas de color + nombre 22/800 y correo 14/500. | `ajustes.js` |
 | **Fila de categoría (Ajustes)** | Caja: círculo de 40 con el icono de la categoría, nombre 16/700, `ICON.chevron`. | `categorias.js` |
 | **Fila de categoría (Presupuesto)** | Caja con padding 8 10 8 12: círculo de 38 con icono, nombre 16/700, "gastado X €" 13/500 (en `--danger` y 700 si se pasa), contador − importe + (ver *Contador*). | `presupuesto.js` |
+| **Hoja de importe** | Hoja con título (y círculo de la categoría), *Importe grande* "al mes" vacío, *Teclado numérico* sin decimales (máx. 6 cifras) y **Listo**. Lo escrito sustituye al importe; sin escribir no cambia nada. | `askAmount()` |
+| **Fila de presupuesto** | La *Fila de categoría (Presupuesto)*; sin `spent` (bienvenida) no enseña "gastado". | `budgetRow()` |
+| **Guía de globos** | Capa que oscurece la pantalla salvo el elemento señalado (anillo blanco) y un globo (caja de radio 20) con título 19/800, texto 14/500, puntos de progreso, **Saltar** y pastilla lima **Siguiente / Entendido**. El globo va debajo del elemento si está en la mitad de arriba, si no encima. | `guidedTour()` |
 | **Paso numerado** | Caja: círculo de 34 con el número sobre un pastel (hecho: `--ink` con `ICON.check`), título 17/800, texto 14/500, y debajo un botón-pastilla de 38 (blanco; hecho: lima). Opcionalmente un recuadro punteado con el enlace enmascarado. | `applepay.js` |
 
 ## Listas

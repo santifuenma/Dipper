@@ -5,6 +5,7 @@ import { handleCards } from "./cards.js";
 import { handleCategories } from "./categories.js";
 import { handleCharges } from "./charges.js";
 import { handleBudget } from "./budget.js";
+import { handleOnboarding } from "./onboarding.js";
 import { handlePush } from "./push.js";
 import { json } from "./util.js";
 
@@ -29,6 +30,7 @@ export default {
       const res =
         (await handlePayments(request, env, url, user, ctx)) ||
         (await handlePush(request, env, url, user)) ||
+        (await handleOnboarding(request, env, url, user)) ||
         (await handleCards(request, env, url, user)) ||
         (await handleCategories(request, env, url, user)) ||
         (await handleCharges(request, env, url, user)) ||

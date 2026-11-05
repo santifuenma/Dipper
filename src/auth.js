@@ -6,6 +6,7 @@ import {
   verifyAuthenticationResponse,
 } from "@simplewebauthn/server";
 import { seedCategories } from "./categories.js";
+import { onboardingOf } from "./onboarding.js";
 import { b64url, enc, fromB64url, getCookie, json, randomToken, readJson, sha256 } from "./util.js";
 
 const COOKIE = "dipper_session";
@@ -51,14 +52,14 @@ async function sessionResponse(env, url, user, status = 200, method = "password"
 }
 
 function publicUser(u) {
-  return { id: u.id, name: u.name, email: u.email };
+  return { id: u.id, name: u.name, email: u.email, onboarding: onboardingOf(u) };
 }
 
 export async function currentUser(request, env) {
   const token = sessionToken(request);
   if (!token) return null;
   return env.DB.prepare(
-    `SELECT u.id, u.name, u.email, s.method AS authMethod, s.token_hash AS sessionHash
+    `SELECT u.id, u.name, u.email, u.onboarding_step, u.tour_seen, u.reminder_off, s.method AS authMethod, s.token_hash AS sessionHash
      FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ? AND s.expires_at > ?`
   )
     .bind(await sha256(token), Date.now())
@@ -125,13 +126,13 @@ async function register(request, env, url) {
   const salt = crypto.getRandomValues(new Uint8Array(16));
   const hash = await hashPassword(password, salt);
   const res = await env.DB.prepare(
-    "INSERT INTO users (name, email, password_hash, password_salt, created_at) VALUES (?, ?, ?, ?, ?)"
+    "INSERT INTO users (name, email, password_hash, password_salt, created_at, onboarding_step, tour_seen) VALUES (?, ?, ?, ?, ?, 0, 0)"
   )
     .bind(cleanName, cleanEmail, b64url(hash), b64url(salt), Date.now())
     .run();
   const userId = res.meta.last_row_id;
   await seedCategories(env, userId);
-  return sessionResponse(env, url, { id: userId, name: cleanName, email: cleanEmail }, 201, "password", request);
+  return sessionResponse(env, url, { id: userId, name: cleanName, email: cleanEmail, onboarding_step: 0, tour_seen: 0 }, 201, "password", request);
 }
 
 async function login(request, env, url) {

@@ -115,7 +115,7 @@ export function renderRegistro() {
       ).user;
       session.justLoggedIn = true;
       session.authMethod = "password";
-      go("/conectar-apple-pay");
+      go("/bienvenida");
     } catch (err) {
       error.textContent = err.message;
     } finally {

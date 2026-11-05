@@ -8,7 +8,7 @@ import { enableFaceId, faceIdEnabledHere, faceIdError, passkeySupported } from "
 
 function row(icon, color, title, sub) {
   const r = html(`
-    <a data-press class="card-box" style="padding:10px 12px;display:flex;align-items:center;gap:12px">
+    <a data-press class="card-box" style="flex:none;padding:10px 12px;display:flex;align-items:center;gap:12px">
       <span class="ic-circle" style="background:${color}">${icon}</span>
       <span style="flex:1;min-width:0">
         <span data-title style="display:block;font-size:16px;font-weight:700"></span>
@@ -41,7 +41,7 @@ export function renderAjustes() {
             <span data-email style="display:block;font-size:14px;font-weight:500;color:#5A5470;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>
           </span>
         </div>
-        <div data-rows style="display:flex;flex-direction:column;gap:8px"></div>
+        <div data-rows class="noscroll" style="flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;margin:0 -20px;padding:0 20px 4px;display:flex;flex-direction:column;gap:8px"></div>
         <div class="error" role="alert"></div>
       </div>
 
@@ -64,6 +64,24 @@ export function renderAjustes() {
   const cardsRow = row(ICON.card, "#A9D8FF", "Tarjetas", "Añadir, editar y borrar");
   cardsRow.href = "#/tarjetas";
   rows.append(cardsRow, cats, pay, pass);
+
+  // Volver a ver la guía de bienvenida (vuelve al primer paso y a enseñar los globos del Inicio).
+  const guide = row(ICON.info, "#FFA8D2", "Guía de bienvenida", "Volver a ver cómo se usa Dipper");
+  guide.setAttribute("role", "button");
+  guide.addEventListener("click", async (e) => {
+    e.preventDefault();
+    busy(guide, true);
+    try {
+      const ob = await api("/onboarding", { restart: true });
+      session.user = { ...session.user, onboarding: { step: ob.step, tour: ob.tour, reminder: ob.reminder } };
+      go("/bienvenida");
+    } catch (err) {
+      error.textContent = err.message;
+    } finally {
+      busy(guide, false);
+    }
+  });
+  rows.append(guide);
 
   if (passkeySupported()) {
     const face = row(ICON.faceId, "#98EBC6", "Face ID", "");

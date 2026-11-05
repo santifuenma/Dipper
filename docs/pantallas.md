@@ -1,6 +1,6 @@
 # Pantallas
 
-Las 18 pantallas de Dipper. Cada una sigue la misma plantilla: para qué sirve, qué muestra, qué se
+Las 19 pantallas de Dipper. Cada una sigue la misma plantilla: para qué sirve, qué muestra, qué se
 puede hacer, de dónde saca los datos y qué reglas tiene. Las piezas citadas están en
 [`componentes.md`](componentes.md) y las reglas largas en [`flujos.md`](flujos.md).
 
@@ -40,6 +40,7 @@ flowchart LR
 | [Movimientos](#movimientos) | `#/movimientos?tarjeta=&categoria=` | Sí | Normal, con scroll |
 | [Pago](#pago) | `#/pago?id=` | Sí | Normal |
 | [Historial](#historial) | `#/historial` | Sí | Normal, con scroll |
+| [Bienvenida](#bienvenida) | `#/bienvenida` | Sí | Raíz (cuentas nuevas) |
 | [Por revisar](#por-revisar) | `#/por-revisar` | Sí | Normal, con scroll |
 | [Nuevo gasto](#nuevo-gasto) | `#/nuevo-gasto` | Sí | Sube desde abajo |
 | [Presupuesto](#presupuesto) | `#/presupuesto` | Sí | Normal |
@@ -77,7 +78,7 @@ Movimientos y Presupuesto.
   correo y contraseña con **fuerza de contraseña**; casilla "Acepto los términos y la privacidad"
   (marcada); botón **Crear cuenta**; "¿Ya tienes cuenta? **Entrar**".
 - **Reglas**: el botón se activa con nombre, correo válido, contraseña de 8 o más y la casilla.
-- **API**: `POST /api/auth/register`. Al terminar va a **Conectar Apple Pay**.
+- **API**: `POST /api/auth/register`. Al terminar va a la **Bienvenida**.
 
 ## Inicio
 
@@ -94,7 +95,7 @@ Movimientos y Presupuesto.
      revisar") con bolitas, y el botón + lima.
 - **Acciones**: cambiar de mes; tocar tarjeta (despliega / abre Ver tarjeta); tocar categoría →
   Ver categoría; **mantener pulsada una categoría y arrastrarla** la cambia de sitio (cuadrícula
-  ordenable) y ese orden se usa en toda la app; Por revisar; + → Nuevo gasto; Historial; Presupuesto; Ajustes. El mes se puede avanzar hasta el último que tenga pagos (`latest`, puede ser futuro).
+  ordenable) y ese orden se usa en toda la app; Por revisar; + → Nuevo gasto; Historial; Presupuesto; Ajustes. Recuadro "Falta …" bajo las tarjetas y guía de globos (cuentas nuevas, ver [Bienvenida](#bienvenida)). El mes se puede avanzar hasta el último que tenga pagos (`latest`, puede ser futuro).
 - **Una sola vez tras entrar con contraseña**: hoja "¿Entrar con Face ID la próxima vez?" con
   **Activar** y **Ahora no** (no se vuelve a preguntar).
 - **API**: `GET /api/month?month=AAAA-MM`.
@@ -140,6 +141,31 @@ Movimientos y Presupuesto.
   pulse "Listo".
 - **API**: `GET /api/charges/:id`, `POST /api/charges/:id` (`categoryId`, `cardId`, `merchant`, `date`, `amountCents`, `concept`),
   `POST /api/charges/:id/delete`.
+
+## Bienvenida
+
+- **Para qué**: guiar a las cuentas nuevas en lo que tienen que aprender y definir. El Inicio manda
+  aquí mientras el paso guardado sea < 8; el servidor recuerda el paso (se retoma al reabrir la app, en
+  otro dispositivo, o al volver de Tarjeta y Apple Pay).
+- **Barra**: atrás (desde el paso 2), 8 segmentos de progreso (el actual y los anteriores en `--ink`) y
+  **Saltar** (no en el primero ni en el último).
+- **Pasos** (título 32/800, subtítulo 15/500 `--muted`, botón lima abajo; ninguno hace scroll a 402×778 ni
+  a 375×667):
+  1. **Bienvenida** — "Hola, Nombre" y 3 *pasos numerados*: tus pagos llegan solos, tú los colocas, ves cuánto te queda. Nota punteada "Son unos 2 minutos…". **Empezar**.
+  2. **Presupuesto** — "¿Cuánto quieres gastar al mes?": importe 64/800 con − y + (de 50 en 50 €) y hoja de teclado al tocarlo (`askAmount`). **Continuar** guarda.
+  3. **Categorías** — "Reparte tu presupuesto": pastilla "X € sin asignar de Y €" / "Todo asignado" / "Te pasas…" y una fila por categoría (`budgetRow`, sin "gastado"). **Continuar** guarda total y categorías.
+  4. **Tarjetas** — lista de las que ya hay (mini tarjeta de color, nombre, ···· 1234) y recuadro punteado **Añadir tarjeta** → Nueva tarjeta (al guardar vuelve aquí).
+  5. **Apple Pay** — explica el atajo; **Configurar ahora** → Conectar Apple Pay (dentro de la bienvenida su barra cambia a atrás + "Lo haré luego" y su botón es **Continuar**, que da el paso por hecho y vuelve) o **Lo haré luego**.
+  6. **Avisos** — si el servidor no tiene claves VAPID, se salta. Sin la app instalada en la pantalla de inicio: 3 pasos para instalarla. Con ella: **Activar avisos** (pide el permiso) o **Ahora no**.
+  7. **Face ID** — se salta si el iPhone no lo admite o ya está activado. **Activar Face ID** o **Ahora no**.
+  8. **Todo listo** — 3 pasos numerados (revisar pagos, añadir a mano, historial). **Ir al inicio** marca la bienvenida como terminada.
+- **Después**: en el Inicio, la primera vez, una *guía de 3 globos* (categorías, Por revisar, +). Luego, mientras
+  falte algo (tarjeta, Apple Pay, avisos, Face ID), un recuadro punteado "Falta conectar Apple Pay" con ✕ para
+  quitarlo; si todo está hecho se quita solo.
+- **Repetir**: Ajustes → **Guía de bienvenida** vuelve al paso 1 y a enseñar los globos.
+- **API**: `GET /api/onboarding` (paso, guía, recordatorio y `checklist` de lo configurado),
+  `POST /api/onboarding` (`step` | `tourSeen` | `reminderOff` | `restart`); además `user.onboarding` en
+  `/api/auth/me`, login y registro.
 
 ## Historial
 
@@ -200,7 +226,7 @@ Movimientos y Presupuesto.
 - **Barra**: volver, "Ajustes".
 - **API de avisos**: `GET /api/push/key`, `POST /api/push/subscribe`, `/unsubscribe` y `/test`.
 - **Muestra**: caja de cuenta (bolitas, nombre y correo); filas **Tarjetas**, **Categorías**,
-  **Conectar Apple Pay**, **Cambiar contraseña**, **Avisos de pagos** (pastilla Activar / Activado; en el entorno de pruebas, con
+  **Conectar Apple Pay**, **Cambiar contraseña**, **Guía de bienvenida**, **Avisos de pagos** (pastilla Activar / Activado; en el entorno de pruebas, con
   avisos activos, aparece además **Enviar aviso de prueba** (no existe en la app principal); sin la app instalada en la pantalla de inicio explica cómo) y, si el
   iPhone lo admite, **Face ID** con pastilla Activar / Activado; abajo, botón blanco **Salir** con texto `--danger` y el enlace **Borrar cuenta**
   en `--danger`.

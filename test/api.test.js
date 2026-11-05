@@ -279,6 +279,32 @@ describe("categorías, pagos a mano y presupuesto", () => {
     expect((await env.DB.prepare("SELECT COUNT(*) AS c FROM push_subscriptions").first()).c).toBe(0);
   });
 
+  it("una cuenta nueva empieza la bienvenida y el servidor recuerda el paso, la guía y lo que falta", async () => {
+    const c = cliente();
+    const reg = await c.call("/auth/register", { name: "Nueva", email: "nueva@dipper.test", password: "contraseña1" });
+    expect(reg.data.user.onboarding).toEqual({ step: 0, tour: true, reminder: true });
+    expect((await c.call("/auth/me")).data.user.onboarding.step).toBe(0);
+
+    expect((await c.call("/onboarding", { step: 99 })).status).toBe(400);
+    expect((await c.call("/onboarding", {})).status).toBe(400);
+    const s3 = await c.call("/onboarding", { step: 3 });
+    expect(s3.data.step).toBe(3);
+    expect(s3.data.checklist).toEqual([
+      { id: "tarjeta", done: false },
+      { id: "applepay", done: false },
+      { id: "avisos", done: false },
+      { id: "faceid", done: false },
+    ]);
+
+    await c.call("/cards", { name: "Visa", last4: "1111", walletName: "Mi Visa", color: "#1B1B1F" });
+    expect((await c.call("/onboarding")).data.checklist[0].done).toBe(true);
+
+    const fin = await c.call("/onboarding", { step: 8, tourSeen: true, reminderOff: true });
+    expect(fin.data).toMatchObject({ step: 8, tour: false, reminder: false });
+    expect((await c.call("/auth/me")).data.user.onboarding).toEqual({ step: 8, tour: false, reminder: false });
+    expect((await c.call("/onboarding", { restart: true })).data).toMatchObject({ step: 0, tour: true, reminder: true });
+  });
+
   it("el mes trae los totales calculados y se puede filtrar por tarjeta o categoría", async () => {
     const a = await cuenta();
     const { card } = (await a.call("/cards", { name: "Visa", last4: "1111", walletName: "Mi Visa", color: "#1B1B1F" })).data;

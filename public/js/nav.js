@@ -61,6 +61,11 @@ function onRoute() {
   if (!route) return redirect(logged ? "/" : "/entrar");
   if (route.auth && !logged) return redirect("/entrar");
   if (!route.auth && logged) return redirect("/");
+  // Una pantalla puede mandar a otra (el Inicio manda a la bienvenida mientras no esté terminada).
+  if (route.redirect) {
+    const to = route.redirect();
+    if (to) return redirect(to);
+  }
   if (current && current.path === path) return;
 
   if (adopted && adopted.path === path) {

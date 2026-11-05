@@ -1,7 +1,7 @@
 // Piezas compartidas entre Inicio, Tarjeta, Categoría y Movimientos.
 import { prefetch } from "./api.js";
-import { html, ICON } from "./dom.js";
-import { dayFull, dayKey, dayTitle, euros, timeOf } from "./format.js";
+import { html, ICON, iconSize } from "./dom.js";
+import { dayFull, dayKey, dayTitle, euros, eurosInt, timeOf } from "./format.js";
 import { cardBorder, cardFg, categoryIcon } from "./icons.js";
 
 // Agrupa pagos (ya ordenados del más reciente al más antiguo) por día.
@@ -623,4 +623,170 @@ export function makeReorderable(grid, { columns = 2, hold = 350, onOrder }) {
     true
   );
   return grid;
+}
+
+// ── Presupuesto: piezas compartidas con la bienvenida ─────────────────────────────────────────────
+
+// Botón redondo de ± (mismas medidas que el resto de botones redondos de Presupuesto).
+export const ROUND = "flex:none;border-radius:50%;border:1.5px solid rgba(27,27,31,.22);background:#F1EDF9;color:#1B1B1F;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0";
+
+// Hoja con el teclado de Nuevo gasto (sin decimales) para escribir un importe en euros al mes.
+// Empieza vacía: lo que se escriba sustituye al importe; si no se escribe nada, no cambia.
+export function askAmount(title, cat, done) {
+  const bg = html(`
+    <div class="sheet-bg">
+      <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="amount-title">
+        <div style="display:flex;align-items:center;gap:12px">
+          ${cat ? `<span data-ic class="ic-circle"></span>` : ""}
+          <span id="amount-title" style="font-size:22px;font-weight:800;letter-spacing:-.4px"></span>
+        </div>
+        <div data-amount-box style="margin-top:14px"></div>
+        <div data-keys-box></div>
+        <button type="button" data-ok class="btn btn-lima" style="margin-top:16px">Listo</button>
+      </div>
+    </div>
+  `);
+  bg.querySelector("#amount-title").textContent = title;
+  if (cat) {
+    const ic = bg.querySelector("[data-ic]");
+    ic.style.background = cat.color;
+    ic.innerHTML = categoryIcon(cat.icon, 20);
+  }
+  const amountEl = bigAmount("al mes");
+  let typed = "";
+  bg.querySelector("[data-amount-box]").append(amountEl);
+  bg.querySelector("[data-keys-box]").replaceWith(
+    keypad({
+      decimals: false,
+      maxLength: 6,
+      style: "margin-top:14px;height:248px;",
+      onChange: (v) => {
+        typed = v;
+        amountEl.show(v);
+      },
+    })
+  );
+  const close = () => {
+    bg.style.transition = "opacity .25s";
+    bg.style.opacity = "0";
+    setTimeout(() => bg.remove(), 260);
+  };
+  bg.querySelector("[data-ok]").addEventListener("click", () => {
+    if (typed !== "") done(Number(typed) * 100);
+    close();
+  });
+  bg.addEventListener("click", (e) => {
+    if (e.target === bg) close();
+  });
+  document.getElementById("app").append(bg);
+}
+
+// Fila de una categoría con su importe del mes: −10 € / tocar para escribir / +10 €.
+// get(): importe actual en céntimos; set(c): lo guarda. spent (céntimos) añade "gastado X €" (Presupuesto);
+// sin spent la fila enseña solo el nombre (bienvenida). onChange avisa tras cada cambio.
+export function budgetRow(c, { get, set, spent = null, onChange }) {
+  const r = html(`
+    <div class="card-box" style="padding:8px 10px 8px 12px;display:flex;align-items:center;gap:10px">
+      <span data-ic class="ic-circle" style="width:38px;height:38px"></span>
+      <span style="flex:1;min-width:0">
+        <span data-name style="display:block;font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>
+        <span data-spent style="display:block;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>
+      </span>
+      <button type="button" data-down class="round-btn" style="${ROUND};width:38px;height:38px">${iconSize(ICON.minus, 18)}</button>
+      <span data-amount data-press role="button" tabindex="0" style="flex:none;width:58px;text-align:center;font-size:18px;font-weight:800;cursor:pointer"></span>
+      <button type="button" data-up class="round-btn" style="${ROUND};width:38px;height:38px">${iconSize(ICON.plus, 18)}</button>
+    </div>
+  `);
+  const ic = r.querySelector("[data-ic]");
+  ic.style.background = c.color;
+  ic.innerHTML = categoryIcon(c.icon, 20);
+  r.querySelector("[data-name]").textContent = c.name;
+  r.querySelector("[data-down]").setAttribute("aria-label", "Bajar 10 euros en " + c.name);
+  r.querySelector("[data-up]").setAttribute("aria-label", "Subir 10 euros en " + c.name);
+  const spentEl = r.querySelector("[data-spent]");
+  if (spent === null) spentEl.remove();
+  const draw = () => {
+    const b = get();
+    if (spent !== null) {
+      const over = spent > b;
+      spentEl.textContent = `gastado ${eurosInt(spent)} €` + (over ? " · te pasas" : "");
+      spentEl.style.color = over ? "#B3261E" : "#5A5470";
+      spentEl.style.fontWeight = over ? "700" : "500";
+    }
+    r.querySelector("[data-amount]").textContent = eurosInt(b) + " €";
+  };
+  const change = (cents) => {
+    set(cents);
+    draw();
+    if (onChange) onChange();
+  };
+  r.querySelector("[data-down]").addEventListener("click", () => change(Math.max(0, get() - 1000)));
+  r.querySelector("[data-up]").addEventListener("click", () => change(get() + 1000));
+  const amount = r.querySelector("[data-amount]");
+  amount.setAttribute("aria-label", "Escribir el presupuesto de " + c.name);
+  amount.addEventListener("click", () => askAmount(c.name, c, change));
+  draw();
+  return r;
+}
+
+// Guía con globos sobre una pantalla: oscurece todo menos el elemento señalado y explica cada paso.
+// steps: [{ target: () => Element, title, text }]. onDone se llama al terminar o al saltar.
+export function guidedTour(steps, onDone) {
+  let i = 0;
+  const bg = html(`
+    <div style="position:absolute;inset:0;z-index:40;touch-action:none">
+      <div data-ring style="position:absolute;box-sizing:border-box;border-radius:22px;border:2px solid #fff;box-shadow:0 0 0 100vmax rgba(27,27,31,.58);transition:left .35s cubic-bezier(.3,1.1,.5,1),top .35s cubic-bezier(.3,1.1,.5,1),width .35s,height .35s"></div>
+      <div data-bubble class="card-box" style="position:absolute;left:20px;right:20px;padding:14px 16px;transition:top .35s cubic-bezier(.3,1.1,.5,1)">
+        <div data-title style="font-size:19px;font-weight:800;letter-spacing:-.3px"></div>
+        <div data-text style="margin-top:4px;font-size:14px;font-weight:500;line-height:1.35;color:#5A5470"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
+          <span data-dots style="display:flex;gap:6px"></span>
+          <span style="display:flex;align-items:center;gap:12px">
+            <button type="button" data-skip class="link-u" style="font-size:14px">Saltar</button>
+            <button type="button" data-next data-press style="height:40px;padding:0 18px;border:1.5px solid rgba(27,27,31,.22);border-radius:99px;background:#CDF56B;font-size:15px;font-weight:800;color:#1B1B1F;cursor:pointer"></button>
+          </span>
+        </div>
+      </div>
+    </div>
+  `);
+  const q = (s) => bg.querySelector(s);
+
+  function show() {
+    const s = steps[i];
+    const t = s.target();
+    if (!t) return finish();
+    const root = document.getElementById("app").getBoundingClientRect();
+    const r = t.getBoundingClientRect();
+    const pad = 6;
+    const ring = q("[data-ring]");
+    ring.style.left = r.left - root.left - pad + "px";
+    ring.style.top = r.top - root.top - pad + "px";
+    ring.style.width = r.width + pad * 2 + "px";
+    ring.style.height = r.height + pad * 2 + "px";
+    q("[data-title]").textContent = s.title;
+    q("[data-text]").textContent = s.text;
+    q("[data-next]").textContent = i === steps.length - 1 ? "Entendido" : "Siguiente";
+    q("[data-skip]").hidden = i === steps.length - 1;
+    q("[data-dots]").replaceChildren(
+      ...steps.map((_, k) => {
+        const d = document.createElement("span");
+        d.style.cssText = `width:8px;height:8px;border-radius:50%;background:${k === i ? "#1B1B1F" : "rgba(27,27,31,.2)"}`;
+        return d;
+      })
+    );
+    // El globo va debajo del elemento si este está en la mitad de arriba; si no, encima.
+    const bubble = q("[data-bubble]");
+    const below = r.top - root.top + r.height / 2 < root.height / 2;
+    bubble.style.top = (below ? r.bottom - root.top + pad + 12 : Math.max(12, r.top - root.top - pad - 12 - bubble.offsetHeight)) + "px";
+  }
+  function finish() {
+    bg.style.transition = "opacity .25s";
+    bg.style.opacity = "0";
+    setTimeout(() => bg.remove(), 260);
+    onDone();
+  }
+  q("[data-next]").addEventListener("click", () => (i < steps.length - 1 ? (i++, show()) : finish()));
+  q("[data-skip]").addEventListener("click", finish);
+  document.getElementById("app").append(bg);
+  show();
 }
